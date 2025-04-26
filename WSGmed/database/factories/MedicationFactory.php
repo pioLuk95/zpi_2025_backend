@@ -17,7 +17,8 @@ class MedicationFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => $this->faker->word,
+            'info' => $this->faker->sentence,
         ];
     }
 }

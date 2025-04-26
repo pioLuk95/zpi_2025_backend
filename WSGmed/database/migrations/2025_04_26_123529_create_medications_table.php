@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('medications', function (Blueprint $table) {
             $table->id();
+            $table->string('name', 255);
+            $table->text('info')->nullable();
             $table->timestamps();
         });
     }

@@ -17,7 +17,9 @@ class LocationFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'room' => $this->faker->numberBetween(1,40),
+            'floor' => $this->faker->numberBetween(1, 4),
+            'limit' => $this->faker->numberBetween(1, 10),
         ];
     }
 }

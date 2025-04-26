@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('locations', function (Blueprint $table) {
             $table->id();
+            $table->integer('room');
+            $table->integer('floor');
+            $table->integer('limit');
             $table->timestamps();
         });
     }

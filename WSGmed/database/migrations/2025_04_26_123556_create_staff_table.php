@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('staff', function (Blueprint $table) {
             $table->id();
+            $table->string('email', 255);
+            $table->string('password', 255);
+            $table->string('name', 255);
+            $table->string('s_name', 255);
+            $table->date('date_of_birth');
+            $table->enum('role', ['internist', 'specialist', 'rehabilitator','nurse','doctor']);
             $table->timestamps();
         });
     }

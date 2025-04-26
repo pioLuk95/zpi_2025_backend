@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('patients', function (Blueprint $table) {
             $table->id();
+            $table->string('email', 255);
+            $table->string('password', 255);
+            $table->string('name', 255);
+            $table->string('s_name', 255);
+            $table->date('date_of_birth');
+            $table->date('date_of_registration');
+            $table->foreignId('location_id')->constrained('locations')->onDelete('cascade');
             $table->timestamps();
         });
     }

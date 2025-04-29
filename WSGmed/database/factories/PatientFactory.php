@@ -22,7 +22,6 @@ class PatientFactory extends Factory
             'name' => $this->faker->firstName,
             's_name' => $this->faker->lastName,
             'date_of_birth' => $this->faker->date('Y-m-d', '2005-01-01'),
-            'date_of_registration' => now(),
             'location_id' => \App\Models\Location::inRandomOrder()->first()->id,
         ];
     }

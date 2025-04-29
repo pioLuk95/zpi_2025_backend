@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Medication;
-use App\Http\Requests\StoreMedicationRequest;
-use App\Http\Requests\UpdateMedicationRequest;
+use Illuminate\Http\Request;
 
 class MedicationController extends Controller
 {
@@ -13,7 +12,9 @@ class MedicationController extends Controller
      */
     public function index()
     {
-        //
+        return view('medications.index', [
+            'medications' => Medication::all(),
+        ]);
     }
 
     /**
@@ -21,15 +22,21 @@ class MedicationController extends Controller
      */
     public function create()
     {
-        //
+        return view('medications.create');
     }
-
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreMedicationRequest $request)
+    public function store(Request $request)
     {
-        //
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'info' => 'string',
+        ]);
+        Medication::create($validated);
+
+        return redirect()->route('medications.index')->with('success', 'Lek został dodany.');
     }
 
     /**
@@ -45,15 +52,21 @@ class MedicationController extends Controller
      */
     public function edit(Medication $medication)
     {
-        //
+        return view('medications.edit', compact('medication'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateMedicationRequest $request, Medication $medication)
+    public function update(Request $request, Medication $medication)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'info' => 'string',
+        ]);
+        $medication->update($validated);
+
+        return redirect()->route('medications.index')->with('success', 'Lek został zaktualizowany.');
     }
 
     /**
@@ -61,6 +74,7 @@ class MedicationController extends Controller
      */
     public function destroy(Medication $medication)
     {
-        //
+        $medication->delete();
+        return redirect()->route('medications.index')->with('success', 'Lek został usunięty.');
     }
 }

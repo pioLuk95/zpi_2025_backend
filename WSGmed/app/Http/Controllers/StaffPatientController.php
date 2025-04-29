@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\StaffPatient;
-use App\Http\Requests\StoreStaffPatientRequest;
-use App\Http\Requests\UpdateStaffPatientRequest;
+use Illuminate\Http\Request;
+
 
 class StaffPatientController extends Controller
 {
@@ -27,7 +27,7 @@ class StaffPatientController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreStaffPatientRequest $request)
+    public function store(Request $request)
     {
         //
     }
@@ -51,7 +51,7 @@ class StaffPatientController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateStaffPatientRequest $request, StaffPatient $staffPatient)
+    public function update(Request $request, StaffPatient $staffPatient)
     {
         //
     }

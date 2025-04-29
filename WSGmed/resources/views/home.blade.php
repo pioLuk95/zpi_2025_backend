@@ -15,8 +15,12 @@
                     @endif
 
                     {{ __('You are logged in!') }}
+
                 </div>
             </div>
+            <a href="{{route('locations.index')}}">Lokalizacje - Pokoje</a> <br><br>
+            <a href="{{route('medications.index')}}">Leki - Spis leków</a> <br><br>
+            <a href="{{route('patients.index')}}">Pacjenci - Spis pacjentów</a> <br><br>
         </div>
     </div>
 </div>

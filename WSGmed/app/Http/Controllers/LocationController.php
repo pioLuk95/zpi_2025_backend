@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Location;
-use App\Http\Requests\StoreLocationRequest;
-use App\Http\Requests\UpdateLocationRequest;
+use Illuminate\Http\Request;
 
 class LocationController extends Controller
 {
@@ -13,7 +12,9 @@ class LocationController extends Controller
      */
     public function index()
     {
-        //
+        return view('locations.index', [
+            'locations' => Location::all(),
+        ]);
     }
 
     /**
@@ -21,15 +22,23 @@ class LocationController extends Controller
      */
     public function create()
     {
-        //
+        return view('locations.create');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreLocationRequest $request)
+    public function store(Request $request)
     {
-        //
+
+        $validated = $request->validate([
+            'room' => 'required|string|max:255',
+            'floor' => 'required|integer',
+            'limit' => 'required|integer',
+        ]);
+        Location::create($validated);
+
+        return redirect()->route('locations.index')->with('success', 'Lokalizacja została dodana.');
     }
 
     /**
@@ -45,15 +54,22 @@ class LocationController extends Controller
      */
     public function edit(Location $location)
     {
-        //
+        return view('locations.edit', compact('location'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateLocationRequest $request, Location $location)
+    public function update(Request $request, Location $location)
     {
-        //
+        $validated = $request->validate([
+            'room' => 'required|string|max:255',
+            'floor' => 'required|integer',
+            'limit' => 'required|integer',
+        ]);
+        $location->update($validated);
+
+        return redirect()->route('locations.index')->with('success', 'Lokalizacja została zaktualizowana.');
     }
 
     /**
@@ -61,6 +77,7 @@ class LocationController extends Controller
      */
     public function destroy(Location $location)
     {
-        //
+        $location->delete();
+        return redirect()->route('locations.index')->with('success', 'Lokalizacja została usunięta.');
     }
 }

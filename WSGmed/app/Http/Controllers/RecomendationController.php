@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Recomendation;
-use App\Http\Requests\StoreRecomendationRequest;
-use App\Http\Requests\UpdateRecomendationRequest;
+use Illuminate\Http\Request;
+
 
 class RecomendationController extends Controller
 {
@@ -27,7 +27,7 @@ class RecomendationController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreRecomendationRequest $request)
+    public function store(Request $request)
     {
         //
     }
@@ -51,7 +51,7 @@ class RecomendationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateRecomendationRequest $request, Recomendation $recomendation)
+    public function update(Request $request, Recomendation $recomendation)
     {
         //
     }

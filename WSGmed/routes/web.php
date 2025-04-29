@@ -9,3 +9,7 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::resource('patients', App\Http\Controllers\PatientController::class);
+Route::resource('medications', App\Http\Controllers\MedicationController::class);
+Route::resource('locations', App\Http\Controllers\LocationController::class);

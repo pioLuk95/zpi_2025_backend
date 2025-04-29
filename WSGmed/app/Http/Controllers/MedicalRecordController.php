@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\MedicalRecord;
-use App\Http\Requests\StoreMedicalRecordRequest;
-use App\Http\Requests\UpdateMedicalRecordRequest;
+use Illuminate\Http\Request;
+
 
 class MedicalRecordController extends Controller
 {

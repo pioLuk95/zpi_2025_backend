@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\EmergencyCalls;
-use App\Http\Requests\StoreEmergencyCallsRequest;
-use App\Http\Requests\UpdateEmergencyCallsRequest;
+use Illuminate\Http\Request;
 
 class EmergencyCallsController extends Controller
 {
@@ -27,7 +26,7 @@ class EmergencyCallsController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreEmergencyCallsRequest $request)
+    public function store(Request $request)
     {
         //
     }
@@ -51,7 +50,7 @@ class EmergencyCallsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateEmergencyCallsRequest $request, EmergencyCalls $emergencyCalls)
+    public function update(Request $request, EmergencyCalls $emergencyCalls)
     {
         //
     }

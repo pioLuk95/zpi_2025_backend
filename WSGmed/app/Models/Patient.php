@@ -23,4 +23,9 @@ class Patient extends Model
     {
         return $this->belongsTo(Location::class);
     }
+
+    public function records()
+    {
+        return $this->hasMany(MedicalRecord::class);
+    }
 }

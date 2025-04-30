@@ -20,6 +20,51 @@
             </form>
             <a href="{{ route('patients.index') }}" class="btn btn-secondary">Powrót</a>
         </div>
+
+        <a href="{{ route('medical-records.create', $patient) }}" class="btn btn-primary mt-3">Dodaj wpis medyczny</a>
+        Zapisy medyczne:
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Pacjent</th>
+                    <th>Data</th>
+                    <th>Ciśnienie</th>
+                    <th>Temp.</th>
+                    <th>Tętno</th>
+                    <th>Waga</th>
+                    <th>Nastrój</th>
+                    <th>Ból</th>
+                    <th>Saturacja</th>
+                    <th>Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($records as $record)
+                <tr>
+                    <td>{{ $record->patient->name }} {{ $record->patient->s_name }}</td>
+                    <td>{{ $record->record_date }}</td>
+                    <td>{{ $record->blood_pressure }}</td>
+                    <td>{{ $record->temperature }}</td>
+                    <td>{{ $record->pulse }}</td>
+                    <td>{{ $record->weight }}</td>
+                    <td>{{ $record->mood }}</td>
+                    <td>{{ $record->pain_level }}</td>
+                    <td>{{ $record->oxygen_saturation }}</td>
+                    <td>
+                        <form action="{{ route('medical-records.destroy', $record) }}" method="POST" onsubmit="return confirm('Na pewno usunąć?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-sm btn-danger">Usuń</button>
+                        </form>
+                    </td>
+                </tr>
+                @empty
+                <tr><td colspan="10">Brak wpisów</td></tr>
+                @endforelse
+            </tbody>
+        </table>    
+
     </div>
 </div>
 @endsection

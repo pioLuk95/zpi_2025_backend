@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MedicalRecord;
+use App\Models\Patient;
 use Illuminate\Http\Request;
 
 
@@ -19,17 +20,35 @@ class MedicalRecordController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Patient $patient)
     {
-        //
+        return view('med_records.create', [
+            'patient' => $patient
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreMedicalRecordRequest $request)
+    public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'patient_id' => 'required|exists:patients,id',
+            'record_date' => 'required|date',
+            'blood_pressure' => 'required|numeric',
+            'temperature' => 'required|numeric',
+            'pulse' => 'required|numeric',
+            'weight' => 'required|numeric',
+            'mood' => 'required|integer|between:1,10',
+            'pain_level' => 'required|integer|between:1,10',
+            'oxygen_saturation' => 'required|numeric',
+        ]);
+    
+        MedicalRecord::create($validated);
+    
+        return redirect()
+            ->route('patients.show', $validated['patient_id'])
+            ->with('success', 'Wpis medyczny został dodany.');
     }
 
     /**
@@ -51,7 +70,7 @@ class MedicalRecordController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateMedicalRecordRequest $request, MedicalRecord $medicalRecord)
+    public function update(Request $request, MedicalRecord $medicalRecord)
     {
         //
     }
@@ -60,7 +79,12 @@ class MedicalRecordController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(MedicalRecord $medicalRecord)
-    {
-        //
+    {   
+        $patient = $medicalRecord->patient;
+        $medicalRecord->delete();
+
+        return redirect()
+            ->route('patients.show', $patient)
+            ->with('success', 'Wpis medyczny został pomyślnie usunięty.');
     }
 }

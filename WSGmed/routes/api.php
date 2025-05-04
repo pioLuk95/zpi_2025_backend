@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\EmergencyCallsController;
+use App\Http\Controllers\Api\LocationController;
+use App\Http\Controllers\Api\MedicalRecordController;
+use App\Http\Controllers\Api\MedicationController;
+use App\Http\Controllers\Api\PatientController;
+use App\Http\Controllers\Api\PatientMedicationController;
+use App\Http\Controllers\Api\RecomendationController;
+use App\Http\Controllers\Api\StaffController;
+use App\Http\Controllers\Api\StaffPatientController;
+use App\Http\Controllers\Api\AuthTokenController;
+
+
+
+
+
+Route::post('login', [AuthTokenController::class, 'login']);
+
+Route::group(['middleware' => 'auth.jwt'], function () {
+    Route::post('logout', [AuthTokenController::class, 'logout']);
+    Route::post('refresh', [AuthTokenController::class, 'refresh']);
+
+    Route::apiResource('emergency-calls', EmergencyCallsController::class);
+    Route::apiResource('locations', LocationController::class);
+    Route::apiResource('medical-records', MedicalRecordController::class);
+    Route::apiResource('medications', MedicationController::class);
+    Route::apiResource('patients', PatientController::class);
+    Route::apiResource('patient-medications', PatientMedicationController::class);
+    Route::apiResource('recomendations', RecomendationController::class);
+    Route::apiResource('staff', StaffController::class);
+    Route::apiResource('staff-patients', StaffPatientController::class);
+});

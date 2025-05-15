@@ -30,7 +30,7 @@ return [
             ],
 
             // Include these routes even if they did not match the rules above.
-            'include' => [
+            'include' => [ '*'
                 // 'users.index', 'POST /new', '/auth/*'
             ],
 
@@ -53,7 +53,7 @@ return [
     'static' => [
         // HTML documentation, assets and Postman collection will be generated to this folder.
         // Source Markdown will still be in resources/docs.
-        'output_path' => 'public/docs',
+        'output_path' => 'public/docs-assets-output',
     ],
 
     'laravel' => [
@@ -67,7 +67,7 @@ return [
         // Directory within `public` in which to store CSS and JS assets.
         // By default, assets are stored in `public/vendor/scribe`.
         // If set, assets will be stored in `public/{{assets_directory}}`
-        'assets_directory' => null,
+        'assets_directory' => 'docs-assets',
 
         // Middleware to attach to the docs endpoint (if `add_routes` is true).
         'middleware' => [],

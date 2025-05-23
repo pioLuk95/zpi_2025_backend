@@ -11,7 +11,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->group('web', [
+            \Illuminate\Cookie\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,  // bardzo ważne!
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            \App\Http\Middleware\SetUserGuard::class, // Twój middleware po sesji
+        ]);
+        $middleware->alias([
+            'check.guard' => \App\Http\Middleware\CheckGuardAccess::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\EmergencyCalls;
+use App\Models\Patient;
 use Illuminate\Http\Request;
 
 class EmergencyCallsController extends Controller
@@ -12,7 +13,17 @@ class EmergencyCallsController extends Controller
      */
     public function index()
     {
-        //
+        return view('emergencyCalls.index', [
+            'calls' => EmergencyCalls::all(),
+        ]);
+    }
+
+    public function showEmergencies(Patient $patient)
+    {   
+        $emergencyCalls = EmergencyCalls::where('patient_id', $patient->id)->get();
+        return view('emergencyCalls.index', [
+            'calls' => $emergencyCalls
+        ]);
     }
 
     /**
@@ -58,8 +69,9 @@ class EmergencyCallsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(EmergencyCalls $emergencyCalls)
+    public function destroy(EmergencyCalls $emergency_call)
     {
-        //
+        $emergency_call->delete();
+        return redirect()->route('emergency_calls.index')->with('success', 'Wpis został usunięty.');
     }
 }

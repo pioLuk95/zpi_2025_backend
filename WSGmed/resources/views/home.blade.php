@@ -21,6 +21,7 @@
             <a href="{{route('locations.index')}}">Lokalizacje - Pokoje</a> <br><br>
             <a href="{{route('medications.index')}}">Leki - Spis leków</a> <br><br>
             <a href="{{route('patients.index')}}">Pacjenci - Spis pacjentów</a> <br><br>
+            <a href="{{route('emergency_calls.index')}}">Pacjenci - Spis emergency callów</a> <br><br>
         </div>
     </div>
 </div>

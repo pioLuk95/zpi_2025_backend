@@ -9,6 +9,7 @@ Route::get('/', function () {
 });
 
 
+Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 #Route::resource('patients', App\Http\Controllers\PatientController::class);
@@ -35,10 +36,8 @@ Route::middleware('check.guard:staff,web,patient')->group(function () {
 
 });
 Route::middleware('check.guard:web')->group(function () {
-    Route::resource('locations', LocationController::class);
+    Route::resource('locations', App\Http\Controllers\LocationController::class);
 });
-
-Auth::routes();
 
 Route::get('/patients/{patient}/show_emergency_calls', [App\Http\Controllers\EmergencyCallsController::class, 'showEmergencies'])->name('patient-emergencies.show');
 

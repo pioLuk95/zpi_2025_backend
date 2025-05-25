@@ -16,7 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,  // bardzo ważne!
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-            \App\Http\Middleware\SetUserGuard::class, // Twój middleware po sesji
+            \App\Http\Middleware\SetUserGuard::class
         ]);
         $middleware->alias([
             'check.guard' => \App\Http\Middleware\CheckGuardAccess::class,

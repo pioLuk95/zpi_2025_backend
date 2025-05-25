@@ -6,7 +6,7 @@
   14 => 'view',
   'app' => 
   array (
-    'name' => 'WSGmed',
+    'name' => 'Laravel',
     'env' => 'local',
     'debug' => true,
     'url' => 'http://localhost',
@@ -17,7 +17,7 @@
     'fallback_locale' => 'en',
     'faker_locale' => 'en_US',
     'cipher' => 'AES-256-CBC',
-    'key' => 'base64:yxq1wzHjGholvCR7Tl55wk80LFT384Q3k3WK/UemyM8=',
+    'key' => 'base64:WnMq8GJOGfAS6dr9Q9Izt+/hFq6BuDd+FjlvLJ1FFJ0=',
     'previous_keys' => 
     array (
     ),
@@ -178,8 +178,8 @@
       'file' => 
       array (
         'driver' => 'file',
-        'path' => 'C:\\xampp\\htdocs\\WSGmed\\storage\\framework/cache/data',
-        'lock_path' => 'C:\\xampp\\htdocs\\WSGmed\\storage\\framework/cache/data',
+        'path' => 'C:\\Users\\Dominik\\GitHub\\zpi_2025_backend\\WSGmed\\storage\\framework/cache/data',
+        'lock_path' => 'C:\\Users\\Dominik\\GitHub\\zpi_2025_backend\\WSGmed\\storage\\framework/cache/data',
       ),
       'memcached' => 
       array (
@@ -223,7 +223,7 @@
         'driver' => 'octane',
       ),
     ),
-    'prefix' => 'wsgmed_cache_',
+    'prefix' => 'laravel_cache_',
   ),
   'database' => 
   array (
@@ -234,7 +234,7 @@
       array (
         'driver' => 'sqlite',
         'url' => NULL,
-        'database' => 'C:\\xampp\\htdocs\\WSGmed\\database\\database.sqlite',
+        'database' => 'C:\\Users\\Dominik\\GitHub\\zpi_2025_backend\\WSGmed\\database\\database.sqlite',
         'prefix' => '',
         'foreign_key_constraints' => true,
         'busy_timeout' => NULL,
@@ -321,7 +321,7 @@
       'options' => 
       array (
         'cluster' => 'redis',
-        'prefix' => 'wsgmed_database_',
+        'prefix' => 'laravel_database_',
         'persistent' => false,
       ),
       'default' => 
@@ -352,7 +352,7 @@
       'local' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\WSGmed\\storage\\app/private',
+        'root' => 'C:\\Users\\Dominik\\GitHub\\zpi_2025_backend\\WSGmed\\storage\\app/private',
         'serve' => true,
         'throw' => false,
         'report' => false,
@@ -360,7 +360,7 @@
       'public' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\WSGmed\\storage\\app/public',
+        'root' => 'C:\\Users\\Dominik\\GitHub\\zpi_2025_backend\\WSGmed\\storage\\app/public',
         'url' => 'http://localhost/storage',
         'visibility' => 'public',
         'throw' => false,
@@ -382,7 +382,7 @@
     ),
     'links' => 
     array (
-      'C:\\xampp\\htdocs\\WSGmed\\public\\storage' => 'C:\\xampp\\htdocs\\WSGmed\\storage\\app/public',
+      'C:\\Users\\Dominik\\GitHub\\zpi_2025_backend\\WSGmed\\public\\storage' => 'C:\\Users\\Dominik\\GitHub\\zpi_2025_backend\\WSGmed\\storage\\app/public',
     ),
   ),
   'logging' => 
@@ -407,14 +407,14 @@
       'single' => 
       array (
         'driver' => 'single',
-        'path' => 'C:\\xampp\\htdocs\\WSGmed\\storage\\logs/laravel.log',
+        'path' => 'C:\\Users\\Dominik\\GitHub\\zpi_2025_backend\\WSGmed\\storage\\logs/laravel.log',
         'level' => 'debug',
         'replace_placeholders' => true,
       ),
       'daily' => 
       array (
         'driver' => 'daily',
-        'path' => 'C:\\xampp\\htdocs\\WSGmed\\storage\\logs/laravel.log',
+        'path' => 'C:\\Users\\Dominik\\GitHub\\zpi_2025_backend\\WSGmed\\storage\\logs/laravel.log',
         'level' => 'debug',
         'days' => 14,
         'replace_placeholders' => true,
@@ -479,13 +479,13 @@
       ),
       'emergency' => 
       array (
-        'path' => 'C:\\xampp\\htdocs\\WSGmed\\storage\\logs/laravel.log',
+        'path' => 'C:\\Users\\Dominik\\GitHub\\zpi_2025_backend\\WSGmed\\storage\\logs/laravel.log',
       ),
     ),
   ),
   'mail' => 
   array (
-    'default' => 'smtp',
+    'default' => 'log',
     'mailers' => 
     array (
       'smtp' => 
@@ -493,10 +493,10 @@
         'transport' => 'smtp',
         'scheme' => NULL,
         'url' => NULL,
-        'host' => 'sandbox.smtp.mailtrap.io',
+        'host' => '127.0.0.1',
         'port' => '2525',
-        'username' => '2e24bad66b9722',
-        'password' => 'b764c115a5d8cb',
+        'username' => NULL,
+        'password' => NULL,
         'timeout' => NULL,
         'local_domain' => 'localhost',
       ),
@@ -550,14 +550,14 @@
     'from' => 
     array (
       'address' => 'hello@example.com',
-      'name' => 'WSGmed',
+      'name' => 'Laravel',
     ),
     'markdown' => 
     array (
       'theme' => 'default',
       'paths' => 
       array (
-        0 => 'C:\\xampp\\htdocs\\WSGmed\\resources\\views/vendor/mail',
+        0 => 'C:\\Users\\Dominik\\GitHub\\zpi_2025_backend\\WSGmed\\resources\\views/vendor/mail',
       ),
     ),
   ),
@@ -652,7 +652,7 @@
     'lifetime' => 120,
     'expire_on_close' => false,
     'encrypt' => false,
-    'files' => 'C:\\xampp\\htdocs\\WSGmed\\storage\\framework/sessions',
+    'files' => 'C:\\Users\\Dominik\\GitHub\\zpi_2025_backend\\WSGmed\\storage\\framework/sessions',
     'connection' => NULL,
     'table' => 'sessions',
     'store' => NULL,
@@ -661,7 +661,7 @@
       0 => 2,
       1 => 100,
     ),
-    'cookie' => 'wsgmed_session',
+    'cookie' => 'laravel_session',
     'path' => '/',
     'domain' => NULL,
     'secure' => NULL,
@@ -779,9 +779,9 @@
   array (
     'paths' => 
     array (
-      0 => 'C:\\xampp\\htdocs\\WSGmed\\resources\\views',
+      0 => 'C:\\Users\\Dominik\\GitHub\\zpi_2025_backend\\WSGmed\\resources\\views',
     ),
-    'compiled' => 'C:\\xampp\\htdocs\\WSGmed\\storage\\framework\\views',
+    'compiled' => 'C:\\Users\\Dominik\\GitHub\\zpi_2025_backend\\WSGmed\\storage\\framework\\views',
   ),
   'tinker' => 
   array (

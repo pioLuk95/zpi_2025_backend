@@ -43,24 +43,24 @@ class TwoFactorController extends Controller
         ]);
     }
     public function verify(Request $request)
-{
-    $request->validate([
-        'otp' => 'required|digits:6',
-    ]);
+    {
+        $request->validate([
+            'otp' => 'required|digits:6',
+        ]);
 
-    $user = auth()->user();
+        $user = auth()->user();
 
-    $totp = TOTP::create($user->google2fa_secret);
+        $totp = TOTP::create($user->google2fa_secret);
 
-    if ($totp->verify($request->input('otp'))) {
+        if ($totp->verify($request->input('otp'))) {
 
-        $user->two_factor_confirmed_at = now();
-        $user->save();
+            $user->two_factor_confirmed_at = now();
+            $user->save();
 
-        return redirect()->route('home')->with('success', '2FA pomyślnie potwierdzone!');
+            return redirect()->route('home')->with('success', '2FA pomyślnie potwierdzone!');
+        }
+
+        return back()->withErrors(['otp' => 'Nieprawidłowy kod uwierzytelniający']);
     }
-
-    return back()->withErrors(['otp' => 'Nieprawidłowy kod uwierzytelniający']);
-}
 }
 

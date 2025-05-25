@@ -12,7 +12,8 @@ class EmergencyCalls extends Model
     protected $fillable = [
         'patient_id',
         'date',
-        'status'
+        'status',
+        'description'
     ];
 
     public function patient()

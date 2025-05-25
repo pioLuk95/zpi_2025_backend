@@ -45,25 +45,27 @@ class EmergencyCallsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(EmergencyCalls $emergencyCalls)
+    public function show(EmergencyCalls $emergency_call)
     {
-        //
+        return view('emergencyCalls.show', compact('emergency_call'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(EmergencyCalls $emergencyCalls)
+    public function edit(EmergencyCalls $emergency_call)
     {
-        //
+        return view('emergencyCalls.edit', compact('emergency_call'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified resource in storage.s
      */
-    public function update(Request $request, EmergencyCalls $emergencyCalls)
+    public function update(Request $request, EmergencyCalls $emergency_call)
     {
-        //
+        $emergency_call->description = $request->input('description');
+        $emergency_call->save();
+        return redirect()->route('emergency_calls.index')->with('success', 'Opis został zaktualizowany.');
     }
 
     /**

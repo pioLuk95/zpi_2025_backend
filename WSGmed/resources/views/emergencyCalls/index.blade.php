@@ -28,6 +28,7 @@
                         @method('DELETE')
                         <button class="btn btn-danger btn-sm">Usuń</button>
                     </form>
+                    <a href="{{ route('emergency_calls.show', $call) }}" class="btn btn-primary mb-3">Pokaż</a>
                 </td>
             </tr>
             @endforeach

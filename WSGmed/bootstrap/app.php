@@ -19,7 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Controllers\Middleware\SetUserGuard::class
         ]);
         $middleware->alias([
-            'check.guard' => \App\Http\Middleware\CheckGuardAccess::class,
+            'check.guard' => \App\Http\Controllers\Middleware\CheckGuardAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

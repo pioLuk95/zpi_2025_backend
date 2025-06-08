@@ -1,28 +1,32 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Dashboard') }}</div>
+<div class="container d-flex justify-content-between">
+    <div class="row col-md-6 justify-content-center">
 
-                <div class="card-body">
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
-                    @endif
+            <h2 class="mb-4">Ostatnie 5 leków</h2>
 
-                    {{ __('You are logged in!') }}
+            @include('medications._list', ['medications' => $medications])
 
-                </div>
+            <div class="mt-3">
+                <a href="{{ route('medications.index') }}" class="btn btn-outline-primary">
+                    Zobacz wszystkie leki
+                </a>
             </div>
-            <a href="{{route('locations.index')}}">Lokalizacje - Pokoje</a> <br><br>
-            <a href="{{route('medications.index')}}">Leki - Spis leków</a> <br><br>
-            <a href="{{route('patients.index')}}">Pacjenci - Spis pacjentów</a> <br><br>
-            <a href="{{route('emergency_calls.index')}}">Pacjenci - Spis emergency callów</a> <br><br>
+
+    </div>
+    <div class="row col-md-6 justify-content-center">
+
+        <h2 class="mb-4">Ostatnie 5 leków</h2>
+
+        @include('medications._list', ['medications' => $medications])
+
+        <div class="mt-3">
+            <a href="{{ route('medications.index') }}" class="btn btn-outline-primary">
+                Zobacz wszystkie leki
+            </a>
         </div>
+
     </div>
 </div>
 @endsection

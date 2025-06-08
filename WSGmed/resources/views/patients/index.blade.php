@@ -11,7 +11,7 @@
             <tr>
                 <th>Imię i Nazwisko</th>
                 <th>Data urodzenia</th>
-                <th>E-mail</th>
+                <th>Lokalizacja</th>
                 <th>Akcje</th>
             </tr>
         </thead>
@@ -21,7 +21,7 @@
             <tr>
                 <td>{{ $patient->name }} {{ $patient->s_name }}</td>
                 <td>{{ $patient->date_of_birth }}</td>
-                <td>{{ $patient->email }}</td>
+                <td>{{ $patient->location->name }}</td>
                 <td>
                     <a href="{{ route('patients.edit', $patient) }}" class="btn btn-warning btn-sm">Edytuj</a>
                     <form action="{{ route('patients.destroy', $patient) }}" method="POST" class="d-inline">

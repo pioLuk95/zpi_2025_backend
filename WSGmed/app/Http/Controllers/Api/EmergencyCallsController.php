@@ -9,78 +9,39 @@ use Illuminate\Http\Request;
 /**
  * @OA\Tag(
  *     name="EmergencyCalls",
- *     description="API Endpoints for managing emergency calls"
+ *     description="API Endpoints for managing emergency calls for patients"
  * )
  */
 class EmergencyCallsController extends Controller
 {
     /**
-     * Display a list of all emergency calls.
-     *
-     * @group EmergencyCalls
-     * @response 200 [
-     *     {
-     *         "id": 1,
-     *         "patient_id": 1,
-     *         "date": "2025-05-05",
-     *         "status": 1,
-     *         "created_at": "2025-05-05T12:00:00Z",
-     *         "updated_at": "2025-05-05T12:00:00Z"
-     *     }
-     * ]
-     *
-     * @OA\Get(
-     *     path="/api/emergency-calls",
-     *     tags={"EmergencyCalls"},
-     *     summary="Get a list of all emergency calls",
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful response",
-     *         @OA\JsonContent(
-     *             type="array",
-     *             @OA\Items(
-     *                 type="object",
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="patient_id", type="integer", example=1),
-     *                 @OA\Property(property="date", type="string", format="date", example="2025-05-05"),
-     *                 @OA\Property(property="status", type="integer", example=1),
-     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2025-05-05T12:00:00Z"),
-     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2025-05-05T12:00:00Z")
-     *             )
-     *         )
-     *     )
-     * )
-     */
-    public function index()
-    {
-        return response()->json(EmergencyCalls::all(), 200);
-    }
-
-    /**
      * Create a new emergency call.
      *
      * @group EmergencyCalls
-     * @bodyParam patient_id integer required The ID of the patient. Example: 1
      * @bodyParam date string required The date of the emergency call. Example: 2025-05-05
      * @bodyParam status integer required The status of the emergency call. Example: 1
      * @response 201 {
-     *     "id": 1,
-     *     "patient_id": 1,
-     *     "date": "2025-05-05",
-     *     "status": 1,
-     *     "created_at": "2025-05-05T12:00:00Z",
-     *     "updated_at": "2025-05-05T12:00:00Z"
+     *     "message": "Emergency call created successfully",
+     *     "call_id": 1
+     * }
+     * @response 401 {
+     *     "error_code": 10001,
+     *     "message": "Unauthorized access"
+     * }
+     * @response 422 {
+     *     "error_code": 10022,
+     *     "message": "Validation error"
      * }
      *
      * @OA\Post(
      *     path="/api/emergency-calls",
      *     tags={"EmergencyCalls"},
      *     summary="Create a new emergency call",
+     *     description="Creates a new emergency call for the authenticated user. The `patient_id` is automatically assigned based on the logged-in user.",
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"patient_id", "date", "status"},
-     *             @OA\Property(property="patient_id", type="integer", example=1),
+     *             required={"date", "status"},
      *             @OA\Property(property="date", type="string", format="date", example="2025-05-05"),
      *             @OA\Property(property="status", type="integer", example=1)
      *         )
@@ -90,189 +51,48 @@ class EmergencyCallsController extends Controller
      *         description="Emergency call created successfully",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="id", type="integer", example=1),
-     *             @OA\Property(property="patient_id", type="integer", example=1),
-     *             @OA\Property(property="date", type="string", format="date", example="2025-05-05"),
-     *             @OA\Property(property="status", type="integer", example=1),
-     *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-05-05T12:00:00Z"),
-     *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-05-05T12:00:00Z")
+     *             @OA\Property(property="message", type="string", example="Emergency call created successfully"),
+     *             @OA\Property(property="call_id", type="integer", example=1)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized access",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="error_code", type="integer", example=10001),
+     *             @OA\Property(property="message", type="string", example="Unauthorized access")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="error_code", type="integer", example=10022),
+     *             @OA\Property(property="message", type="string", example="Validation error")
      *         )
      *     )
      * )
      */
     public function store(Request $request)
     {
+        $user = auth()->user(); // Pobierz zalogowanego użytkownika
+
         $validated = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
             'date' => 'required|date',
             'status' => 'required|integer|min:0|max:2',
         ]);
 
-        $emergencyCall = EmergencyCalls::create($validated);
-
-        return response()->json($emergencyCall, 201);
-    }
-
-    /**
-     * Get a specific emergency call by ID.
-     *
-     * @group EmergencyCalls
-     * @urlParam id integer required The ID of the emergency call. Example: 1
-     * @response 200 {
-     *     "id": 1,
-     *     "patient_id": 1,
-     *     "date": "2025-05-05",
-     *     "status": 1,
-     *     "created_at": "2025-05-05T12:00:00Z",
-     *     "updated_at": "2025-05-05T12:00:00Z"
-     * }
-     * @response 404 {
-     *     "message": "Emergency call not found"
-     * }
-     *
-     * @OA\Get(
-     *     path="/api/emergency-calls/{id}",
-     *     tags={"EmergencyCalls"},
-     *     summary="Get a specific emergency call by ID",
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="ID of the emergency call",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful response",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="id", type="integer", example=1),
-     *             @OA\Property(property="patient_id", type="integer", example=1),
-     *             @OA\Property(property="date", type="string", format="date", example="2025-05-05"),
-     *             @OA\Property(property="status", type="integer", example=1),
-     *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-05-05T12:00:00Z"),
-     *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-05-05T12:00:00Z")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Emergency call not found"
-     *     )
-     * )
-     */
-    public function show(EmergencyCalls $emergencyCalls)
-    {
-        return $emergencyCalls;
-    }
-
-    /**
-     * Update an existing emergency call.
-     *
-     * @group EmergencyCalls
-     * @urlParam id integer required The ID of the emergency call. Example: 1
-     * @bodyParam patient_id integer The ID of the patient. Example: 1
-     * @bodyParam date string The date of the emergency call. Example: 2025-05-05
-     * @bodyParam status integer The status of the emergency call. Example: 1
-     * @response 200 {
-     *     "id": 1,
-     *     "patient_id": 1,
-     *     "date": "2025-05-05",
-     *     "status": 1,
-     *     "created_at": "2025-05-05T12:00:00Z",
-     *     "updated_at": "2025-05-05T12:00:00Z"
-     * }
-     * @response 404 {
-     *     "message": "Emergency call not found"
-     * }
-     *
-     * @OA\Put(
-     *     path="/api/emergency-calls/{id}",
-     *     tags={"EmergencyCalls"},
-     *     summary="Update an existing emergency call",
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="ID of the emergency call",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             @OA\Property(property="patient_id", type="integer", example=1),
-     *             @OA\Property(property="date", type="string", format="date", example="2025-05-05"),
-     *             @OA\Property(property="status", type="integer", example=1)
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Emergency call updated successfully",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="id", type="integer", example=1),
-     *             @OA\Property(property="patient_id", type="integer", example=1),
-     *             @OA\Property(property="date", type="string", format="date", example="2025-05-05"),
-     *             @OA\Property(property="status", type="integer", example=1),
-     *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-05-05T12:00:00Z"),
-     *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-05-05T12:00:00Z")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Emergency call not found"
-     *     )
-     * )
-     */
-    public function update(Request $request, EmergencyCalls $emergencyCalls)
-    {
-        $validated = $request->validate([
-            'patient_id' => 'sometimes|required|exists:patients,id',
-            'date' => 'sometimes|required|date',
-            'status' => 'sometimes|required|integer|min:0|max:2',
+        $emergencyCall = EmergencyCalls::create([
+            'patient_id' => $user->id, // Użyj ID zalogowanego użytkownika
+            'date' => $validated['date'],
+            'status' => $validated['status'],
         ]);
 
-        $emergencyCalls->update($validated);
-
-        return response()->json($emergencyCalls, 200);
-    }
-
-    /**
-     * Delete an emergency call.
-     *
-     * @group EmergencyCalls
-     * @urlParam id integer required The ID of the emergency call. Example: 1
-     * @response 204 {
-     *     "message": "Emergency call deleted successfully"
-     * }
-     * @response 404 {
-     *     "message": "Emergency call not found"
-     * }
-     *
-     * @OA\Delete(
-     *     path="/api/emergency-calls/{id}",
-     *     tags={"EmergencyCalls"},
-     *     summary="Delete an emergency call",
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="ID of the emergency call",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=204,
-     *         description="Emergency call deleted successfully"
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Emergency call not found"
-     *     )
-     * )
-     */
-    public function destroy(EmergencyCalls $emergencyCalls)
-    {
-        $emergencyCalls->delete();
-
-        return response()->json(null, 204);
+        return response()->json([
+            'message' => 'Emergency call created successfully',
+            'call_id' => $emergencyCall->id,
+        ], 201);
     }
 }

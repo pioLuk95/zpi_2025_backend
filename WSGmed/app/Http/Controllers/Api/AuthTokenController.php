@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+use Illuminate\Auth\Events\PasswordReset;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
@@ -29,92 +32,11 @@ use Firebase\JWT\Key;
 class AuthTokenController extends Controller
 {
     /**
-     * Register a new user
-     *
-     * Creates a new user account and returns a JWT token upon successful registration.
-     *
-     * @OA\Post(
-     *     path="/api/register",
-     *     tags={"Auth"},
-     *     summary="Register a new user",
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"name", "email", "password", "password_confirmation"},
-     *             @OA\Property(property="name", type="string", example="John Doe"),
-     *             @OA\Property(property="email", type="string", example="user@example.com"),
-     *             @OA\Property(property="password", type="string", example="password123"),
-     *             @OA\Property(property="password_confirmation", type="string", example="password123")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="User registered successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="User registered successfully"),
-     *             @OA\Property(property="token", type="string", example="eyJhbGciOiJIUzI1...")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
-     *             @OA\Property(property="errors", type="object",
-     *                 example={
-     *                     "email": {"The email has already been taken."},
-     *                     "password": {"The password confirmation does not match."}
-     *                 }
-     *             )
-     *         )
-     *     )
-     * )
-     */
-    public function register(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'The given data was invalid.',
-                'errors' => $validator->errors(),
-            ], 422);
-        }
-
-        $user = User::create([
-            'name' => $request->input('name'),
-            'email' => $request->input('email'),
-            'password' => Hash::make($request->input('password')),
-        ]);
-
-        $payload = [
-            'iss' => "WSGmed",
-            'sub' => $user->id,
-            'iat' => time(),
-            'exp' => time() + 60*60
-        ];
-
-        $jwt = JWT::encode($payload, env('JWT_SECRET'), 'HS256');
-
-        return response()->json([
-            'message' => 'User registered successfully',
-            'token' => $jwt,
-        ], 201);
-    }
-
-    /**
-     * Log in and get a JWT token
-     *
-     * Authenticates the user and returns a JWT token if credentials are valid.
-     *
      * @OA\Post(
      *     path="/api/login",
      *     tags={"Auth"},
      *     summary="Log in and get a JWT token",
+     *     security={},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -132,7 +54,11 @@ class AuthTokenController extends Controller
      *     ),
      *     @OA\Response(
      *         response=401,
-     *         description="Unauthorized"
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="Unauthorized"),
+     *             @OA\Property(property="code", type="integer", example=10001)
+     *         )
      *     )
      * )
      */
@@ -155,42 +81,54 @@ class AuthTokenController extends Controller
             return response()->json(['token' => $jwt], 200);
         }
 
-        return response()->json(['error' => 'Unauthorized'], 401);
+        return response()->json(['error' => 'Unauthorized', 'code' => 10001], 401);
     }
 
     /**
-     * Log out the user
-     *
-     * Logs out the currently authenticated user.
-     *
      * @OA\Post(
      *     path="/api/logout",
      *     tags={"Auth"},
      *     summary="Log out the user",
+     *     security={{"bearerAuth":{}}},
      *     @OA\Response(
      *         response=200,
      *         description="Successfully logged out",
      *         @OA\JsonContent(
      *             @OA\Property(property="message", type="string", example="Successfully logged out")
      *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="Unauthorized"),
+     *             @OA\Property(property="code", type="integer", example=10001)
+     *         )
      *     )
      * )
      */
     public function logout(Request $request)
     {
-        Auth::logout();
-        return response()->json(['message' => 'Successfully logged out'], 200);
+        $token = $request->bearerToken();
+        if (!$token) {
+            return response()->json(['error' => 'Unauthorized', 'code' => 10001], 401);
+        }
+        
+        try {
+            JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
+            Auth::logout();
+            return response()->json(['message' => 'Successfully logged out'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Unauthorized', 'code' => 10001], 401);
+        }
     }
 
     /**
-     * Refresh the JWT token
-     *
-     * Generates a new JWT token based on the provided valid token.
-     *
      * @OA\Post(
      *     path="/api/refresh",
      *     tags={"Auth"},
      *     summary="Refresh the JWT token",
+     *     security={{"bearerAuth":{}}},
      *     @OA\Response(
      *         response=200,
      *         description="Token refreshed successfully",
@@ -200,7 +138,11 @@ class AuthTokenController extends Controller
      *     ),
      *     @OA\Response(
      *         response=401,
-     *         description="Token not provided or invalid"
+     *         description="Token not provided or invalid",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="Unauthorized"),
+     *             @OA\Property(property="code", type="integer", example=10001)
+     *         )
      *     )
      * )
      */
@@ -209,7 +151,7 @@ class AuthTokenController extends Controller
         $token = $request->bearerToken();
 
         if (!$token) {
-            return response()->json(['error' => 'Token not provided'], 401);
+            return response()->json(['error' => 'Token not provided', 'code' => 10001], 401);
         }
 
         try {
@@ -227,107 +169,16 @@ class AuthTokenController extends Controller
 
             return response()->json(['token' => $newJwt], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Invalid token'], 401);
+            return response()->json(['error' => 'Invalid token', 'code' => 10001], 401);
         }
     }
 
     /**
-     * Confirm user's password
-     *
-     * Checks if the provided password matches the authenticated user's password.
-     *
-     * @OA\Post(
-     *     path="/api/confirm-password",
-     *     tags={"Auth"},
-     *     summary="Confirm user's password",
-     *     security={{"bearerAuth":{}}},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"password"},
-     *             @OA\Property(property="password", type="string", example="password123")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Password confirmed successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Password confirmed successfully")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized or invalid token",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="Unauthorized")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
-     *             @OA\Property(property="errors", type="object",
-     *                 example={
-     *                     "password": {"The password field is required."}
-     *                 }
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Password does not match",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="Password does not match")
-     *         )
-     *     )
-     * )
-     */
-    public function confirmPassword(Request $request)
-    {
-        $token = $request->bearerToken();
-        if (!$token) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
-        try {
-            $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
-            $userId = $decoded->sub;
-            $user = User::find($userId);
-            if (!$user) {
-                return response()->json(['error' => 'Unauthorized'], 401);
-            }
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'password' => ['required', 'string'],
-        ]);
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'The given data was invalid.',
-                'errors' => $validator->errors(),
-            ], 422);
-        }
-
-        if (!Hash::check($request->input('password'), $user->password)) {
-            return response()->json(['error' => 'Password does not match'], 403);
-        }
-
-        return response()->json(['message' => 'Password confirmed successfully'], 200);
-    }
-
-    /**
-     * Send password reset email
-     *
-     * Sends a password reset link to the user's email.
-     *
      * @OA\Post(
      *     path="/api/password/email",
      *     tags={"Auth"},
      *     summary="Send password reset email",
-     *     security={{"bearerAuth":{}}},
+     *     security={},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -343,20 +194,6 @@ class AuthTokenController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="Unauthorized")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="User not found",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="User not found")
-     *         )
-     *     ),
-     *     @OA\Response(
      *         response=422,
      *         description="Validation error",
      *         @OA\JsonContent(
@@ -365,24 +202,22 @@ class AuthTokenController extends Controller
      *                 example={
      *                     "email": {"The email field is required."}
      *                 }
-     *             )
+     *             ),
+     *             @OA\Property(property="code", type="integer", example=10022)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Unable to send reset link",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="Unable to send reset link"),
+     *             @OA\Property(property="code", type="integer", example=10100)
      *         )
      *     )
      * )
      */
     public function sendResetLinkEmail(Request $request)
     {
-        // JWT auth
-        $token = $request->bearerToken();
-        if (!$token) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-        try {
-            $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'email', 'exists:users,email'],
         ]);
@@ -390,34 +225,27 @@ class AuthTokenController extends Controller
             return response()->json([
                 'message' => 'The given data was invalid.',
                 'errors' => $validator->errors(),
+                'code' => 10002,
             ], 422);
         }
 
-        $user = User::where('email', $request->input('email'))->first();
-        if (!$user) {
-            return response()->json(['error' => 'User not found'], 404);
-        }
- $status = Password::sendResetLink(
+        $status = Password::sendResetLink(
             ['email' => $request->input('email')]
         );
 
         if ($status === Password::RESET_LINK_SENT) {
             return response()->json(['message' => 'Password reset link sent'], 200);
         } else {
-            return response()->json(['error' => 'Unable to send reset link'], 500);
+            return response()->json(['error' => 'Unable to send reset link', 'code' => 10100], 500);
         }
     }
 
     /**
-     * Reset password
-     *
-     * Resets the user's password using a valid token.
-     *
      * @OA\Post(
      *     path="/api/password/reset",
      *     tags={"Auth"},
      *     summary="Reset password",
-     *     security={{"bearerAuth":{}}},
+     *     security={},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -436,17 +264,11 @@ class AuthTokenController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized",
+     *         response=400,
+     *         description="Invalid token or email",
      *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="Unauthorized")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="User not found",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="User not found")
+     *             @OA\Property(property="error", type="string", example="Invalid token or email"),
+     *             @OA\Property(property="code", type="integer", example=10000)
      *         )
      *     ),
      *     @OA\Response(
@@ -458,24 +280,14 @@ class AuthTokenController extends Controller
      *                 example={
      *                     "password": {"The password confirmation does not match."}
      *                 }
-     *             )
+     *             ),
+     *             @OA\Property(property="code", type="integer", example=10022)
      *         )
      *     )
      * )
      */
     public function resetPassword(Request $request)
     {
-        // JWT auth
-        $token = $request->bearerToken();
-        if (!$token) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-        try {
-            $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'email', 'exists:users,email'],
             'token' => ['required', 'string'],
@@ -485,15 +297,11 @@ class AuthTokenController extends Controller
             return response()->json([
                 'message' => 'The given data was invalid.',
                 'errors' => $validator->errors(),
+                'code' => 10022,
             ], 422);
         }
 
-        $user = User::where('email', $request->input('email'))->first();
-        if (!$user) {
-            return response()->json(['error' => 'User not found'], 404);
-        }
-
-       $status = Password::reset(
+        $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, $password) {
                 $user->password = Hash::make($password);
@@ -506,98 +314,7 @@ class AuthTokenController extends Controller
         if ($status === Password::PASSWORD_RESET) {
             return response()->json(['message' => 'Password reset successfully'], 200);
         } else {
-            return response()->json(['error' => 'Invalid token or email'], 400);
+            return response()->json(['error' => 'Invalid token or email', 'code' => 10000], 400);
         }
-    }
-
-    /**
-     * Verify user's email
-     *
-     * Verifies the user's email using a verification token.
-     *
-     * @OA\Post(
-     *     path="/api/email/verify",
-     *     tags={"Auth"},
-     *     summary="Verify user's email",
-     *     security={{"bearerAuth":{}}},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"id", "hash"},
-     *             @OA\Property(property="id", type="integer", example=1),
-     *             @OA\Property(property="hash", type="string", example="verification-hash")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Email verified successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Email verified successfully")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="Unauthorized")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Invalid verification data",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="Invalid verification data")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="User not found",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="User not found")
-     *         )
-     *     )
-     * )
-     */
-    public function verifyEmail(Request $request)
-    {
-        // JWT auth
-        $token = $request->bearerToken();
-        if (!$token) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-        try {
-            $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'id' => ['required', 'integer', 'exists:users,id'],
-            'hash' => ['required', 'string'],
-        ]);
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'The given data was invalid.',
-                'errors' => $validator->errors(),
-            ], 400);
-        }
-
-        $user = User::find($request->input('id'));
-        if (!$user) {
-            return response()->json(['error' => 'User not found'], 404);
-        }
-
-        $expectedHash = sha1($user->getEmailForVerification());
-        if ($request->input('hash') !== $expectedHash) {
-            return response()->json(['error' => 'Invalid verification data'], 400);
-        }
-
-        if ($user->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Email already verified'], 200);
-        }
-
-        $user->markEmailAsVerified();
-
-        return response()->json(['message' => 'Email verified successfully'], 200);
     }
 }

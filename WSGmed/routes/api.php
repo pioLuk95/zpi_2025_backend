@@ -29,7 +29,20 @@ Route::group(['middleware' => 'auth.jwt'], function () {
     Route::apiResource('medical-records', MedicalRecordController::class);
     Route::apiResource('medications', MedicationController::class);
     Route::apiResource('patients', PatientController::class);
-    Route::apiResource('patient-medications', PatientMedicationController::class);
+
+    Route::get('medical-visits/specialists', [MedicalVisitController::class, 'getSpecialists']);
+    Route::get('medical-visits/available-slots', [MedicalVisitController::class, 'getAvailableSlots']);
+    Route::post('medical-visits/schedule', [MedicalVisitController::class, 'scheduleVisit']);
+    Route::get('medical-visits/my-visits', [MedicalVisitController::class, 'getMyVisits']);
+    
+  
+    Route::get('patient-medications/patient/{patient_id}', [PatientMedicationController::class, 'getByPatient']);
+    Route::post('patient-medications/confirm', [PatientMedicationController::class, 'confirm']);
+    Route::get('patient-medications/active', [PatientMedicationController::class, 'getActiveMedications']);
+    
+    
+    Route::apiResource('patient-medications', PatientMedicationController::class)->only(['index']);
+    
     Route::apiResource('recomendations', RecomendationController::class);
     Route::apiResource('staff', StaffController::class);
     Route::apiResource('staff-patients', StaffPatientController::class);

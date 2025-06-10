@@ -15,6 +15,11 @@ class PatientController extends Controller
      */
     public function index()
     {
+        if (Auth::guard('patient')->check()) {
+            $patient = Auth::guard('patient')->user();
+            $records = $patient->records()->get();
+            return view('patients.show', compact('patient', 'records'));
+        }
         return view('patients.index', [
             'patients' => Patient::all(),
         ]);

@@ -3,6 +3,7 @@
 @section('content')
 <div class="container mt-4">
     <h2>Szczegóły pacjenta</h2>
+     <a href="{{ route('patient-emergencies.show', $patient) }}" class="btn btn-primary mb-3">Pokaż emergency calle dla tego pacjenta</a>
 
     <div class="card mt-3">
         <div class="card-body">

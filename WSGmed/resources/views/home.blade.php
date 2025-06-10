@@ -13,7 +13,6 @@
                     Zobacz wszystkie leki
                 </a>
             </div>
-
     </div>
     <div class="row col-md-6 justify-content-center">
 

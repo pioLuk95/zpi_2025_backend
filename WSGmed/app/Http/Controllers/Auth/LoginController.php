@@ -4,6 +4,12 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\Patient;
+use App\Models\Staff;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
@@ -36,5 +42,36 @@ class LoginController extends Controller
     {
         $this->middleware('guest')->except('logout');
         $this->middleware('auth')->only('logout');
+    }
+
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+        $guard = 'web';
+
+        if (!$user) {
+            $user = Patient::where('email', $request->email)->first();
+            $guard = 'patient';
+        }
+
+        if (!$user) {
+            $user = Staff::where('email', $request->email)->first();
+            $guard = 'staff';
+        }
+
+        if ($user && Hash::check($request->password, $user->password)) {
+            Auth::guard($guard)->login($user);
+            session(['guard' => $guard]);
+            return redirect()->intended('/home');
+        }
+
+        return back()->withErrors([
+            'email' => 'Nieprawidłowy e-mail lub hasło.',
+        ]);
     }
 }

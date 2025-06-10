@@ -9,7 +9,7 @@ Route::get('/', function () {
 });
 
 Auth::routes();
-
+// revert
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::resource('patients', App\Http\Controllers\PatientController::class);

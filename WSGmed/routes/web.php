@@ -12,20 +12,25 @@ Route::get('/', function () {
 });
 
 Auth::routes();
-// revert
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
+// Basic CRUD operations
 Route::resource('patients', App\Http\Controllers\PatientController::class);
 Route::resource('medications', App\Http\Controllers\MedicationController::class);
 Route::resource('locations', App\Http\Controllers\LocationController::class);
 Route::resource('emergency_calls', App\Http\Controllers\EmergencyCallsController::class);
 
+// Profile
+Route::get('/profile/show', [ProfileController::class, 'show'])->name('profile.show');
 Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
 Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-Route::get('/2fa/setup', [TwoFactorController::class, 'showSetupForm'])->name('2fa.setup');
-Route::post('/2fa/verify', [TwoFactorController::class, 'verify'])->name('2fa.verify');
 
+// 2FA
+Route::post('/profile/disable-2fa', [ProfileController::class, 'disable2FA'])->name('profile.disable-2fa');
+Route::get('/2fa/setup', [TwoFactorController::class, 'showSetupForm'])->name('2fa.setup');
+Route::post('/2fa/completeSetup', [TwoFactorController::class, 'completeSetup'])->name('2fa.completeSetup');
+
+// Others
 Route::get('/patients/{patient}/medical_records/create', [App\Http\Controllers\MedicalRecordController::class, 'create'])->name('medical-records.create');
 Route::post('medical-records', [App\Http\Controllers\MedicalRecordController::class, 'store'])->name('medical-records.store');
 Route::delete('medical_records/{medicalRecord}', [App\Http\Controllers\MedicalRecordController::class, 'destroy'])->name('medical-records.destroy');

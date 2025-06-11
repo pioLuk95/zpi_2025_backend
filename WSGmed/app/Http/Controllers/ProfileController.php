@@ -11,6 +11,13 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
+    public function show(Request $request): View
+    {
+        return view('profile.show', [
+            'user' => $request->user(),
+        ]);
+    }
+    
     /**
      * Display the user's profile form.
      */
@@ -24,7 +31,7 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request)
     {
         $request->user()->fill($request->validated());
 
@@ -40,21 +47,18 @@ class ProfileController extends Controller
     /**
      * Delete the user's account.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function disable2FA(Request $request)
     {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
-        ]);
-
         $user = $request->user();
+        $user->google2fa_secret = null;
+        $user->two_factor_confirmed_at = null;
+        $user->save();
 
+        return Redirect::route("profile.show");
+    }
+
+    public function logout(Request $request) {
         Auth::logout();
-
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
+        return view('auth.login');
     }
 }

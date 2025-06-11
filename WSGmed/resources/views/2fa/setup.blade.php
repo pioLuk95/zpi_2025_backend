@@ -14,7 +14,7 @@
 
     <p>Po dodaniu kliknij przycisk poniżej i wprowadź 6-cyfrowy kod z aplikacji, aby potwierdzić:</p>
 
-    <form method="POST" action="{{ route('2fa.verify') }}">
+    <form method="POST" action="{{ route('2fa.completeSetup') }}">
         @csrf
         <div class="form-group">
             <label for="code">Wprowadź kod</label>

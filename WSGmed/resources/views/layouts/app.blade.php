@@ -25,6 +25,11 @@
         <a href="/medications">Leki</a>
         <a href="/locations">Sale</a>
         <a href="#">Personel</a>
+        <a href="{{route("profile.show")}}">Profil</a>
+        <form id="logout-form" action="{{ url('logout') }}" method="POST">
+            {{ csrf_field() }}
+            <input type="submit" value="Wyloguj" class="btn btn-danger w-100 mt-3">
+        </form>
     </nav>
 
     <!-- Main content -->

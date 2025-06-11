@@ -25,6 +25,7 @@
         <a href="/medications">Leki</a>
         <a href="/locations">Sale</a>
         <a href="#">Personel</a>
+        <a href="{{route("emergency_calls.index")}}">Emergency Calle</a>
         <a href="{{route("profile.show")}}">Profil</a>
         <form id="logout-form" action="{{ url('logout') }}" method="POST">
             {{ csrf_field() }}

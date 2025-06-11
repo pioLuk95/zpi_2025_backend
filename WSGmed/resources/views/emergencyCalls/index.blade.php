@@ -4,7 +4,6 @@
 <div class="container">
     <h1>Emergency Calle</h1>
 
-    <a href="{{ route('emergency_calls.create') }}" class="btn btn-primary mb-3">Dodaj nowy wpis</a>
 
     <table class="table table-striped">
         <thead>
@@ -34,6 +33,8 @@
             @endforeach
         </tbody>
     </table>
+
+    {{$calls->links('pagination::bootstrap-5')}}
 </div>
 
 @endsection

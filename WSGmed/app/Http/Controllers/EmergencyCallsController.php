@@ -13,16 +13,15 @@ class EmergencyCallsController extends Controller
      */
     public function index()
     {
-        return view('emergencyCalls.index', [
-            'calls' => EmergencyCalls::all(),
-        ]);
+        $calls = EmergencyCalls::paginate(10);
+        return view('emergencyCalls.index', compact('calls'));
     }
 
     public function showEmergencies(Patient $patient)
     {   
-        $emergencyCalls = EmergencyCalls::where('patient_id', $patient->id)->get();
+        $calls = EmergencyCalls::where('patient_id', $patient->id)->paginate(10);
         return view('emergencyCalls.index', [
-            'calls' => $emergencyCalls
+            'calls' => $calls
         ]);
     }
 

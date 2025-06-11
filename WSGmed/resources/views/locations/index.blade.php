@@ -27,5 +27,7 @@
         </div>
         @endforeach
     </div>
+
+    {{$locations->links('pagination::bootstrap-5')}}
 </div>
 @endsection

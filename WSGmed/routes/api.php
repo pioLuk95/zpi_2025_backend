@@ -12,7 +12,6 @@ use App\Http\Controllers\Api\StaffController;
 use App\Http\Controllers\Api\StaffPatientController;
 use App\Http\Controllers\Api\AuthTokenController;
 
-
 Route::post('register', [AuthTokenController::class, 'register']);
 Route::post('login', [AuthTokenController::class, 'login']);
 
@@ -35,13 +34,9 @@ Route::group(['middleware' => 'auth.jwt'], function () {
     Route::post('medical-visits/schedule', [MedicalVisitController::class, 'scheduleVisit']);
     Route::get('medical-visits/my-visits', [MedicalVisitController::class, 'getMyVisits']);
     
-  
-    Route::get('patient-medications/patient/{patient_id}', [PatientMedicationController::class, 'getByPatient']);
-    Route::post('patient-medications/confirm', [PatientMedicationController::class, 'confirm']);
-    Route::get('patient-medications/active', [PatientMedicationController::class, 'getActiveMedications']);
-    
-    
-    Route::apiResource('patient-medications', PatientMedicationController::class)->only(['index']);
+    // Poprawione ścieżki dla PatientMedicationController
+    Route::get('patient-medications', [PatientMedicationController::class, 'index']); // Lista leków
+    Route::post('patient-medications/confirm', [PatientMedicationController::class, 'confirm']); // Potwierdzenie leków
     
     Route::apiResource('recomendations', RecomendationController::class);
     Route::apiResource('staff', StaffController::class);

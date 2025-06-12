@@ -249,11 +249,9 @@ class AuthTokenController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"email", "token", "password", "password_confirmation"},
+     *             required={"email", "password"},
      *             @OA\Property(property="email", type="string", example="user@example.com"),
-     *             @OA\Property(property="token", type="string", example="reset-token"),
      *             @OA\Property(property="password", type="string", example="newpassword123"),
-     *             @OA\Property(property="password_confirmation", type="string", example="newpassword123")
      *         )
      *     ),
      *     @OA\Response(
@@ -302,10 +300,9 @@ class AuthTokenController extends Controller
         }
 
         $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
+            $request->only('email', 'password'),
             function ($user, $password) {
                 $user->password = Hash::make($password);
-                $user->setRememberToken(Str::random(60));
                 $user->save();
                 event(new PasswordReset($user));
             }
@@ -314,7 +311,7 @@ class AuthTokenController extends Controller
         if ($status === Password::PASSWORD_RESET) {
             return response()->json(['message' => 'Password reset successfully'], 200);
         } else {
-            return response()->json(['error' => 'Invalid token or email', 'code' => 10000], 400);
+            return response()->json(['error' => 'Invalid login or email', 'code' => 10000], 400);
         }
     }
 }

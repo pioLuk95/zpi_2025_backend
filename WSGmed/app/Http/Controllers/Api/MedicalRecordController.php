@@ -56,7 +56,7 @@ class MedicalRecordController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             required={"record_date", "blood_pressure", "temperature", "pulse", "weight", "mood", "pain_level", "oxygen_saturation"},
-     *             @OA\Property(property="record_date", type="string", format="date", example="2025-05-05"),
+     *             @OA\Property(property="record_date", type="string", format="date", example="2025-05-05",enum={"YYYY-MM-DD"}, description="Medical record date"),
      *             @OA\Property(property="blood_pressure", type="number", format="float", example=120.80),
      *             @OA\Property(property="temperature", type="number", format="float", example=36.6),
      *             @OA\Property(property="pulse", type="number", format="float", example=75),

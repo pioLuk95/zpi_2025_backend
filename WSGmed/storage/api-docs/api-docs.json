@@ -300,24 +300,14 @@
                             "schema": {
                                 "required": [
                                     "email",
-                                    "token",
-                                    "password",
-                                    "password_confirmation"
+                                    "password"
                                 ],
                                 "properties": {
                                     "email": {
                                         "type": "string",
                                         "example": "user@example.com"
                                     },
-                                    "token": {
-                                        "type": "string",
-                                        "example": "reset-token"
-                                    },
                                     "password": {
-                                        "type": "string",
-                                        "example": "newpassword123"
-                                    },
-                                    "password_confirmation": {
                                         "type": "string",
                                         "example": "newpassword123"
                                     }
@@ -402,26 +392,22 @@
                     "EmergencyCalls"
                 ],
                 "summary": "Create a new emergency call",
-                "description": "Creates a new emergency call for the authenticated user. The `patient_id` is automatically assigned based on the logged-in user.",
-                "operationId": "c4841f462732c8f264dde05db5d05e5c",
+                "description": "Creates a new emergency call for the authenticated user. The patient_id is automatically assigned based on the logged-in user.",
+                "operationId": "createEmergencyCall",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "date",
-                                    "status"
-                                ],
                                 "properties": {
                                     "date": {
+                                        "description": "Emergency Call date",
                                         "type": "string",
                                         "format": "date",
-                                        "example": "2025-05-05"
-                                    },
-                                    "status": {
-                                        "type": "integer",
-                                        "example": 1
+                                        "enum": [
+                                            "YYYY-MM-DD"
+                                        ],
+                                        "example": "2025-06-15"
                                     }
                                 },
                                 "type": "object"
@@ -437,15 +423,21 @@
                                 "schema": {
                                     "properties": {
                                         "message": {
+                                            "description": "Success message",
                                             "type": "string",
                                             "example": "Emergency call created successfully"
                                         },
                                         "call_id": {
+                                            "description": "The ID of the newly created emergency call",
                                             "type": "integer",
                                             "example": 1
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "message": "Emergency call created successfully",
+                                    "call_id": 1
                                 }
                             }
                         }
@@ -466,6 +458,10 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error_code": 10001,
+                                    "message": "Unauthorized access"
                                 }
                             }
                         }
@@ -483,14 +479,44 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Validation error"
+                                        },
+                                        "errors": {
+                                            "description": "Validation errors grouped by field",
+                                            "type": "object",
+                                            "example": {
+                                                "date": [
+                                                    "The date field is required.",
+                                                    "The date must be a valid date."
+                                                ]
+                                            },
+                                            "additionalProperties": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            }
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error_code": 10022,
+                                    "message": "Validation error",
+                                    "errors": {
+                                        "date": [
+                                            "The date field is required."
+                                        ]
+                                    }
                                 }
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/medical-records": {
@@ -518,8 +544,12 @@
                                 ],
                                 "properties": {
                                     "record_date": {
+                                        "description": "Medical record date",
                                         "type": "string",
                                         "format": "date",
+                                        "enum": [
+                                            "YYYY-MM-DD"
+                                        ],
                                         "example": "2025-05-05"
                                     },
                                     "blood_pressure": {
@@ -640,219 +670,57 @@
                 ]
             }
         },
-        "/api/medical-visits/specialists": {
-            "get": {
+        "/api/medical-visits/schedule": {
+            "post": {
                 "tags": [
                     "Medical Visits"
                 ],
-                "summary": "Retrieve Available Medical Specialists",
-                "description": "Returns a categorized list of available healthcare providers including doctors, nurses, and physiotherapists. This endpoint is the starting point for appointment booking.",
-                "operationId": "getSpecialists",
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved specialists list",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "description": "Human-readable success message",
-                                            "type": "string",
-                                            "example": "Specialists list retrieved successfully"
-                                        },
-                                        "data": {
-                                            "description": "Specialists grouped by type",
-                                            "properties": {
-                                                "doctor": {
-                                                    "description": "Available doctors",
-                                                    "type": "array",
-                                                    "items": {
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "integer",
-                                                                "example": 1
-                                                            },
-                                                            "type": {
-                                                                "type": "string",
-                                                                "example": "doctor"
-                                                            },
-                                                            "name": {
-                                                                "type": "string",
-                                                                "example": "Dr. Anna Johnson"
-                                                            },
-                                                            "specialization": {
-                                                                "type": "string",
-                                                                "example": "Family Medicine"
-                                                            },
-                                                            "email": {
-                                                                "type": "string",
-                                                                "example": "anna.johnson@hospital.com"
-                                                            },
-                                                            "phone": {
-                                                                "type": "string",
-                                                                "example": "+1-555-0101"
-                                                            }
-                                                        },
-                                                        "type": "object"
-                                                    }
-                                                },
-                                                "nurse": {
-                                                    "description": "Available nurses",
-                                                    "type": "array",
-                                                    "items": {
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "integer",
-                                                                "example": 3
-                                                            },
-                                                            "type": {
-                                                                "type": "string",
-                                                                "example": "nurse"
-                                                            },
-                                                            "name": {
-                                                                "type": "string",
-                                                                "example": "Nurse Sarah Williams"
-                                                            },
-                                                            "specialization": {
-                                                                "type": "string",
-                                                                "example": "Home Care"
-                                                            },
-                                                            "email": {
-                                                                "type": "string",
-                                                                "example": "sarah.williams@hospital.com"
-                                                            },
-                                                            "phone": {
-                                                                "type": "string",
-                                                                "example": "+1-555-0201"
-                                                            }
-                                                        },
-                                                        "type": "object"
-                                                    }
-                                                },
-                                                "physiotherapist": {
-                                                    "description": "Available physiotherapists",
-                                                    "type": "array",
-                                                    "items": {
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "integer",
-                                                                "example": 5
-                                                            },
-                                                            "type": {
-                                                                "type": "string",
-                                                                "example": "physiotherapist"
-                                                            },
-                                                            "name": {
-                                                                "type": "string",
-                                                                "example": "PT Robert Davis"
-                                                            },
-                                                            "specialization": {
-                                                                "type": "string",
-                                                                "example": "Sports Rehabilitation"
-                                                            },
-                                                            "email": {
-                                                                "type": "string",
-                                                                "example": "robert.davis@hospital.com"
-                                                            },
-                                                            "phone": {
-                                                                "type": "string",
-                                                                "example": "+1-555-0301"
-                                                            }
-                                                        },
-                                                        "type": "object"
-                                                    }
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
+                "summary": "Schedule New Medical Appointment",
+                "description": "Creates a new medical appointment booking.",
+                "operationId": "scheduleVisit",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "specialist_type",
+                                    "specialist_id",
+                                    "date",
+                                    "time",
+                                    "reason"
+                                ],
+                                "properties": {
+                                    "specialist_type": {
+                                        "type": "string",
+                                        "example": "doctor"
                                     },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Authentication required",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        },
-                                        "code": {
-                                            "type": "integer",
-                                            "example": 10001
-                                        }
+                                    "specialist_id": {
+                                        "type": "integer",
+                                        "example": 1
                                     },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Unable to retrieve specialists"
-                                        },
-                                        "code": {
-                                            "type": "integer",
-                                            "example": 10100
-                                        }
+                                    "date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-06-15"
                                     },
-                                    "type": "object"
-                                }
+                                    "time": {
+                                        "type": "string",
+                                        "example": "14:30"
+                                    },
+                                    "reason": {
+                                        "type": "string",
+                                        "example": "Consultation about blood pressure"
+                                    }
+                                },
+                                "type": "object"
                             }
                         }
                     }
                 },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/medical-visits/available-slots": {
-            "get": {
-                "tags": [
-                    "Medical Visits"
-                ],
-                "summary": "Check Available Appointment Time Slots",
-                "description": "Returns available time slots for a specific specialist on a given date. This is used in the second step of appointment booking.",
-                "operationId": "getAvailableSlots",
-                "parameters": [
-                    {
-                        "name": "specialist_id",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "date",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
-                    }
-                ],
                 "responses": {
-                    "200": {
-                        "description": "Available time slots retrieved successfully",
+                    "201": {
+                        "description": "Appointment scheduled successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -863,40 +731,33 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Available slots retrieved successfully"
+                                            "example": "Medical visit scheduled successfully"
                                         },
                                         "data": {
                                             "properties": {
-                                                "specialist": {
-                                                    "description": "Details of the selected specialist",
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "integer",
-                                                            "example": 1
-                                                        },
-                                                        "name": {
-                                                            "type": "string",
-                                                            "example": "Dr. Anna Johnson"
-                                                        },
-                                                        "specialization": {
-                                                            "type": "string",
-                                                            "example": "Family Medicine"
-                                                        }
-                                                    },
-                                                    "type": "object"
+                                                "visit_id": {
+                                                    "type": "string",
+                                                    "example": "visit_1622548800_1234"
+                                                },
+                                                "specialist_name": {
+                                                    "type": "string",
+                                                    "example": "Dr. Anna Johnson"
+                                                },
+                                                "specialization": {
+                                                    "type": "string",
+                                                    "example": "Family Medicine"
                                                 },
                                                 "date": {
                                                     "type": "string",
-                                                    "format": "date",
                                                     "example": "2025-06-15"
                                                 },
-                                                "available_slots": {
-                                                    "description": "List of available appointment times",
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "09:00"
-                                                    }
+                                                "time": {
+                                                    "type": "string",
+                                                    "example": "10:30"
+                                                },
+                                                "reason": {
+                                                    "type": "string",
+                                                    "example": "General checkup"
                                                 }
                                             },
                                             "type": "object"
@@ -938,15 +799,7 @@
                                             "example": "The given data was invalid."
                                         },
                                         "errors": {
-                                            "type": "object",
-                                            "example": {
-                                                "specialist_id": [
-                                                    "The specialist id field is required."
-                                                ],
-                                                "date": [
-                                                    "The date must be a date after or equal to today."
-                                                ]
-                                            }
+                                            "type": "object"
                                         },
                                         "code": {
                                             "type": "integer",
@@ -986,205 +839,99 @@
                 ]
             }
         },
-        "/api/medical-visits/schedule": {
-            "post": {
+        "/api/medications": {
+            "get": {
                 "tags": [
-                    "Medical Visits"
+                    "Medications"
                 ],
-                "summary": "Schedule New Medical Appointment",
-                "description": "Creates a new medical appointment booking. This is the main endpoint for completing the appointment scheduling process.",
-                "operationId": "scheduleVisit",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "specialist_type",
-                                    "specialist_id",
-                                    "date",
-                                    "time",
-                                    "reason",
-                                    "patient_name",
-                                    "patient_phone",
-                                    "patient_email"
-                                ],
-                                "properties": {
-                                    "specialist_type": {
-                                        "type": "string",
-                                        "example": "doctor"
-                                    },
-                                    "specialist_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2025-06-15"
-                                    },
-                                    "time": {
-                                        "type": "string",
-                                        "example": "10:30"
-                                    },
-                                    "reason": {
-                                        "type": "string",
-                                        "example": "General checkup and consultation about recent symptoms"
-                                    },
-                                    "patient_name": {
-                                        "type": "string",
-                                        "example": "John Doe"
-                                    },
-                                    "patient_phone": {
-                                        "type": "string",
-                                        "example": "+1-555-0199"
-                                    },
-                                    "patient_email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "example": "john.doe@email.com"
-                                    }
-                                },
-                                "type": "object"
-                            }
+                "summary": "Get patient's medications for a specific day",
+                "description": "Returns a list of medications assigned to the logged-in patient for a given date.",
+                "operationId": "getMedicationsByDate",
+                "parameters": [
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "description": "Date of the medications",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "YYYY-MM-DD"
                         }
                     }
-                },
+                ],
                 "responses": {
-                    "201": {
-                        "description": "Appointment scheduled successfully",
+                    "200": {
+                        "description": "List of medications",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Medical visit scheduled successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "visit_id": {
-                                                    "type": "string",
-                                                    "example": "visit_1622548800_1234"
-                                                },
-                                                "specialist_name": {
-                                                    "type": "string",
-                                                    "example": "Dr. Anna Johnson"
-                                                },
-                                                "specialization": {
-                                                    "type": "string",
-                                                    "example": "Family Medicine"
-                                                },
-                                                "date": {
-                                                    "type": "string",
-                                                    "format": "date",
-                                                    "example": "2025-06-15"
-                                                },
-                                                "time": {
-                                                    "type": "string",
-                                                    "example": "10:30"
-                                                },
-                                                "reason": {
-                                                    "type": "string",
-                                                    "example": "General checkup and consultation about recent symptoms"
-                                                },
-                                                "status": {
-                                                    "type": "string",
-                                                    "example": "scheduled"
-                                                },
-                                                "confirmation_number": {
-                                                    "type": "string",
-                                                    "example": "CONF-2025-001"
-                                                }
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "medication_id": {
+                                                "type": "integer",
+                                                "example": 1
                                             },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Cannot schedule appointments in the past"
+                                            "name": {
+                                                "type": "string",
+                                                "example": "Aspirin"
+                                            },
+                                            "dosage": {
+                                                "type": "string",
+                                                "example": "100mg"
+                                            },
+                                            "part_of_day": {
+                                                "type": "string",
+                                                "example": "morning"
+                                            },
+                                            "is_taken": {
+                                                "type": "boolean",
+                                                "example": false
+                                            }
                                         },
-                                        "code": {
-                                            "type": "integer",
-                                            "example": 10000
-                                        }
+                                        "type": "object"
+                                    }
+                                },
+                                "example": [
+                                    {
+                                        "medication_id": 1,
+                                        "name": "Aspirin",
+                                        "dosage": "100mg",
+                                        "part_of_day": "morning",
+                                        "is_taken": false
                                     },
-                                    "type": "object"
-                                }
+                                    {
+                                        "medication_id": 2,
+                                        "name": "Vitamin D",
+                                        "dosage": "1000 IU",
+                                        "part_of_day": "evening",
+                                        "is_taken": true
+                                    }
+                                ]
                             }
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized access",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        },
-                                        "code": {
+                                        "error_code": {
                                             "type": "integer",
                                             "example": 10001
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Resource not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Specialist not found or type mismatch"
                                         },
-                                        "code": {
-                                            "type": "integer",
-                                            "example": 10004
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict - Time slot already booked",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
+                                        "message": {
                                             "type": "string",
-                                            "example": "The selected time slot is already booked"
-                                        },
-                                        "code": {
-                                            "type": "integer",
-                                            "example": 10009
+                                            "example": "Unauthorized access"
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "error_code": 10001,
+                                    "message": "Unauthorized access"
                                 }
                             }
                         }
@@ -1195,24 +942,28 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "error_code": {
+                                            "type": "integer",
+                                            "example": 10022
+                                        },
                                         "message": {
                                             "type": "string",
-                                            "example": "The given data was invalid."
+                                            "example": "Validation error"
                                         },
                                         "errors": {
                                             "type": "object",
                                             "example": {
-                                                "reason": [
-                                                    "The reason must be at least 10 characters."
-                                                ],
-                                                "patient_email": [
-                                                    "The patient email must be a valid email address."
+                                                "date": [
+                                                    "The date must be a valid date.",
+                                                    "The date does not match the format Y-m-d."
                                                 ]
+                                            },
+                                            "additionalProperties": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
                                             }
-                                        },
-                                        "code": {
-                                            "type": "integer",
-                                            "example": 10022
                                         }
                                     },
                                     "type": "object"
@@ -1228,25 +979,144 @@
                 ]
             }
         },
-        "/api/patient-medications": {
-            "get": {
+        "/api/medications/confirm": {
+            "post": {
                 "tags": [
-                    "PatientMedications"
+                    "Medications"
                 ],
-                "summary": "Show medications to confirm",
-                "description": "Show medications to confirm",
-                "operationId": "3e0210136c4be2663d3b9940aa261a33",
+                "summary": "Confirm medication intake",
+                "description": "Updates the intake status of a medication for a given ID.",
+                "operationId": "confirmMedication",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "medication_id"
+                                ],
+                                "properties": {
+                                    "medication_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "is_taken": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "example": {
+                                "medication_id": 1,
+                                "is_taken": true
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "Successful response",
+                        "description": "Medication status updated successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Medication status updated"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": true,
+                                    "message": "Medication status updated"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized access",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error_code": {
+                                            "type": "integer",
+                                            "example": 10001
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized access"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "error_code": 10001,
+                                    "message": "Unauthorized access"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Medication not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error_code": {
+                                            "type": "integer",
+                                            "example": 1004
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Medication not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "error_code": 1004,
+                                    "message": "Medication not found"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error_code": {
+                                            "type": "integer",
+                                            "example": 10022
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation error"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "medication_id": [
+                                                    "The medication id field is required.",
+                                                    "The medication id must be an integer."
+                                                ],
+                                                "is_taken": [
+                                                    "The is taken field must be true or false."
+                                                ]
+                                            },
+                                            "additionalProperties": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
                                             }
                                         }
                                     },
@@ -1255,69 +1125,118 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/patient-medications/confirm": {
-            "post": {
+        "/api/medications/statistics": {
+            "get": {
                 "tags": [
-                    "PatientMedications"
+                    "Medications"
                 ],
-                "summary": "Confirm medication intake",
-                "description": "Confirm medication intake",
-                "operationId": "a2aa82bc8a059896c459c4a1352f2f2a",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "medication_ids"
-                                ],
-                                "properties": {
-                                    "medication_ids": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "integer"
-                                        },
-                                        "example": [
-                                            1,
-                                            2,
-                                            3
-                                        ]
-                                    }
-                                },
-                                "type": "object"
-                            }
+                "summary": "Medication intake statistics",
+                "description": "Returns the total number of medications and how many have been taken for a given date.",
+                "operationId": "getMedicationStats",
+                "parameters": [
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "description": "Date in format YYYY-MM-DD",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-06-15"
                         }
                     }
-                },
+                ],
                 "responses": {
                     "200": {
-                        "description": "Medication intake confirmed successfully",
+                        "description": "Medication statistics",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Medication intake confirmed successfully."
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "taken": {
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "percentage": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 60
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "total": 5,
+                                    "taken": 3,
+                                    "percentage": 60
                                 }
                             }
                         }
                     },
-                    "400": {
-                        "description": "Invalid medication IDs provided",
+                    "401": {
+                        "description": "Unauthorized access",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "error_code": {
+                                            "type": "integer",
+                                            "example": 10001
+                                        },
                                         "message": {
                                             "type": "string",
-                                            "example": "Invalid medication IDs provided."
+                                            "example": "Unauthorized access"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "error_code": 10001,
+                                    "message": "Unauthorized access"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error_code": {
+                                            "type": "integer",
+                                            "example": 10022
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation error"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "date": [
+                                                    "The date must be a valid date.",
+                                                    "The date does not match the format Y-m-d."
+                                                ]
+                                            },
+                                            "additionalProperties": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            }
                                         }
                                     },
                                     "type": "object"
@@ -1325,7 +1244,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/recommendations": {
@@ -1472,7 +1396,7 @@
             "description": "API Endpoints for managing emergency calls for patients"
         },
         {
-            "name": "PatientMedications",
+            "name": "Medications",
             "description": "API Endpoints for managing patient medications"
         },
         {

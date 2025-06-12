@@ -19,7 +19,6 @@ class EmergencyCallsController extends Controller
      *
      * @group EmergencyCalls
      * @bodyParam date string required The date of the emergency call. Example: 2025-05-05
-     * @bodyParam status integer required The status of the emergency call. Example: 1
      * @response 201 {
      *     "message": "Emergency call created successfully",
      *     "call_id": 1
@@ -35,24 +34,39 @@ class EmergencyCallsController extends Controller
      *
      * @OA\Post(
      *     path="/api/emergency-calls",
+     *     operationId="createEmergencyCall",
      *     tags={"EmergencyCalls"},
      *     summary="Create a new emergency call",
-     *     description="Creates a new emergency call for the authenticated user. The `patient_id` is automatically assigned based on the logged-in user.",
+     *     description="Creates a new emergency call for the authenticated user. The patient_id is automatically assigned based on the logged-in user.",
+     *     security={{"bearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(
-     *             required={"date", "status"},
-     *             @OA\Property(property="date", type="string", format="date", example="2025-05-05"),
-     *             @OA\Property(property="status", type="integer", example=1)
-     *         )
+     *              @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="date", type="string", format="date", example="2025-06-15", enum={"YYYY-MM-DD"},description="Emergency Call date"),
+     *             )
      *     ),
      *     @OA\Response(
      *         response=201,
      *         description="Emergency call created successfully",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="message", type="string", example="Emergency call created successfully"),
-     *             @OA\Property(property="call_id", type="integer", example=1)
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 description="Success message",
+     *                 example="Emergency call created successfully"
+     *             ),
+     *             @OA\Property(
+     *                 property="call_id",
+     *                 type="integer",
+     *                 description="The ID of the newly created emergency call",
+     *                 example=1
+     *             ),
+     *             example={
+     *                 "message": "Emergency call created successfully",
+     *                 "call_id": 1
+     *             }
      *         )
      *     ),
      *     @OA\Response(
@@ -60,8 +74,20 @@ class EmergencyCallsController extends Controller
      *         description="Unauthorized access",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="error_code", type="integer", example=10001),
-     *             @OA\Property(property="message", type="string", example="Unauthorized access")
+     *             @OA\Property(
+     *                 property="error_code",
+     *                 type="integer",
+     *                 example=10001
+     *             ),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="Unauthorized access"
+     *             ),
+     *             example={
+     *                 "error_code": 10001,
+     *                 "message": "Unauthorized access"
+     *             }
      *         )
      *     ),
      *     @OA\Response(
@@ -69,27 +95,57 @@ class EmergencyCallsController extends Controller
      *         description="Validation error",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="error_code", type="integer", example=10022),
-     *             @OA\Property(property="message", type="string", example="Validation error")
+     *             @OA\Property(
+     *                 property="error_code",
+     *                 type="integer",
+     *                 example=10022
+     *             ),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="Validation error"
+     *             ),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 description="Validation errors grouped by field",
+     *                 @OA\AdditionalProperties(
+     *                     type="array",
+     *                     @OA\Items(type="string")
+     *                 ),
+     *                 example={
+     *                     "date": {"The date field is required.", "The date must be a valid date."}
+     *                 }
+     *             ),
+     *             example={
+     *                 "error_code": 10022,
+     *                 "message": "Validation error",
+     *                 "errors": {
+     *                     "date": {"The date field is required."}
+     *                 }
+     *             }
      *         )
      *     )
      * )
      */
     public function store(Request $request)
     {
-        $user = auth()->user(); // Pobierz zalogowanego użytkownika
+        // Pobieranie zalogowanego użytkownika
+        $user = auth()->user();
 
+        // Walidacja danych wejściowych
+        // Format daty musi być zgodny z ISO 8601 (YYYY-MM-DD)
         $validated = $request->validate([
-            'date' => 'required|date',
-            'status' => 'required|integer|min:0|max:2',
+            'date' => 'required|date|date_format:Y-m-d',
         ]);
 
+        // Tworzenie nowego zgłoszenia alarmowego
         $emergencyCall = EmergencyCalls::create([
-            'patient_id' => $user->id, // Użyj ID zalogowanego użytkownika
+            'patient_id' => $user->id,
             'date' => $validated['date'],
-            'status' => $validated['status'],
         ]);
 
+        // Zwracanie odpowiedzi z sukcesem
         return response()->json([
             'message' => 'Emergency call created successfully',
             'call_id' => $emergencyCall->id,

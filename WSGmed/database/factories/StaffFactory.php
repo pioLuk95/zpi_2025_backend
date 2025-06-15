@@ -22,7 +22,7 @@ class StaffFactory extends Factory
             'name' => $this->faker->firstName,
             's_name' => $this->faker->lastName,
             'date_of_birth' => $this->faker->date('Y-m-d', '1990-01-01'),
-            'role' => $this->faker->randomElement(['internist', 'specialist', 'rehabilitator','nurse','doctor']),
+            'role_id' => $this->faker->numberBetween(1,5)
         ];
     }
 }

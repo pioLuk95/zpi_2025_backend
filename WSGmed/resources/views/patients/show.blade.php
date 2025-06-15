@@ -22,6 +22,36 @@
             <a href="{{ route('patients.index') }}" class="btn btn-secondary">Powrót</a>
         </div>
 
+        <a href="{{ route('staff_patients.renderAssign', $patient) }}" class="btn btn-primary mt-3">Dodaj nową osobę odpowiedzialną</a>
+        Przypisany personel:
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Imię i nazwisko</th>
+                    <th>Rola</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($staff as $staffMember)
+                <tr>
+                    <td><a href="{{ route("staff.show", $staffMember) }}">{{ $staffMember->name }} {{ $staffMember->s_name }}</a></td>
+                    <td>{{ ucfirst($staffMember->role->name) }}</td>
+                    <td>
+                        <form action="{{ route('staff_patients.unassign', ['staff'=>$staffMember, 'patient'=>$patient]) }}" method="POST" onsubmit="return confirm('Na pewno usunąć?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-sm btn-danger">Usuń</button>
+                        </form>
+                    </td>
+                </tr>
+                @empty
+                <tr><td colspan="10">Brak wpisów</td></tr>
+                @endforelse
+            </tbody>
+        </table>    
+
+
         <a href="{{ route('medical-records.create', $patient) }}" class="btn btn-primary mt-3">Dodaj wpis medyczny</a>
         Zapisy medyczne:
 

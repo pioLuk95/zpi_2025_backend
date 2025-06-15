@@ -33,4 +33,9 @@ class Patient extends Model
     {
         return $this->hasMany(EmergencyCalls::class);
     }
+
+    public function staff()
+    {
+        return $this->belongsToMany(Staff::class, "staff_patients", "patient_id", "staff_id");
+    }
 }

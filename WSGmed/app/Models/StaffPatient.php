@@ -9,4 +9,8 @@ class StaffPatient extends Model
 {
     /** @use HasFactory<\Database\Factories\StaffPatientFactory> */
     use HasFactory;
+    protected $fillable = [
+        'staff_id',
+        'patient_id'
+    ];
 }

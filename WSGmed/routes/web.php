@@ -19,6 +19,7 @@ Route::resource('patients', App\Http\Controllers\PatientController::class);
 Route::resource('medications', App\Http\Controllers\MedicationController::class);
 Route::resource('locations', App\Http\Controllers\LocationController::class);
 Route::resource('emergency_calls', App\Http\Controllers\EmergencyCallsController::class);
+Route::resource('staff', App\Http\Controllers\StaffController::class);
 
 // Profile
 Route::get('/profile/show', [ProfileController::class, 'show'])->name('profile.show');
@@ -35,3 +36,6 @@ Route::get('/patients/{patient}/medical_records/create', [App\Http\Controllers\M
 Route::post('medical-records', [App\Http\Controllers\MedicalRecordController::class, 'store'])->name('medical-records.store');
 Route::delete('medical_records/{medicalRecord}', [App\Http\Controllers\MedicalRecordController::class, 'destroy'])->name('medical-records.destroy');
 Route::get('/patients/{patient}/show_emergency_calls', [App\Http\Controllers\EmergencyCallsController::class, 'showEmergencies'])->name('patient-emergencies.show');
+Route::delete('staff_patients/{staff}/{patient}', [App\Http\Controllers\StaffPatientController::class, 'unassign'])->name('staff_patients.unassign');
+Route::get('patients/{patient}/assign', [App\Http\Controllers\StaffPatientController::class, 'renderAssign'])->name('staff_patients.renderAssign');
+Route::post('patients/{patient}/assign', [App\Http\Controllers\StaffPatientController::class, 'assign'])->name('staff_patients.assign');

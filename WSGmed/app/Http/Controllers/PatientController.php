@@ -51,8 +51,9 @@ class PatientController extends Controller
      */
     public function show(Patient $patient)
     {
+        $staff = $patient->staff;
         $records = $patient->records()->get();
-        return view('patients.show', compact('patient', 'records'));
+        return view('patients.show', compact('patient', 'records', 'staff'));
     }
 
     /**

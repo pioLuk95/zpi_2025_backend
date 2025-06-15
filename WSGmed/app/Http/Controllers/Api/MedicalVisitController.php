@@ -17,20 +17,6 @@ class MedicalVisitController extends Controller
     private array $availableSpecialists = []; // pozostało bez zmian
     private array $visits = [];
 
-    private function authenticateRequest(Request $request): array
-    {
-        $token = $request->bearerToken();
-        if (!$token) {
-            return ['success' => false, 'error' => 'Unauthorized', 'code' => 10001];
-        }
-        try {
-            $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
-            return ['success' => true, 'user_id' => $decoded->sub];
-        } catch (ExpiredException|SignatureInvalidException|\Exception) {
-            return ['success' => false, 'error' => 'Unauthorized', 'code' => 10001];
-        }
-    }
-
     /**
      * @OA\Post(
      *     path="/api/medical-visits/schedule",
@@ -95,14 +81,9 @@ class MedicalVisitController extends Controller
      */
     public function scheduleVisit(Request $request): JsonResponse
     {
-        $auth = $this->authenticateRequest($request);
-        if (!$auth['success']) {
-            return response()->json([
-                'error' => $auth['error'],
-                'code' => $auth['code']
-            ], 401);
-        }
-
+        // Logika $this->authenticateRequest($request) jest już obsłużona
+        // przez middleware 'auth.jwt' zdefiniowane w routes/api.php.
+        // Można uzyskać dostęp do użytkownika przez Auth::user() lub $request->user().
         $validator = Validator::make($request->all(), [
             'specialist_type' => 'required|in:doctor,nurse,physiotherapist',
             'specialist_id' => 'required|integer',

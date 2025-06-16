@@ -6,18 +6,14 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
 {
-    /**
-     * Globalne middleware, wykonywane przy każdym żądaniu.
-     */
+    
     protected $middleware = [
         \Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests::class,
         \Illuminate\Http\Middleware\TrustProxies::class,
         \Illuminate\Http\Middleware\HandleCors::class,
     ];
 
-    /**
-     * Middleware grupowe – domyślnie dla tras "web" i "api".
-     */
+    
     protected $middlewareGroups = [
         'web' => [
             \App\Http\Middleware\EncryptCookies::class,
@@ -34,9 +30,7 @@ class Kernel extends HttpKernel
         ],
     ];
 
-    /**
-     * Middleware tras – do przypisania indywidualnym trasom.
-     */
+    
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
         'jwt' => \App\Http\Middleware\AuthenticateJwt::class,

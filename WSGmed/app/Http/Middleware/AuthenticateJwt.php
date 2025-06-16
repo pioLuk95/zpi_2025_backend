@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User; // Upewnij się, że ścieżka do modelu User jest poprawna
+use App\Models\User;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Firebase\JWT\ExpiredException;
@@ -32,7 +32,7 @@ class AuthenticateJwt
         try {
             $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
 
-            // Sprawdź, czy 'sub' (identyfikator użytkownika) istnieje w tokenie
+           
             if (!isset($decoded->sub)) {
                 return response()->json(['error' => 'Invalid token structure', 'code' => 10001], Response::HTTP_UNAUTHORIZED);
             }
@@ -43,15 +43,12 @@ class AuthenticateJwt
                 return response()->json(['error' => 'User not found for token', 'code' => 10001], Response::HTTP_UNAUTHORIZED);
             }
 
-            Auth::setUser($user); // Ustawia zalogowanego użytkownika dla bieżącego żądania
-
+            Auth::setUser($user);
         } catch (ExpiredException $e) {
             return response()->json(['error' => 'Token has expired', 'code' => 10001], Response::HTTP_UNAUTHORIZED);
         } catch (SignatureInvalidException $e) {
             return response()->json(['error' => 'Invalid token signature', 'code' => 10001], Response::HTTP_UNAUTHORIZED);
-        } catch (\Throwable $e) { // Łapie bardziej ogólne wyjątki, w tym te z JWT::decode
-            // Możesz dodać logowanie błędu dla celów diagnostycznych
-            // Log::error('JWT Authentication Error: ' . $e->getMessage());
+        } catch (\Throwable $e) { /;
             return response()->json(['error' => 'Invalid token', 'code' => 10001], Response::HTTP_UNAUTHORIZED);
         }
 

@@ -48,7 +48,7 @@ class AuthenticateJwt
             return response()->json(['error' => 'Token has expired', 'code' => 10001], Response::HTTP_UNAUTHORIZED);
         } catch (SignatureInvalidException $e) {
             return response()->json(['error' => 'Invalid token signature', 'code' => 10001], Response::HTTP_UNAUTHORIZED);
-        } catch (\Throwable $e) { /;
+        } catch (\Throwable $e) { 
             return response()->json(['error' => 'Invalid token', 'code' => 10001], Response::HTTP_UNAUTHORIZED);
         }
 

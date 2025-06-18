@@ -45,4 +45,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function is2FAEnabled(): bool
+    {
+        return !empty($this->google2fa_secret);
+    }
 }

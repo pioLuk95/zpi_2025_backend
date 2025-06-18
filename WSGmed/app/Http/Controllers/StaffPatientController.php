@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Staff;
 use App\Models\StaffPatient;
+use Exception;
 use Illuminate\Http\Request;
 
 
@@ -62,5 +64,41 @@ class StaffPatientController extends Controller
     public function destroy(StaffPatient $staffPatient)
     {
         //
+    }
+
+    public function unassign(Request $request, $staff, $patient)
+    {
+        StaffPatient::where('staff_id', $staff)
+            ->where('patient_id', $patient)
+            ->delete();
+
+        return redirect()->route('patients.show', $patient);
+    }
+
+    public function renderAssign(Request $request, $patient)
+    {
+        $staff = Staff::all()->filter(function ($s) use ($patient) {
+            return !StaffPatient::where('staff_id', $s->id)
+                ->where('patient_id', $patient)
+                ->exists();
+        });
+        
+        return view('staff_patients.assign', [
+            'staff' => $staff,
+            'patient' => $patient,
+        ]);
+    }
+
+    public function assign(Request $request, $patient)
+    {
+        $valideted = $request->validate([
+            'staff_id' => 'required|exists:staff,id',
+        ]);
+
+        StaffPatient::create([
+        'staff_id' => $valideted['staff_id'],
+        'patient_id' => $patient]);
+        
+        return redirect()->route('patients.show', $patient);
     }
 }

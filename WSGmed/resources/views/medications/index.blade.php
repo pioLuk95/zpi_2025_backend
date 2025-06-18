@@ -26,5 +26,7 @@
         </div>
         @endforeach
     </div>
+
+    {{$medications->links('pagination::bootstrap-5')}}
 </div>
 @endsection

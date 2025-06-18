@@ -1,0 +1,71 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="container mt-4">
+    <h2>Szczegóły pacjenta</h2>
+     <a href="{{ route('patient-emergencies.show', $patient) }}" class="btn btn-primary mb-3">Pokaż emergency calle dla tego pacjenta</a>
+
+    <div class="card mt-3">
+        <div class="card-body">
+            <h5 class="card-title">{{ $patient->name }} {{ $patient->s_name }}</h5>
+            <p class="card-text"><strong>Email:</strong> {{ $patient->email }}</p>
+            <p class="card-text"><strong>Data urodzenia:</strong> {{ $patient->date_of_birth }}</p>
+            <p class="card-text"><strong>Lokalizacja:</strong> {{ $patient->location->name ?? 'Brak' }}</p>
+
+            <a href="{{ route('patients.edit', $patient) }}" class="btn btn-warning">Edytuj</a>
+            <form action="{{ route('patients.destroy', $patient) }}" method="POST" class="d-inline"
+                  onsubmit="return confirm('Na pewno usunąć pacjenta?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger">Usuń</button>
+            </form>
+            <a href="{{ route('patients.index') }}" class="btn btn-secondary">Powrót</a>
+        </div>
+
+        <a href="{{ route('medical-records.create', $patient) }}" class="btn btn-primary mt-3">Dodaj wpis medyczny</a>
+        Zapisy medyczne:
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Pacjent</th>
+                    <th>Data</th>
+                    <th>Ciśnienie</th>
+                    <th>Temp.</th>
+                    <th>Tętno</th>
+                    <th>Waga</th>
+                    <th>Nastrój</th>
+                    <th>Ból</th>
+                    <th>Saturacja</th>
+                    <th>Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($records as $record)
+                <tr>
+                    <td>{{ $record->patient->name }} {{ $record->patient->s_name }}</td>
+                    <td>{{ $record->record_date }}</td>
+                    <td>{{ $record->blood_pressure }}</td>
+                    <td>{{ $record->temperature }}</td>
+                    <td>{{ $record->pulse }}</td>
+                    <td>{{ $record->weight }}</td>
+                    <td>{{ $record->mood }}</td>
+                    <td>{{ $record->pain_level }}</td>
+                    <td>{{ $record->oxygen_saturation }}</td>
+                    <td>
+                        <form action="{{ route('medical-records.destroy', $record) }}" method="POST" onsubmit="return confirm('Na pewno usunąć?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-sm btn-danger">Usuń</button>
+                        </form>
+                    </td>
+                </tr>
+                @empty
+                <tr><td colspan="10">Brak wpisów</td></tr>
+                @endforelse
+            </tbody>
+        </table>    
+
+    </div>
+</div>
+@endsection

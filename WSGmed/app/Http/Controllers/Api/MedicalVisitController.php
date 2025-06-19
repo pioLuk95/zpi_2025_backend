@@ -52,7 +52,7 @@ class MedicalVisitController extends Controller
      *         description="Unauthorized",
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="error", type="string", example="Authentication token not provided."),
+     *             @OA\Property(property="message", type="string", example="Authentication token not provided."),
      *             @OA\Property(property="code", type="integer", example=10002)
      *         )
      *     ),
@@ -70,7 +70,7 @@ class MedicalVisitController extends Controller
      *         description="Specialist of the requested type not found",
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="error", type="string", example="The requested resource was not found."),
+     *             @OA\Property(property="message", type="string", example="The requested resource was not found."),
      *             @OA\Property(property="code", type="integer", example=13001)
      *         )
      *     )

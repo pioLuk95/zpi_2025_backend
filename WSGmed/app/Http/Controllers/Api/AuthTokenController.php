@@ -18,17 +18,17 @@ use App\Http\Traits\ApiResponseTrait;
 
 /**
  * @OA\Tag(
- *     name="Auth",
- *     description="API Endpoints for authentication and token management"
+ * name="Auth",
+ * description="API Endpoints for authentication and token management"
  * )
  */
 
 /**
  * @OA\SecurityScheme(
- *     securityScheme="bearerAuth",
- *     type="http",
- *     scheme="bearer",
- *     bearerFormat="JWT"
+ * securityScheme="bearerAuth",
+ * type="http",
+ * scheme="bearer",
+ * bearerFormat="JWT"
  * )
  */
 class AuthTokenController extends Controller
@@ -62,36 +62,36 @@ class AuthTokenController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/login",
-     *     tags={"Auth"},
-     *     summary="Log in and get a JWT token",
-     *     security={},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"email", "password"},
-     *             @OA\Property(property="email", type="string", example="user@example.com"),
-     *             @OA\Property(property="password", type="string", example="password123")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful login",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="access_token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."),
-     *             @OA\Property(property="refresh_token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."),
-     *             @OA\Property(property="token_type", type="string", example="bearer"),
-     *             @OA\Property(property="expires_in", type="integer", example=3600, description="Access token lifetime in seconds")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="Invalid email or password."),
-     *             @OA\Property(property="code", type="integer", example=10001)
-     *         )
-     *     )
+     * path="/api/login",
+     * tags={"Auth"},
+     * summary="Log in and get a JWT token",
+     * security={},
+     * @OA\RequestBody(
+     * required=true,
+     * @OA\JsonContent(
+     * required={"email", "password"},
+     * @OA\Property(property="email", type="string", example="user@example.com"),
+     * @OA\Property(property="password", type="string", example="password123")
+     * )
+     * ),
+     * @OA\Response(
+     * response=200,
+     * description="Successful login",
+     * @OA\JsonContent(
+     * @OA\Property(property="access_token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."),
+     * @OA\Property(property="refresh_token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."),
+     * @OA\Property(property="token_type", type="string", example="bearer"),
+     * @OA\Property(property="expires_in", type="integer", example=3600, description="Access token lifetime in seconds")
+     * )
+     * ),
+     * @OA\Response(
+     * response=401,
+     * description="Unauthorized",
+     * @OA\JsonContent(
+     * @OA\Property(property="message", type="string", example="Unauthorized"),
+     * @OA\Property(property="code", type="integer", example=10001)
+     * )
+     * )
      * )
      */
     public function login(Request $request)
@@ -117,30 +117,30 @@ class AuthTokenController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/logout",
-     *     tags={"Auth"},
-     *     summary="Log out the user",
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successfully logged out",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Successfully logged out")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="Authentication token not provided."),
-     *             @OA\Property(property="code", type="integer", example=10002)
-     *         )
-     *     )
+     * path="/api/logout",
+     * tags={"Auth"},
+     * summary="Log out the user",
+     * security={{"bearerAuth":{}}},
+     * @OA\Response(
+     * response=200,
+     * description="Successfully logged out",
+     * @OA\JsonContent(
+     * @OA\Property(property="message", type="string", example="Successfully logged out")
+     * )
+     * ),
+     * @OA\Response(
+     * response=401,
+     * description="Unauthorized",
+     * @OA\JsonContent(
+     * @OA\Property(property="message", type="string", example="Unauthorized"),
+     * @OA\Property(property="code", type="integer", example=10002)
+     * )
+     * )
      * )
      */
     public function logout(Request $request)
     {
-        denylist (blacklist).
+      
        
         $token = $request->bearerToken();
         if (!$token) {
@@ -159,37 +159,37 @@ class AuthTokenController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/refresh",
-     *     tags={"Auth"},
-     *     summary="Refresh the JWT token",
-     *     description="Provides a new access token and a new refresh token in exchange for a valid refresh token.",
-     *     security={},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         description="Requires a valid refresh_token.",
-     *         @OA\JsonContent(
-     *             required={"refresh_token"},
-     *             @OA\Property(property="refresh_token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Token refreshed successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="access_token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."),
-     *             @OA\Property(property="refresh_token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."),
-     *             @OA\Property(property="token_type", type="string", example="bearer"),
-     *             @OA\Property(property="expires_in", type="integer", example=3600, description="New access token lifetime in seconds")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Refresh token not provided, invalid, or expired",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="Invalid or expired authentication token."),
-     *             @OA\Property(property="code", type="integer", example=10002)
-     *         )
-     *     )
+     * path="/api/refresh",
+     * tags={"Auth"},
+     * summary="Refresh the JWT token",
+     * description="Provides a new access token and a new refresh token in exchange for a valid refresh token.",
+     * security={},
+     * @OA\RequestBody(
+     * required=true,
+     * description="Requires a valid refresh_token.",
+     * @OA\JsonContent(
+     * required={"refresh_token"},
+     * @OA\Property(property="refresh_token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
+     * )
+     * ),
+     * @OA\Response(
+     * response=200,
+     * description="Token refreshed successfully",
+     * @OA\JsonContent(
+     * @OA\Property(property="access_token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."),
+     * @OA\Property(property="refresh_token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."),
+     * @OA\Property(property="token_type", type="string", example="bearer"),
+     * @OA\Property(property="expires_in", type="integer", example=3600, description="New access token lifetime in seconds")
+     * )
+     * ),
+     * @OA\Response(
+     * response=401,
+     * description="Refresh token not provided, invalid, or expired",
+     * @OA\JsonContent(
+     * @OA\Property(property="messagee", type="string", example="Unauthorized"),
+     * @OA\Property(property="code", type="integer", example=10002)
+     * )
+     * )
      * )
      */
     public function refresh(Request $request)
@@ -231,45 +231,33 @@ class AuthTokenController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/password/email",
-     *     tags={"Auth"},
-     *     summary="Send password reset email",
-     *     security={},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"email"},
-     *             @OA\Property(property="email", type="string", example="user@example.com")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Password reset link sent",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Password reset link sent")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
-     *             @OA\Property(property="errors", type="object",
-     *                 example={
-     *                     "email": {"The email field is required."}
-     *                 }
-     *             ),
-     *             @OA\Property(property="code", type="integer", example=11000)
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Unable to send reset link",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="Unable to send reset link"),
-     *             @OA\Property(property="code", type="integer", example=10011)
-     *         )
-     *     )
+     * path="/api/password/email",
+     * tags={"Auth"},
+     * summary="Send password reset email",
+     * security={},
+     * @OA\RequestBody(
+     * required=true,
+     * @OA\JsonContent(
+     * required={"email"},
+     * @OA\Property(property="email", type="string", example="user@example.com")
+     * )
+     * ),
+     * @OA\Response(
+     * response=200,
+     * description="Password reset link sent",
+     * @OA\JsonContent(
+     * @OA\Property(property="message", type="string", example="Password reset link sent")
+     * )
+     * ),
+     * @OA\Response(
+     * response=422,
+     * description="Validation error",
+     * @OA\JsonContent(
+     * @OA\Property(property="success", type="boolean", example=false),
+     * @OA\Property(property="message", type="string", example="The given data was invalid."),
+     * @OA\Property(property="code", type="integer", example=11000)
+     * )
+     * )
      * )
      */
     public function sendResetLinkEmail(Request $request)

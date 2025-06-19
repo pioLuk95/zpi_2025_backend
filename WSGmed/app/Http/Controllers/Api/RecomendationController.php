@@ -52,7 +52,7 @@ class RecomendationController extends Controller
      *         description="Unauthorized",
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="error", type="string", example="Authentication token not provided."),
+     *             @OA\Property(property="message", type="string", example="Unauthorized"),
      *             @OA\Property(property="code", type="integer", example=10002) 
      *         )
      *     ),
@@ -61,7 +61,7 @@ class RecomendationController extends Controller
      *         description="Internal Server Error",
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="error", type="string", example="An unexpected error occurred on the server."),
+     *             @OA\Property(property="message", type="string", example="An unexpected error occurred on the server."),
      *             @OA\Property(property="code", type="integer", example=19001)
      *         )
      *     )

@@ -31,7 +31,6 @@ class MedicalRecordController extends Controller
      * Create a new medical record
      * * Creates a new medical record for the authenticated patient with the provided health parameters. 
      * The patient_id is automatically retrieved from the authenticated user. 
-     * The date_time field is automatically set to the current server timestamp, any value sent will be ignored.
      * * @bodyParam blood_pressure integer required Blood pressure value. Example: 120
      * @bodyParam temperature numeric required Body temperature in Celsius (e.g., 36.6). Example: 36.6
      * @bodyParam pulse integer required Pulse rate (beats per minute). Example: 75
@@ -77,23 +76,22 @@ class MedicalRecordController extends Controller
      * security={{"bearerAuth":{}}},
      * @OA\RequestBody(
      * required=true,
-     * description="Medical record data. The `date_time` field is required but its value is ignored as the server sets it automatically.",
      * @OA\JsonContent(
-     * required={"blood_pressure", "temperature", "pulse", "weight", "mood", "pain_level", "oxygen_saturation", "date_time"},
-     * @OA\Property(property="blood_pressure", type="integer", example=120),     
-     * @OA\Property(property="temperature", type="number", format="float", example=36.6, description="Body temperature in Celsius, e.g., up to one decimal place."),
-     * @OA\Property(property="pulse", type="integer", example=75),
-     * @OA\Property(property="weight", type="number", format="float", example=70.55, description="Weight in kilograms, e.g., up to two decimal places."),
-     * @OA\Property(property="mood", type="string", example="Good", enum={"Very bad", "Bad", "Good", "Very good"}, description="Patient's mood rating."),
-     * @OA\Property(property="pain_level", type="integer", example=3, enum={1,2,3,4,5,6,7,8,9,10}, description="Pain level on a scale of 1 (no pain) to 10 (worst pain)."),
-     * @OA\Property(property="oxygen_saturation", type="integer", example=98, description="Blood oxygen saturation (%, 0-100)"),
+     * required={"date_time", "blood_pressure", "temperature", "pulse", "weight", "mood", "pain_level", "oxygen_saturation"},
      * @OA\Property(
      * property="date_time",
      * type="string",
      * format="date-time",
      * example="2025-07-15-10-30-00",
      * description="Date and time of the record in YYYY-MM-DD-HH-mm-ss format. This field is IGNORED - the server will automatically use the current timestamp."
-     * )
+     * ),
+     * @OA\Property(property="blood_pressure", type="integer", example=120),     
+     * @OA\Property(property="temperature", type="number", format="float", example=36.6, description="Body temperature in Celsius, e.g., up to one decimal place."),
+     * @OA\Property(property="pulse", type="integer", example=75),
+     * @OA\Property(property="weight", type="number", format="float", example=70.55, description="Weight in kilograms, e.g., up to two decimal places."),
+     * @OA\Property(property="mood", type="string", example="Good", enum={"Very bad", "Bad", "Good", "Very good"}, description="Patient's mood rating."),
+     * @OA\Property(property="pain_level", type="integer", example=3, enum={1,2,3,4,5,6,7,8,9,10}, description="Pain level on a scale of 1 (no pain) to 10 (worst pain)."),
+     * @OA\Property(property="oxygen_saturation", type="integer", example=98, description="Blood oxygen saturation (%, 0-100)")
      * )
      * ),
      * @OA\Response(
@@ -103,14 +101,6 @@ class MedicalRecordController extends Controller
      * type="object",
      * @OA\Property(property="success", type="boolean", example=true),
      * @OA\Property(property="message", type="string", example="Medical record created successfully"),
-     * @OA\Property(
-     * property="data",
-     * type="object",
-     * description="Represents the created medical record. Note: The current endpoint implementation returns an empty object for 'data'. This schema describes the full resource if it were returned.",
-     * @OA\Property(property="id", type="integer", example=1, description="ID of the created medical record"),
-     * @OA\Property(property="patient_id", type="integer", example=101, description="ID of the patient who made the record, derived from authenticated user"),
-     * @OA\Property(property="date_time", type="string", example="2025-07-15-10-30-00", description="Date and time of the record, automatically set by the server. Format: YYYY-MM-DD-HH-mm-ss.")
-     * ),
      * example={"success": true, "message": "Medical record created successfully"}
      * )
      * ),
@@ -129,11 +119,11 @@ class MedicalRecordController extends Controller
      * @OA\JsonContent(
      * type="object",
      * @OA\Property(property="success", type="boolean", example=false),
-     * @OA\Property(property="error", type="string", example="Authentication token not provided."),
+     * @OA\Property(property="message", type="string", example="Unauthorized"),
      * @OA\Property(property="code", type="integer", example=10002),
      * example={
      * "success": false,
-     * "error": "Authentication token not provided.",
+     * "message": "Authentication token not provided.",
      * "code": 10002
      * }
      * )
@@ -145,10 +135,10 @@ class MedicalRecordController extends Controller
      * type="object",
      * @OA\Property(property="success", type="boolean", example=false),
      * @OA\Property(property="code", type="integer", example=15001),
-     * @OA\Property(property="error", type="string", example="You have made too many requests in a short period. Please try again later."),
+     * @OA\Property(property="message", type="string", example="You have made too many requests in a short period. Please try again later."),
      * example={
      * "success": false,
-     * "error": "You have made too many requests in a short period. Please try again later.",
+     * "message": "You have made too many requests in a short period. Please try again later.",
      * "code": 15001
      * }
      * )
@@ -159,11 +149,11 @@ class MedicalRecordController extends Controller
      * @OA\JsonContent(
      * type="object",
      * @OA\Property(property="success", type="boolean", example=false),
-     * @OA\Property(property="error", type="string", example="An unexpected error occurred on the server."),
+     * @OA\Property(property="message", type="string", example="An unexpected error occurred on the server."),
      * @OA\Property(property="code", type="integer", example=19001),
      * example={
      * "success": false,
-     * "error": "An unexpected error occurred on the server.",
+     * "message": "An unexpected error occurred on the server.",
      * "code": 19001
      * }
      * )
@@ -174,11 +164,11 @@ class MedicalRecordController extends Controller
      * @OA\JsonContent(
      * type="object",
      * @OA\Property(property="success", type="boolean", example=false),
-     * @OA\Property(property="error", type="string", example="The service is temporarily unavailable. Please try again later."),
+     * @OA\Property(property="message", type="string", example="The service is temporarily unavailable. Please try again later."),
      * @OA\Property(property="code", type="integer", example=19002),
      * example={
      * "success": false,
-     * "error": "The service is temporarily unavailable. Please try again later.",
+     * "message": "The service is temporarily unavailable. Please try again later.",
      * "code": 19002
      * }
      * )

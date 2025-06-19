@@ -65,11 +65,11 @@ class PatientMedicationController extends Controller
      *         description="Unauthorized access",
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="error", type="string", example="Authentication token not provided."),
+     *             @OA\Property(property="message", type="string", example="Unauthorized"),
      *             @OA\Property(property="code", type="integer", example=10002),
      *             example={
      *                 "success": false,
-     *                 "error": "Authentication token not provided.",
+     *                 "message": "Authentication token not provided.",
      *                 "code": 10002
      *             }
      *         )
@@ -141,11 +141,11 @@ class PatientMedicationController extends Controller
      *         description="Unauthorized access",
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="error", type="string", example="Authentication token not provided."),
+     *             @OA\Property(property="message", type="string", example="Unauthorized"),
      *             @OA\Property(property="code", type="integer", example=10002),
      *             example={
      *                 "success": false,
-     *                 "error": "Authentication token not provided.",
+     *                 "message": "Authentication token not provided.",
      *                 "code": 10002
      *             }
      *         )

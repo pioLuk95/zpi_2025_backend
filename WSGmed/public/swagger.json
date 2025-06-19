@@ -82,9 +82,9 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "error": {
+                                        "message": {
                                             "type": "string",
-                                            "example": "Invalid email or password."
+                                            "example": "Unauthorized"
                                         },
                                         "code": {
                                             "type": "integer",
@@ -130,9 +130,9 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "error": {
+                                        "message": {
                                             "type": "string",
-                                            "example": "Authentication token not provided."
+                                            "example": "Unauthorized"
                                         },
                                         "code": {
                                             "type": "integer",
@@ -216,9 +216,9 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "error": {
+                                        "messagee": {
                                             "type": "string",
-                                            "example": "Invalid or expired authentication token."
+                                            "example": "Unauthorized"
                                         },
                                         "code": {
                                             "type": "integer",
@@ -283,41 +283,17 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
                                         "message": {
                                             "type": "string",
                                             "example": "The given data was invalid."
                                         },
-                                        "errors": {
-                                            "type": "object",
-                                            "example": {
-                                                "email": [
-                                                    "The email field is required."
-                                                ]
-                                            }
-                                        },
                                         "code": {
                                             "type": "integer",
                                             "example": 11000
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Unable to send reset link",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Unable to send reset link"
-                                        },
-                                        "code": {
-                                            "type": "integer",
-                                            "example": 10011
                                         }
                                     },
                                     "type": "object"
@@ -335,7 +311,7 @@
                     "EmergencyCalls"
                 ],
                 "summary": "Create a new emergency call",
-                "description": "Creates a new emergency call for the authenticated user. The patient_id is automatically assigned based on the logged-in user. The date_time field is automatically set to the current server timestamp, any value sent will be ignored.",
+                "description": "Creates a new emergency call for the authenticated user. The patient_id is automatically assigned based on the logged-in user.",
                 "operationId": "createEmergencyCall",
                 "requestBody": {
                     "description": "Request body for creating emergency call",
@@ -390,9 +366,9 @@
                                             "type": "boolean",
                                             "example": false
                                         },
-                                        "error": {
+                                        "message": {
                                             "type": "string",
-                                            "example": "Authentication token not provided."
+                                            "example": "Unauthorized"
                                         },
                                         "code": {
                                             "type": "integer",
@@ -403,7 +379,7 @@
                                 },
                                 "example": {
                                     "success": false,
-                                    "error": "Authentication token not provided.",
+                                    "message": "Unauthorized",
                                     "code": 10002
                                 }
                             }
@@ -423,7 +399,7 @@
                                             "type": "integer",
                                             "example": 15001
                                         },
-                                        "error": {
+                                        "message": {
                                             "type": "string",
                                             "example": "You have made too many requests in a short period. Please try again later."
                                         }
@@ -432,7 +408,7 @@
                                 },
                                 "example": {
                                     "success": false,
-                                    "error": "You have made too many requests in a short period. Please try again later.",
+                                    "message": " You have made too many requests in a short period. Please try again later.",
                                     "code": 15001
                                 }
                             }
@@ -448,7 +424,7 @@
                                             "type": "boolean",
                                             "example": false
                                         },
-                                        "error": {
+                                        "message": {
                                             "type": "string",
                                             "example": "An unexpected error occurred on the server."
                                         },
@@ -461,7 +437,7 @@
                                 },
                                 "example": {
                                     "success": false,
-                                    "error": "An unexpected error occurred on the server.",
+                                    "message": "An unexpected error occurred on the server.",
                                     "code": 19001
                                 }
                             }
@@ -477,7 +453,7 @@
                                             "type": "boolean",
                                             "example": false
                                         },
-                                        "error": {
+                                        "message": {
                                             "type": "string",
                                             "example": "The service is temporarily unavailable. Please try again later."
                                         },
@@ -490,7 +466,7 @@
                                 },
                                 "example": {
                                     "success": false,
-                                    "error": "The service is temporarily unavailable. Please try again later.",
+                                    "message": "The service is temporarily unavailable. Please try again later.",
                                     "code": 19002
                                 }
                             }
@@ -513,22 +489,27 @@
                 "description": "Creates a new medical record for the authenticated patient. The `date_time` field is automatically set by the server, any value sent in the request for this field will be ignored.",
                 "operationId": "562a9bb1a3476fa3cd18ea0d9f82b4e4",
                 "requestBody": {
-                    "description": "Medical record data. The `date_time` field is required but its value is ignored as the server sets it automatically.",
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
+                                    "date_time",
                                     "blood_pressure",
                                     "temperature",
                                     "pulse",
                                     "weight",
                                     "mood",
                                     "pain_level",
-                                    "oxygen_saturation",
-                                    "date_time"
+                                    "oxygen_saturation"
                                 ],
                                 "properties": {
+                                    "date_time": {
+                                        "description": "Date and time of the record in YYYY-MM-DD-HH-mm-ss format. This field is IGNORED - the server will automatically use the current timestamp.",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-07-15-10-30-00"
+                                    },
                                     "blood_pressure": {
                                         "type": "integer",
                                         "example": 120
@@ -581,12 +562,6 @@
                                         "description": "Blood oxygen saturation (%, 0-100)",
                                         "type": "integer",
                                         "example": 98
-                                    },
-                                    "date_time": {
-                                        "description": "Date and time of the record in YYYY-MM-DD-HH-mm-ss format. This field is IGNORED - the server will automatically use the current timestamp.",
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2025-07-15-10-30-00"
                                     }
                                 },
                                 "type": "object"
@@ -608,27 +583,6 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Medical record created successfully"
-                                        },
-                                        "data": {
-                                            "description": "Represents the created medical record. Note: The current endpoint implementation returns an empty object for 'data'. This schema describes the full resource if it were returned.",
-                                            "properties": {
-                                                "id": {
-                                                    "description": "ID of the created medical record",
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "patient_id": {
-                                                    "description": "ID of the patient who made the record, derived from authenticated user",
-                                                    "type": "integer",
-                                                    "example": 101
-                                                },
-                                                "date_time": {
-                                                    "description": "Date and time of the record, automatically set by the server. Format: YYYY-MM-DD-HH-mm-ss.",
-                                                    "type": "string",
-                                                    "example": "2025-07-15-10-30-00"
-                                                }
-                                            },
-                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -674,9 +628,9 @@
                                             "type": "boolean",
                                             "example": false
                                         },
-                                        "error": {
+                                        "message": {
                                             "type": "string",
-                                            "example": "Authentication token not provided."
+                                            "example": "Unauthorized"
                                         },
                                         "code": {
                                             "type": "integer",
@@ -687,7 +641,7 @@
                                 },
                                 "example": {
                                     "success": false,
-                                    "error": "Authentication token not provided.",
+                                    "message": "Authentication token not provided.",
                                     "code": 10002
                                 }
                             }
@@ -707,7 +661,7 @@
                                             "type": "integer",
                                             "example": 15001
                                         },
-                                        "error": {
+                                        "message": {
                                             "type": "string",
                                             "example": "You have made too many requests in a short period. Please try again later."
                                         }
@@ -716,7 +670,7 @@
                                 },
                                 "example": {
                                     "success": false,
-                                    "error": "You have made too many requests in a short period. Please try again later.",
+                                    "message": "You have made too many requests in a short period. Please try again later.",
                                     "code": 15001
                                 }
                             }
@@ -732,7 +686,7 @@
                                             "type": "boolean",
                                             "example": false
                                         },
-                                        "error": {
+                                        "message": {
                                             "type": "string",
                                             "example": "An unexpected error occurred on the server."
                                         },
@@ -745,7 +699,7 @@
                                 },
                                 "example": {
                                     "success": false,
-                                    "error": "An unexpected error occurred on the server.",
+                                    "message": "An unexpected error occurred on the server.",
                                     "code": 19001
                                 }
                             }
@@ -761,7 +715,7 @@
                                             "type": "boolean",
                                             "example": false
                                         },
-                                        "error": {
+                                        "message": {
                                             "type": "string",
                                             "example": "The service is temporarily unavailable. Please try again later."
                                         },
@@ -774,7 +728,7 @@
                                 },
                                 "example": {
                                     "success": false,
-                                    "error": "The service is temporarily unavailable. Please try again later.",
+                                    "message": "The service is temporarily unavailable. Please try again later.",
                                     "code": 19002
                                 }
                             }
@@ -863,7 +817,7 @@
                                             "type": "boolean",
                                             "example": false
                                         },
-                                        "error": {
+                                        "message": {
                                             "type": "string",
                                             "example": "Authentication token not provided."
                                         },
@@ -911,7 +865,7 @@
                                             "type": "boolean",
                                             "example": false
                                         },
-                                        "error": {
+                                        "message": {
                                             "type": "string",
                                             "example": "The requested resource was not found."
                                         },
@@ -1010,9 +964,9 @@
                                             "type": "boolean",
                                             "example": false
                                         },
-                                        "error": {
+                                        "message": {
                                             "type": "string",
-                                            "example": "Authentication token not provided."
+                                            "example": "Unauthorized"
                                         },
                                         "code": {
                                             "type": "integer",
@@ -1023,7 +977,7 @@
                                 },
                                 "example": {
                                     "success": false,
-                                    "error": "Authentication token not provided.",
+                                    "message": "Authentication token not provided.",
                                     "code": 10002
                                 }
                             }
@@ -1113,9 +1067,9 @@
                                             "type": "boolean",
                                             "example": false
                                         },
-                                        "error": {
+                                        "message": {
                                             "type": "string",
-                                            "example": "Authentication token not provided."
+                                            "example": "Unauthorized"
                                         },
                                         "code": {
                                             "type": "integer",
@@ -1126,7 +1080,7 @@
                                 },
                                 "example": {
                                     "success": false,
-                                    "error": "Authentication token not provided.",
+                                    "message": "Authentication token not provided.",
                                     "code": 10002
                                 }
                             }
@@ -1197,9 +1151,9 @@
                                             "type": "boolean",
                                             "example": false
                                         },
-                                        "error": {
+                                        "message": {
                                             "type": "string",
-                                            "example": "Authentication token not provided."
+                                            "example": "Unauthorized"
                                         },
                                         "code": {
                                             "type": "integer",
@@ -1221,7 +1175,7 @@
                                             "type": "boolean",
                                             "example": false
                                         },
-                                        "error": {
+                                        "message": {
                                             "type": "string",
                                             "example": "An unexpected error occurred on the server."
                                         },

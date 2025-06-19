@@ -46,6 +46,38 @@
         
         <button type="submit" class="btn btn-success">{{ isset($patient) ? 'Zapisz zmiany' : 'Dodaj' }}</button>
     </form>
+
+    @if(isset($patient))
+        <hr>
+        <h4>Edytuj przypisane leki</h4>
+        @if($medications->count())
+            <ul class="list-group mb-3">
+                @foreach($medications as $pm)
+                <li class="list-group-item d-flex align-items-center justify-content-between">
+                    <form action="{{ route('patients_medications.update', ['patient' => $patient->id, 'patientMedication' => $pm->id]) }}" method="POST" class="d-flex align-items-center">
+                        @csrf
+                        @method('PUT')
+                        <select name="medication_id" class="form-select form-select-sm me-2" required>
+                            @foreach(\App\Models\Medication::all() as $med)
+                                <option value="{{ $med->id }}" {{ $pm->medication_id == $med->id ? 'selected' : '' }}>{{ $med->name }}</option>
+                            @endforeach
+                        </select>
+                        <input type="number" name="dosage" class="form-control form-control-sm me-2" value="{{ $pm->dosage }}" min="0" required style="width:90px;">
+                        <span class="me-2">mg</span>
+                        <button type="submit" class="btn btn-primary btn-sm me-2">Zapisz</button>
+                    </form>
+                    <form action="{{ route('patients_medications.destroy', ['patient' => $patient->id, 'patientMedication' => $pm->id]) }}" method="POST" onsubmit="return confirm('Na pewno usunąć lek?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger btn-sm">Usuń</button>
+                    </form>
+                </li>
+                @endforeach
+            </ul>
+        @else
+            <p class="text-muted">Brak przypisanych leków</p>
+        @endif
+    @endif
 </div>
 
 @endsection

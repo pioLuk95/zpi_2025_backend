@@ -77,7 +77,8 @@ class PatientController extends Controller
             abort(403);
         }
         $locations = Location::all();
-        return view('patients.edit', compact('patient', 'locations'));
+        $medications = $patient->medications()->with('medication')->get();
+        return view('patients.edit', compact('patient', 'locations', 'medications'));
     }
 
     /**

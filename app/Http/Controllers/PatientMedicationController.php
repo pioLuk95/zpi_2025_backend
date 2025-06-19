@@ -26,9 +26,21 @@ class PatientMedicationController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, $patientId)
     {
-        //
+        $validated = $request->validate([
+            'medication_id' => 'required|exists:medications,id',
+            'dosage' => 'required|integer|min:0',
+        ]);
+        
+        \App\Models\PatientMedication::create([
+            'patient_id' => $patientId,
+            'medication_id' => $validated['medication_id'],
+            'dosage' => $validated['dosage'],
+            'start_date' => now(),
+            'end_date' => null,
+        ]);
+        return redirect()->route('patients_medications.landing')->with('success', 'Medication assigned to patient.');
     }
 
     /**
@@ -58,8 +70,20 @@ class PatientMedicationController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(PatientMedication $patientMedication)
+    public function destroy($patientId, $patientMedicationId)
     {
-        //
+        $patientMedication = \App\Models\PatientMedication::findOrFail($patientMedicationId);
+        $patientMedication->delete();
+        return redirect()->back()->with('success', 'Lek został usunięty.');
+    }
+
+    public function landing()
+    {
+        if (auth()->user()->role === 'user') {
+            abort(403);
+        }
+        $patients = \App\Models\Patient::all();
+        $medications = \App\Models\Medication::all();
+        return view('patients_medications.landing', compact('patients', 'medications'));
     }
 }

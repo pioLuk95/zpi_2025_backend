@@ -33,4 +33,9 @@ class Patient extends Model
     {
         return $this->hasMany(EmergencyCalls::class);
     }
+
+    public function medications()
+    {
+        return $this->hasMany(\App\Models\PatientMedication::class);
+    }
 }

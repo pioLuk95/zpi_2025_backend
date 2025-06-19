@@ -11,6 +11,16 @@
             <p class="card-text"><strong>Email:</strong> {{ $patient->email }}</p>
             <p class="card-text"><strong>Data urodzenia:</strong> {{ $patient->date_of_birth }}</p>
             <p class="card-text"><strong>Lokalizacja:</strong> {{ $patient->location->name ?? 'Brak' }}</p>
+            <p class="card-text"><strong>Leki:</strong> 
+                @php $meds = $patient->medications ?? []; @endphp
+                @if(count($meds))
+                    @foreach($meds as $pm)
+                        {{ $pm->medication->name }} ({{ $pm->dosage }} mg)@if(!$loop->last), @endif
+                    @endforeach
+                @else
+                    Brak leków
+                @endif
+            </p>
 
             <a href="{{ route('patients.edit', $patient) }}" class="btn btn-warning">Edytuj</a>
             <form action="{{ route('patients.destroy', $patient) }}" method="POST" class="d-inline"

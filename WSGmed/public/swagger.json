@@ -53,9 +53,22 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "token": {
+                                        "access_token": {
                                             "type": "string",
-                                            "example": "eyJhbGciOiJIUzI1..."
+                                            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                        },
+                                        "refresh_token": {
+                                            "type": "string",
+                                            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "bearer"
+                                        },
+                                        "expires_in": {
+                                            "description": "Access token lifetime in seconds",
+                                            "type": "integer",
+                                            "example": 3600
                                         }
                                     },
                                     "type": "object"
@@ -71,7 +84,7 @@
                                     "properties": {
                                         "error": {
                                             "type": "string",
-                                            "example": "Unauthorized"
+                                            "example": "Invalid email or password."
                                         },
                                         "code": {
                                             "type": "integer",
@@ -119,11 +132,11 @@
                                     "properties": {
                                         "error": {
                                             "type": "string",
-                                            "example": "Unauthorized"
+                                            "example": "Authentication token not provided."
                                         },
                                         "code": {
                                             "type": "integer",
-                                            "example": 10001
+                                            "example": 10002
                                         }
                                     },
                                     "type": "object"
@@ -145,7 +158,28 @@
                     "Auth"
                 ],
                 "summary": "Refresh the JWT token",
+                "description": "Provides a new access token and a new refresh token in exchange for a valid refresh token.",
                 "operationId": "47d6ecf1aa5d59780a66a97113e085e1",
+                "requestBody": {
+                    "description": "Requires a valid refresh_token.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "refresh_token"
+                                ],
+                                "properties": {
+                                    "refresh_token": {
+                                        "type": "string",
+                                        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "Token refreshed successfully",
@@ -153,9 +187,22 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "token": {
+                                        "access_token": {
                                             "type": "string",
-                                            "example": "eyJhbGciOiJIUzI1..."
+                                            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                        },
+                                        "refresh_token": {
+                                            "type": "string",
+                                            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "bearer"
+                                        },
+                                        "expires_in": {
+                                            "description": "New access token lifetime in seconds",
+                                            "type": "integer",
+                                            "example": 3600
                                         }
                                     },
                                     "type": "object"
@@ -164,18 +211,18 @@
                         }
                     },
                     "401": {
-                        "description": "Token not provided or invalid",
+                        "description": "Refresh token not provided, invalid, or expired",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "error": {
                                             "type": "string",
-                                            "example": "Unauthorized"
+                                            "example": "Invalid or expired authentication token."
                                         },
                                         "code": {
                                             "type": "integer",
-                                            "example": 10001
+                                            "example": 10002
                                         }
                                     },
                                     "type": "object"
@@ -184,11 +231,7 @@
                         }
                     }
                 },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                "security": []
             }
         },
         "/api/password/email": {
@@ -254,7 +297,7 @@
                                         },
                                         "code": {
                                             "type": "integer",
-                                            "example": 10022
+                                            "example": 11000
                                         }
                                     },
                                     "type": "object"
@@ -274,107 +317,7 @@
                                         },
                                         "code": {
                                             "type": "integer",
-                                            "example": 10100
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": []
-            }
-        },
-        "/api/password/reset": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Reset password",
-                "operationId": "1d7e5a677aac4915ac3ee634758bf23d",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "email",
-                                    "password"
-                                ],
-                                "properties": {
-                                    "email": {
-                                        "type": "string",
-                                        "example": "user@example.com"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "example": "newpassword123"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Password reset successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Password reset successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid token or email",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Invalid token or email"
-                                        },
-                                        "code": {
-                                            "type": "integer",
-                                            "example": 10000
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "The given data was invalid."
-                                        },
-                                        "errors": {
-                                            "type": "object",
-                                            "example": {
-                                                "password": [
-                                                    "The password confirmation does not match."
-                                                ]
-                                            }
-                                        },
-                                        "code": {
-                                            "type": "integer",
-                                            "example": 10022
+                                            "example": 10011
                                         }
                                     },
                                     "type": "object"
@@ -392,22 +335,23 @@
                     "EmergencyCalls"
                 ],
                 "summary": "Create a new emergency call",
-                "description": "Creates a new emergency call for the authenticated user. The patient_id is automatically assigned based on the logged-in user.",
+                "description": "Creates a new emergency call for the authenticated user. The patient_id is automatically assigned based on the logged-in user. The date_time field is automatically set to the current server timestamp, any value sent will be ignored.",
                 "operationId": "createEmergencyCall",
                 "requestBody": {
+                    "description": "Request body for creating emergency call",
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
+                                "required": [
+                                    "date_time"
+                                ],
                                 "properties": {
-                                    "date": {
-                                        "description": "Emergency Call date",
+                                    "date_time": {
+                                        "description": "Emergency call date and time in YYYY-MM-DD-HH-mm-ss format. This field is IGNORED - the server will automatically use the current timestamp.",
                                         "type": "string",
-                                        "format": "date",
-                                        "enum": [
-                                            "YYYY-MM-DD"
-                                        ],
-                                        "example": "2025-06-15"
+                                        "format": "date-time",
+                                        "example": "2025-06-15-10-30-45"
                                     }
                                 },
                                 "type": "object"
@@ -422,91 +366,132 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "message": {
-                                            "description": "Success message",
-                                            "type": "string",
-                                            "example": "Emergency call created successfully"
-                                        },
-                                        "call_id": {
-                                            "description": "The ID of the newly created emergency call",
-                                            "type": "integer",
-                                            "example": 1
+                                        "success": {
+                                            "description": "Indicates whether the operation was successful",
+                                            "type": "boolean",
+                                            "example": true
                                         }
                                     },
                                     "type": "object"
                                 },
                                 "example": {
-                                    "message": "Emergency call created successfully",
-                                    "call_id": 1
+                                    "success": true
                                 }
                             }
                         }
                     },
                     "401": {
-                        "description": "Unauthorized access",
+                        "description": "Unauthorized - Authentication required",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "error_code": {
-                                            "type": "integer",
-                                            "example": 10001
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
                                         },
-                                        "message": {
+                                        "error": {
                                             "type": "string",
-                                            "example": "Unauthorized access"
+                                            "example": "Authentication token not provided."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 10002
                                         }
                                     },
                                     "type": "object"
                                 },
                                 "example": {
-                                    "error_code": 10001,
-                                    "message": "Unauthorized access"
+                                    "success": false,
+                                    "error": "Authentication token not provided.",
+                                    "code": 10002
                                 }
                             }
                         }
                     },
-                    "422": {
-                        "description": "Validation error",
+                    "429": {
+                        "description": "Too Many Requests - Rate limit exceeded",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "error_code": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
                                             "type": "integer",
-                                            "example": 10022
+                                            "example": 15001
                                         },
-                                        "message": {
+                                        "error": {
                                             "type": "string",
-                                            "example": "Validation error"
-                                        },
-                                        "errors": {
-                                            "description": "Validation errors grouped by field",
-                                            "type": "object",
-                                            "example": {
-                                                "date": [
-                                                    "The date field is required.",
-                                                    "The date must be a valid date."
-                                                ]
-                                            },
-                                            "additionalProperties": {
-                                                "type": "array",
-                                                "items": {
-                                                    "type": "string"
-                                                }
-                                            }
+                                            "example": "You have made too many requests in a short period. Please try again later."
                                         }
                                     },
                                     "type": "object"
                                 },
                                 "example": {
-                                    "error_code": 10022,
-                                    "message": "Validation error",
-                                    "errors": {
-                                        "date": [
-                                            "The date field is required."
-                                        ]
-                                    }
+                                    "success": false,
+                                    "error": "You have made too many requests in a short period. Please try again later.",
+                                    "code": 15001
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred on the server."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19001
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "error": "An unexpected error occurred on the server.",
+                                    "code": 19001
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable - Database connection issues",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "The service is temporarily unavailable. Please try again later."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19002
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "error": "The service is temporarily unavailable. Please try again later.",
+                                    "code": 19002
                                 }
                             }
                         }
@@ -525,65 +510,83 @@
                     "Medical Records"
                 ],
                 "summary": "Create a new medical record",
-                "description": "Create a new medical record\n\nCreates a new medical record for the authenticated patient with the provided health parameters.\nThe patient_id is automatically retrieved from the authenticated user.",
+                "description": "Creates a new medical record for the authenticated patient. The `date_time` field is automatically set by the server, any value sent in the request for this field will be ignored.",
                 "operationId": "562a9bb1a3476fa3cd18ea0d9f82b4e4",
                 "requestBody": {
+                    "description": "Medical record data. The `date_time` field is required but its value is ignored as the server sets it automatically.",
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "record_date",
                                     "blood_pressure",
                                     "temperature",
                                     "pulse",
                                     "weight",
                                     "mood",
                                     "pain_level",
-                                    "oxygen_saturation"
+                                    "oxygen_saturation",
+                                    "date_time"
                                 ],
                                 "properties": {
-                                    "record_date": {
-                                        "description": "Medical record date",
-                                        "type": "string",
-                                        "format": "date",
-                                        "enum": [
-                                            "YYYY-MM-DD"
-                                        ],
-                                        "example": "2025-05-05"
-                                    },
                                     "blood_pressure": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 120.8
+                                        "type": "integer",
+                                        "example": 120
                                     },
                                     "temperature": {
+                                        "description": "Body temperature in Celsius, e.g., up to one decimal place.",
                                         "type": "number",
                                         "format": "float",
                                         "example": 36.6
                                     },
                                     "pulse": {
-                                        "type": "number",
-                                        "format": "float",
+                                        "type": "integer",
                                         "example": 75
                                     },
                                     "weight": {
+                                        "description": "Weight in kilograms, e.g., up to two decimal places.",
                                         "type": "number",
                                         "format": "float",
-                                        "example": 70.5
+                                        "example": 70.55
                                     },
                                     "mood": {
-                                        "type": "integer",
-                                        "example": 7
+                                        "description": "Patient's mood rating.",
+                                        "type": "string",
+                                        "enum": [
+                                            "Very bad",
+                                            "Bad",
+                                            "Good",
+                                            "Very good"
+                                        ],
+                                        "example": "Good"
                                     },
                                     "pain_level": {
+                                        "description": "Pain level on a scale of 1 (no pain) to 10 (worst pain).",
                                         "type": "integer",
+                                        "enum": [
+                                            1,
+                                            2,
+                                            3,
+                                            4,
+                                            5,
+                                            6,
+                                            7,
+                                            8,
+                                            9,
+                                            10
+                                        ],
                                         "example": 3
                                     },
                                     "oxygen_saturation": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 98.5
+                                        "description": "Blood oxygen saturation (%, 0-100)",
+                                        "type": "integer",
+                                        "example": 98
+                                    },
+                                    "date_time": {
+                                        "description": "Date and time of the record in YYYY-MM-DD-HH-mm-ss format. This field is IGNORED - the server will automatically use the current timestamp.",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-07-15-10-30-00"
                                     }
                                 },
                                 "type": "object"
@@ -598,46 +601,41 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Medical record created successfully"
+                                        },
                                         "data": {
+                                            "description": "Represents the created medical record. Note: The current endpoint implementation returns an empty object for 'data'. This schema describes the full resource if it were returned.",
                                             "properties": {
-                                                "blood_pressure": {
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 120.8
-                                                },
-                                                "temperature": {
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 36.6
-                                                },
-                                                "pulse": {
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 75
-                                                },
-                                                "weight": {
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 70.5
-                                                },
-                                                "mood": {
+                                                "id": {
+                                                    "description": "ID of the created medical record",
                                                     "type": "integer",
-                                                    "example": 7
+                                                    "example": 1
                                                 },
-                                                "pain_level": {
+                                                "patient_id": {
+                                                    "description": "ID of the patient who made the record, derived from authenticated user",
                                                     "type": "integer",
-                                                    "example": 3
+                                                    "example": 101
                                                 },
-                                                "oxygen_saturation": {
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 98.5
+                                                "date_time": {
+                                                    "description": "Date and time of the record, automatically set by the server. Format: YYYY-MM-DD-HH-mm-ss.",
+                                                    "type": "string",
+                                                    "example": "2025-07-15-10-30-00"
                                                 }
                                             },
                                             "type": "object"
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "success": true,
+                                    "message": "Medical record created successfully"
                                 }
                             }
                         }
@@ -648,16 +646,136 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "error_code": {
-                                            "type": "integer",
-                                            "example": 10022
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Validation error"
+                                            "example": "The given data was invalid."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 11000
                                         }
                                     },
                                     "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Authentication required",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Authentication token not provided."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 10002
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "error": "Authentication token not provided.",
+                                    "code": 10002
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests - Rate limit exceeded",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 15001
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "You have made too many requests in a short period. Please try again later."
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "error": "You have made too many requests in a short period. Please try again later.",
+                                    "code": 15001
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred on the server."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19001
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "error": "An unexpected error occurred on the server.",
+                                    "code": 19001
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable - Database connection issues",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "The service is temporarily unavailable. Please try again later."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19002
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "error": "The service is temporarily unavailable. Please try again later.",
+                                    "code": 19002
                                 }
                             }
                         }
@@ -685,28 +803,24 @@
                             "schema": {
                                 "required": [
                                     "specialist_type",
-                                    "specialist_id",
-                                    "date",
-                                    "time",
+                                    "date_time",
                                     "reason"
                                 ],
                                 "properties": {
                                     "specialist_type": {
+                                        "description": "Type of the specialist for the visit. Possible values: doctor, nurse, physiotherapist.",
                                         "type": "string",
+                                        "enum": [
+                                            "doctor",
+                                            "nurse",
+                                            "physiotherapist"
+                                        ],
                                         "example": "doctor"
                                     },
-                                    "specialist_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "date": {
+                                    "date_time": {
+                                        "description": "Date and time of the visit in YYYY-MM-DD-HH-mm format.",
                                         "type": "string",
-                                        "format": "date",
-                                        "example": "2025-06-15"
-                                    },
-                                    "time": {
-                                        "type": "string",
-                                        "example": "14:30"
+                                        "example": "2025-06-15-14-30"
                                     },
                                     "reason": {
                                         "type": "string",
@@ -732,35 +846,6 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Medical visit scheduled successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "visit_id": {
-                                                    "type": "string",
-                                                    "example": "visit_1622548800_1234"
-                                                },
-                                                "specialist_name": {
-                                                    "type": "string",
-                                                    "example": "Dr. Anna Johnson"
-                                                },
-                                                "specialization": {
-                                                    "type": "string",
-                                                    "example": "Family Medicine"
-                                                },
-                                                "date": {
-                                                    "type": "string",
-                                                    "example": "2025-06-15"
-                                                },
-                                                "time": {
-                                                    "type": "string",
-                                                    "example": "10:30"
-                                                },
-                                                "reason": {
-                                                    "type": "string",
-                                                    "example": "General checkup"
-                                                }
-                                            },
-                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -774,13 +859,17 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
                                         "error": {
                                             "type": "string",
-                                            "example": "Unauthorized"
+                                            "example": "Authentication token not provided."
                                         },
                                         "code": {
                                             "type": "integer",
-                                            "example": 10001
+                                            "example": 10002
                                         }
                                     },
                                     "type": "object"
@@ -794,16 +883,17 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
                                         "message": {
                                             "type": "string",
                                             "example": "The given data was invalid."
                                         },
-                                        "errors": {
-                                            "type": "object"
-                                        },
                                         "code": {
                                             "type": "integer",
-                                            "example": 10022
+                                            "example": 11000
                                         }
                                     },
                                     "type": "object"
@@ -812,18 +902,22 @@
                         }
                     },
                     "404": {
-                        "description": "Specialist not found",
+                        "description": "Specialist of the requested type not found",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
                                         "error": {
                                             "type": "string",
-                                            "example": "Specialist not found"
+                                            "example": "The requested resource was not found."
                                         },
                                         "code": {
                                             "type": "integer",
-                                            "example": 10004
+                                            "example": 13001
                                         }
                                     },
                                     "type": "object"
@@ -847,19 +941,6 @@
                 "summary": "Get patient's medications for a specific day",
                 "description": "Returns a list of medications assigned to the logged-in patient for a given date.",
                 "operationId": "getMedicationsByDate",
-                "parameters": [
-                    {
-                        "name": "date",
-                        "in": "query",
-                        "description": "Date of the medications",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "format": "date",
-                            "example": "YYYY-MM-DD"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "List of medications",
@@ -882,7 +963,14 @@
                                                 "example": "100mg"
                                             },
                                             "part_of_day": {
+                                                "description": "Indicates the part of the day for medication intake. Possible values: morning, midday, evening, night.",
                                                 "type": "string",
+                                                "enum": [
+                                                    "morning",
+                                                    "midday",
+                                                    "evening",
+                                                    "night"
+                                                ],
                                                 "example": "morning"
                                             },
                                             "is_taken": {
@@ -918,55 +1006,25 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "error_code": {
-                                            "type": "integer",
-                                            "example": 10001
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
                                         },
-                                        "message": {
+                                        "error": {
                                             "type": "string",
-                                            "example": "Unauthorized access"
+                                            "example": "Authentication token not provided."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 10002
                                         }
                                     },
                                     "type": "object"
                                 },
                                 "example": {
-                                    "error_code": 10001,
-                                    "message": "Unauthorized access"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error_code": {
-                                            "type": "integer",
-                                            "example": 10022
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Validation error"
-                                        },
-                                        "errors": {
-                                            "type": "object",
-                                            "example": {
-                                                "date": [
-                                                    "The date must be a valid date.",
-                                                    "The date does not match the format Y-m-d."
-                                                ]
-                                            },
-                                            "additionalProperties": {
-                                                "type": "array",
-                                                "items": {
-                                                    "type": "string"
-                                                }
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
+                                    "success": false,
+                                    "error": "Authentication token not provided.",
+                                    "code": 10002
                                 }
                             }
                         }
@@ -993,23 +1051,29 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "medication_id"
+                                    "medication_ids"
                                 ],
                                 "properties": {
-                                    "medication_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "is_taken": {
-                                        "type": "boolean",
-                                        "example": true
+                                    "medication_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
                                     }
                                 },
                                 "type": "object"
                             },
                             "example": {
-                                "medication_id": 1,
-                                "is_taken": true
+                                "medication_ids": [
+                                    1,
+                                    2,
+                                    3
+                                ]
                             }
                         }
                     }
@@ -1045,201 +1109,25 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "error_code": {
-                                            "type": "integer",
-                                            "example": 10001
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
                                         },
-                                        "message": {
+                                        "error": {
                                             "type": "string",
-                                            "example": "Unauthorized access"
+                                            "example": "Authentication token not provided."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 10002
                                         }
                                     },
                                     "type": "object"
                                 },
                                 "example": {
-                                    "error_code": 10001,
-                                    "message": "Unauthorized access"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Medication not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error_code": {
-                                            "type": "integer",
-                                            "example": 1004
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Medication not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                },
-                                "example": {
-                                    "error_code": 1004,
-                                    "message": "Medication not found"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error_code": {
-                                            "type": "integer",
-                                            "example": 10022
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Validation error"
-                                        },
-                                        "errors": {
-                                            "type": "object",
-                                            "example": {
-                                                "medication_id": [
-                                                    "The medication id field is required.",
-                                                    "The medication id must be an integer."
-                                                ],
-                                                "is_taken": [
-                                                    "The is taken field must be true or false."
-                                                ]
-                                            },
-                                            "additionalProperties": {
-                                                "type": "array",
-                                                "items": {
-                                                    "type": "string"
-                                                }
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/medications/statistics": {
-            "get": {
-                "tags": [
-                    "Medications"
-                ],
-                "summary": "Medication intake statistics",
-                "description": "Returns the total number of medications and how many have been taken for a given date.",
-                "operationId": "getMedicationStats",
-                "parameters": [
-                    {
-                        "name": "date",
-                        "in": "query",
-                        "description": "Date in format YYYY-MM-DD",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "format": "date",
-                            "example": "2025-06-15"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Medication statistics",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "total": {
-                                            "type": "integer",
-                                            "example": 5
-                                        },
-                                        "taken": {
-                                            "type": "integer",
-                                            "example": 3
-                                        },
-                                        "percentage": {
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": 60
-                                        }
-                                    },
-                                    "type": "object"
-                                },
-                                "example": {
-                                    "total": 5,
-                                    "taken": 3,
-                                    "percentage": 60
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized access",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error_code": {
-                                            "type": "integer",
-                                            "example": 10001
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized access"
-                                        }
-                                    },
-                                    "type": "object"
-                                },
-                                "example": {
-                                    "error_code": 10001,
-                                    "message": "Unauthorized access"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error_code": {
-                                            "type": "integer",
-                                            "example": 10022
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Validation error"
-                                        },
-                                        "errors": {
-                                            "type": "object",
-                                            "example": {
-                                                "date": [
-                                                    "The date must be a valid date.",
-                                                    "The date does not match the format Y-m-d."
-                                                ]
-                                            },
-                                            "additionalProperties": {
-                                                "type": "array",
-                                                "items": {
-                                                    "type": "string"
-                                                }
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
+                                    "success": false,
+                                    "error": "Authentication token not provided.",
+                                    "code": 10002
                                 }
                             }
                         }
@@ -1269,10 +1157,6 @@
                                     "type": "array",
                                     "items": {
                                         "properties": {
-                                            "id": {
-                                                "type": "integer",
-                                                "example": 1
-                                            },
                                             "title": {
                                                 "type": "string",
                                                 "example": "Check-up Visit"
@@ -1282,14 +1166,19 @@
                                                 "example": "Recommended check-up visit in 3 months"
                                             },
                                             "created_at": {
+                                                "description": "Creation date in YYYY-MM-DD-HH-mm-ss format",
                                                 "type": "string",
-                                                "format": "date-time",
-                                                "example": "2025-05-13T14:30:00Z"
+                                                "example": "2025-05-13-14-30-00"
                                             },
-                                            "updated_at": {
+                                            "specialist_type": {
+                                                "description": "Type of the specialist who added the recommendation. Possible values: doctor, nurse, physiotherapist.",
                                                 "type": "string",
-                                                "format": "date-time",
-                                                "example": "2025-05-13T14:30:00Z"
+                                                "enum": [
+                                                    "doctor",
+                                                    "nurse",
+                                                    "physiotherapist"
+                                                ],
+                                                "example": "doctor"
                                             }
                                         },
                                         "type": "object"
@@ -1297,58 +1186,24 @@
                                 }
                             }
                         }
-                    }
-                }
-            }
-        },
-        "/api/recommendations/{id}": {
-            "get": {
-                "tags": [
-                    "Recommendations"
-                ],
-                "summary": "Get recommendation details",
-                "description": "Get recommendation details\n\nReturns detailed information about a specific recommendation.",
-                "operationId": "getRecommendationById",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID of the recommendation",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "id": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Authentication token not provided."
+                                        },
+                                        "code": {
                                             "type": "integer",
-                                            "example": 1
-                                        },
-                                        "title": {
-                                            "type": "string",
-                                            "example": "Check-up Visit"
-                                        },
-                                        "description": {
-                                            "type": "string",
-                                            "example": "Recommended check-up visit in 3 months"
-                                        },
-                                        "created_at": {
-                                            "type": "string",
-                                            "format": "date-time",
-                                            "example": "2025-05-13T14:30:00Z"
-                                        },
-                                        "updated_at": {
-                                            "type": "string",
-                                            "format": "date-time",
-                                            "example": "2025-05-13T14:30:00Z"
+                                            "example": 10002
                                         }
                                     },
                                     "type": "object"
@@ -1356,19 +1211,23 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "Recommendation not found",
+                    "500": {
+                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "error_code": {
-                                            "type": "integer",
-                                            "example": 1004
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
                                         },
-                                        "message": {
+                                        "error": {
                                             "type": "string",
-                                            "example": "Recommendation not found"
+                                            "example": "An unexpected error occurred on the server."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19001
                                         }
                                     },
                                     "type": "object"
@@ -1392,8 +1251,16 @@
     },
     "tags": [
         {
+            "name": "Auth",
+            "description": "Auth"
+        },
+		{
             "name": "EmergencyCalls",
             "description": "API Endpoints for managing emergency calls for patients"
+        },
+        {
+            "name": "Medical Records",
+            "description": "API Endpoints for managing patient medical records"
         },
         {
             "name": "Medications",
@@ -1403,14 +1270,7 @@
             "name": "Recommendations",
             "description": "Operations related to recommendations"
         },
-        {
-            "name": "Auth",
-            "description": "Auth"
-        },
-        {
-            "name": "Medical Records",
-            "description": "Medical Records"
-        },
+        
         {
             "name": "Medical Visits",
             "description": "Medical Visits"

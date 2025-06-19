@@ -13,6 +13,8 @@ use Illuminate\Support\Str;
 use Illuminate\Auth\Events\PasswordReset;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use App\Common\ApiErrorCodes;
+use App\Http\Traits\ApiResponseTrait;
 
 /**
  * @OA\Tag(
@@ -31,6 +33,33 @@ use Firebase\JWT\Key;
  */
 class AuthTokenController extends Controller
 {
+    use ApiResponseTrait;
+
+    private function generateAccessToken(User $user): string
+    {
+        $payload = [
+            'iss' => "WSGmed", 
+            'sub' => $user->id, 
+            'type' => 'access',
+            'iat' => time(), 
+            'exp' => time() + env('JWT_ACCESS_TOKEN_TTL', 3600) 
+        ];
+        return JWT::encode($payload, env('JWT_SECRET'), 'HS256');
+    }
+
+    private function generateRefreshToken(User $user): string
+    {
+        $payload = [
+            'iss' => "WSGmed", 
+            'sub' => $user->id, 
+            'type' => 'refresh', 
+            'jti' => Str::random(32), 
+            'iat' => time(), 
+            'exp' => time() + env('JWT_REFRESH_TOKEN_TTL', 604800) 
+        ];
+        return JWT::encode($payload, env('JWT_SECRET'), 'HS256');
+    }
+
     /**
      * @OA\Post(
      *     path="/api/login",
@@ -49,14 +78,17 @@ class AuthTokenController extends Controller
      *         response=200,
      *         description="Successful login",
      *         @OA\JsonContent(
-     *             @OA\Property(property="token", type="string", example="eyJhbGciOiJIUzI1...")
+     *             @OA\Property(property="access_token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."),
+     *             @OA\Property(property="refresh_token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."),
+     *             @OA\Property(property="token_type", type="string", example="bearer"),
+     *             @OA\Property(property="expires_in", type="integer", example=3600, description="Access token lifetime in seconds")
      *         )
      *     ),
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
      *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="Unauthorized"),
+     *             @OA\Property(property="error", type="string", example="Invalid email or password."),
      *             @OA\Property(property="code", type="integer", example=10001)
      *         )
      *     )
@@ -68,20 +100,19 @@ class AuthTokenController extends Controller
 
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
+            $accessToken = $this->generateAccessToken($user);
+            $refreshToken = $this->generateRefreshToken($user);
 
-            $payload = [
-                'iss' => "WSGmed",
-                'sub' => $user->id,
-                'iat' => time(),
-                'exp' => time() + 60*60
+            $responseData = [
+                'access_token' => $accessToken,
+                'refresh_token' => $refreshToken,
+                'token_type' => 'bearer',
+                'expires_in' => env('JWT_ACCESS_TOKEN_TTL', 3600)
             ];
-
-            $jwt = JWT::encode($payload, env('JWT_SECRET'), 'HS256');
-
-            return response()->json(['token' => $jwt], 200);
+            return $this->successResponse($responseData, 'Login successful');
         }
 
-        return response()->json(['error' => 'Unauthorized', 'code' => 10001], 401);
+        return $this->errorResponse(ApiErrorCodes::AUTH_LOGIN_FAILED);
     }
 
     /**
@@ -101,25 +132,28 @@ class AuthTokenController extends Controller
      *         response=401,
      *         description="Unauthorized",
      *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="Unauthorized"),
-     *             @OA\Property(property="code", type="integer", example=10001)
+     *             @OA\Property(property="error", type="string", example="Authentication token not provided."),
+     *             @OA\Property(property="code", type="integer", example=10002)
      *         )
      *     )
      * )
      */
     public function logout(Request $request)
     {
+        denylist (blacklist).
+       
         $token = $request->bearerToken();
         if (!$token) {
-            return response()->json(['error' => 'Unauthorized', 'code' => 10001], 401);
+            return $this->errorResponse(ApiErrorCodes::AUTH_TOKEN_NOT_PROVIDED);
         }
         
         try {
             JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
+       
             Auth::logout();
-            return response()->json(['message' => 'Successfully logged out'], 200);
+            return $this->successResponse([], 'Successfully logged out');
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Unauthorized', 'code' => 10001], 401);
+            return $this->errorResponse(ApiErrorCodes::AUTH_INVALID_OR_EXPIRED_TOKEN);
         }
     }
 
@@ -128,48 +162,70 @@ class AuthTokenController extends Controller
      *     path="/api/refresh",
      *     tags={"Auth"},
      *     summary="Refresh the JWT token",
-     *     security={{"bearerAuth":{}}},
+     *     description="Provides a new access token and a new refresh token in exchange for a valid refresh token.",
+     *     security={},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Requires a valid refresh_token.",
+     *         @OA\JsonContent(
+     *             required={"refresh_token"},
+     *             @OA\Property(property="refresh_token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
+     *         )
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Token refreshed successfully",
      *         @OA\JsonContent(
-     *             @OA\Property(property="token", type="string", example="eyJhbGciOiJIUzI1...")
+     *             @OA\Property(property="access_token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."),
+     *             @OA\Property(property="refresh_token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."),
+     *             @OA\Property(property="token_type", type="string", example="bearer"),
+     *             @OA\Property(property="expires_in", type="integer", example=3600, description="New access token lifetime in seconds")
      *         )
      *     ),
      *     @OA\Response(
      *         response=401,
-     *         description="Token not provided or invalid",
+     *         description="Refresh token not provided, invalid, or expired",
      *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="Unauthorized"),
-     *             @OA\Property(property="code", type="integer", example=10001)
+     *             @OA\Property(property="error", type="string", example="Invalid or expired authentication token."),
+     *             @OA\Property(property="code", type="integer", example=10002)
      *         )
      *     )
      * )
      */
     public function refresh(Request $request)
-    {
-        $token = $request->bearerToken();
+    {        
+        $refreshToken = $request->input('refresh_token');
 
-        if (!$token) {
-            return response()->json(['error' => 'Token not provided', 'code' => 10001], 401);
+        if (!$refreshToken) {
+            return $this->errorResponse(ApiErrorCodes::AUTH_TOKEN_NOT_PROVIDED);
         }
 
         try {
-            $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
-            $userId = $decoded->sub;
+            $decodedRefreshToken = JWT::decode($refreshToken, new Key(env('JWT_SECRET'), 'HS256'));
 
-            $payload = [
-                'iss' => "WSGmed",
-                'sub' => $userId,
-                'iat' => time(),
-                'exp' => time() + 60*60
+           
+            if (!isset($decodedRefreshToken->type) || $decodedRefreshToken->type !== 'refresh') {
+                return $this->errorResponse(ApiErrorCodes::AUTH_INVALID_OR_EXPIRED_TOKEN, 'Invalid token type provided for refresh.');
+            }
+
+            $user = User::find($decodedRefreshToken->sub);
+            if (!$user) {
+                
+                return $this->errorResponse(ApiErrorCodes::AUTH_INVALID_OR_EXPIRED_TOKEN, 'User not found for refresh token.');
+            }
+
+            $newAccessToken = $this->generateAccessToken($user);
+            $newRefreshToken = $this->generateRefreshToken($user); 
+
+            $responseData = [
+                'access_token' => $newAccessToken,
+                'refresh_token' => $newRefreshToken,
+                'token_type' => 'bearer',
+                'expires_in' => env('JWT_ACCESS_TOKEN_TTL', 3600)
             ];
-
-            $newJwt = JWT::encode($payload, env('JWT_SECRET'), 'HS256');
-
-            return response()->json(['token' => $newJwt], 200);
+            return $this->successResponse($responseData, 'Token refreshed successfully');
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Invalid token', 'code' => 10001], 401);
+            return $this->errorResponse(ApiErrorCodes::AUTH_INVALID_OR_EXPIRED_TOKEN);
         }
     }
 
@@ -203,7 +259,7 @@ class AuthTokenController extends Controller
      *                     "email": {"The email field is required."}
      *                 }
      *             ),
-     *             @OA\Property(property="code", type="integer", example=10022)
+     *             @OA\Property(property="code", type="integer", example=11000)
      *         )
      *     ),
      *     @OA\Response(
@@ -211,7 +267,7 @@ class AuthTokenController extends Controller
      *         description="Unable to send reset link",
      *         @OA\JsonContent(
      *             @OA\Property(property="error", type="string", example="Unable to send reset link"),
-     *             @OA\Property(property="code", type="integer", example=10100)
+     *             @OA\Property(property="code", type="integer", example=10011)
      *         )
      *     )
      * )
@@ -222,96 +278,18 @@ class AuthTokenController extends Controller
             'email' => ['required', 'email', 'exists:users,email'],
         ]);
         if ($validator->fails()) {
-            return response()->json([
-                'message' => 'The given data was invalid.',
-                'errors' => $validator->errors(),
-                'code' => 10002,
-            ], 422);
+            return $this->errorResponse(ApiErrorCodes::VALIDATION_FAILED, $validator->errors());
         }
 
         $status = Password::sendResetLink(
             ['email' => $request->input('email')]
         );
-
+        
         if ($status === Password::RESET_LINK_SENT) {
-            return response()->json(['message' => 'Password reset link sent'], 200);
+            return $this->successResponse([], 'Password reset link sent');
         } else {
-            return response()->json(['error' => 'Unable to send reset link', 'code' => 10100], 500);
-        }
-    }
-
-    /**
-     * @OA\Post(
-     *     path="/api/password/reset",
-     *     tags={"Auth"},
-     *     summary="Reset password",
-     *     security={},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"email", "password"},
-     *             @OA\Property(property="email", type="string", example="user@example.com"),
-     *             @OA\Property(property="password", type="string", example="newpassword123"),
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Password reset successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Password reset successfully")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Invalid token or email",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="Invalid token or email"),
-     *             @OA\Property(property="code", type="integer", example=10000)
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
-     *             @OA\Property(property="errors", type="object",
-     *                 example={
-     *                     "password": {"The password confirmation does not match."}
-     *                 }
-     *             ),
-     *             @OA\Property(property="code", type="integer", example=10022)
-     *         )
-     *     )
-     * )
-     */
-    public function resetPassword(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'email' => ['required', 'email', 'exists:users,email'],
-            'token' => ['required', 'string'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'The given data was invalid.',
-                'errors' => $validator->errors(),
-                'code' => 10022,
-            ], 422);
-        }
-
-        $status = Password::reset(
-            $request->only('email', 'password'),
-            function ($user, $password) {
-                $user->password = Hash::make($password);
-                $user->save();
-                event(new PasswordReset($user));
-            }
-        );
-
-        if ($status === Password::PASSWORD_RESET) {
-            return response()->json(['message' => 'Password reset successfully'], 200);
-        } else {
-            return response()->json(['error' => 'Invalid login or email', 'code' => 10000], 400);
+            
+            return $this->errorResponse(ApiErrorCodes::AUTH_PASSWORD_RESET_LINK_SEND_FAILED);
         }
     }
 }

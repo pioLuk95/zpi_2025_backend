@@ -3,12 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Common\ApiErrorCodes;
+use App\Http\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use App\Models\PatientMedication;
-use Illuminate\Support\Facades\Auth;
-use App\Services\ErrorFormatter;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rule;
 
 /**
  * @OA\Tag(
@@ -18,6 +19,8 @@ use Illuminate\Validation\ValidationException;
  */
 class PatientMedicationController extends Controller
 {
+    use ApiResponseTrait;
+
     /**
      * @OA\Get(
      *     path="/api/medications",
@@ -26,13 +29,6 @@ class PatientMedicationController extends Controller
      *     operationId="getMedicationsByDate",
      *     tags={"Medications"},
      *     security={{"bearerAuth": {}}},
-     *     @OA\Parameter(
-     *         name="date",
-     *         in="query",
-     *         description="Date of the medications",
-     *         required=false,
-     *         @OA\Schema(type="string", format="date", example="YYYY-MM-DD")
-     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="List of medications",
@@ -42,8 +38,8 @@ class PatientMedicationController extends Controller
      *                 type="object",
      *                 @OA\Property(property="medication_id", type="integer", example=1),
      *                 @OA\Property(property="name", type="string", example="Aspirin"),
-     *                 @OA\Property(property="dosage", type="string", example="100mg"),
-     *                 @OA\Property(property="part_of_day", type="string", example="morning"),
+     *                 @OA\Property(property="dosage", type="string", example="100mg"),     
+     *                 @OA\Property(property="part_of_day", type="string", example="morning", enum={"morning", "midday", "evening", "night"}, description="Indicates the part of the day for medication intake. Possible values: morning, midday, evening, night."),
      *                 @OA\Property(property="is_taken", type="boolean", example=false)
      *             ),
      *             example={
@@ -68,73 +64,43 @@ class PatientMedicationController extends Controller
      *         response=401,
      *         description="Unauthorized access",
      *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="error_code", type="integer", example=10001),
-     *             @OA\Property(property="message", type="string", example="Unauthorized access"),
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="error", type="string", example="Authentication token not provided."),
+     *             @OA\Property(property="code", type="integer", example=10002),
      *             example={
-     *                 "error_code": 10001,
-     *                 "message": "Unauthorized access"
+     *                 "success": false,
+     *                 "error": "Authentication token not provided.",
+     *                 "code": 10002
      *             }
      *         )
      *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="error_code", type="integer", example=10022),
-     *             @OA\Property(property="message", type="string", example="Validation error"),
-     *             @OA\Property(
-     *                 property="errors",
-     *                 type="object",
-     *                 @OA\AdditionalProperties(
-     *                     type="array",
-     *                     @OA\Items(type="string")
-     *                 ),
-     *                 example={
-     *                     "date": {"The date must be a valid date.", "The date does not match the format Y-m-d."}
-     *                 }
-     *             )
-     *         )
-     *     )
      * )
      */
     public function getMedicationsByDate(Request $request)
     {
+        $user = auth()->user();
+        if (!$user || !isset($user->patient_id)) {
+            
+            return $this->errorResponse(ApiErrorCodes::AUTH_FORBIDDEN, 'User is not properly configured as a patient.', 403);
+        }
+        $patientId = $user->patient_id;
+
         try {
-           
-            $user = Auth::user();
-            if (!$user) {
-                return response()->json([
-                    'error_code' => 10001,
-                    'message' => 'Unauthorized access'
-                ], 401);
-            }
+            $today = Carbon::today()->toDateString();
 
-         
-            $validated = $request->validate([
-                'date' => 'nullable|date|date_format:Y-m-d'
-            ]);
-
-            $date = $validated['date'] ?? Carbon::today()->toDateString();
-
-            $medications = PatientMedication::where('user_id', $user->id)
-                ->whereDate('date', $date)
+            
+            $medications = PatientMedication::where('patient_id', $patientId)
+                
+                ->where('start_date', '<=', $today)
+                ->where(function ($query) use ($today) {
+                    $query->whereNull('end_date')
+                          ->orWhere('end_date', '>=', $today);
+                })
                 ->get(['id as medication_id', 'name', 'dosage', 'part_of_day', 'is_taken']);
 
-            return response()->json($medications);
-
-        } catch (ValidationException $e) {
-            return response()->json([
-                'error_code' => 10022,
-                'message' => 'Validation error',
-                'errors' => $e->errors()
-            ], 422);
+            return $this->successResponse($medications, 'Medications retrieved successfully.');
         } catch (\Exception $e) {
-            return response()->json([
-                'error_code' => 10500,
-                'message' => 'Internal server error'
-            ], 500);
+            return $this->errorResponse(ApiErrorCodes::SERVER_ERROR);
         }
     }
 
@@ -150,12 +116,10 @@ class PatientMedicationController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             type="object",
-     *             required={"medication_id"},
-     *             @OA\Property(property="medication_id", type="integer", example=1),
-     *             @OA\Property(property="is_taken", type="boolean", example=true),
+     *             required={"medication_ids"},
+     *             @OA\Property(property="medication_ids", type="array", @OA\Items(type="integer"), example={1, 2, 3}),
      *             example={
-     *                 "medication_id": 1,
-     *                 "is_taken": true
+     *                 "medication_ids": {1, 2, 3}
      *             }
      *         )
      *     ),
@@ -176,217 +140,58 @@ class PatientMedicationController extends Controller
      *         response=401,
      *         description="Unauthorized access",
      *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="error_code", type="integer", example=10001),
-     *             @OA\Property(property="message", type="string", example="Unauthorized access"),
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="error", type="string", example="Authentication token not provided."),
+     *             @OA\Property(property="code", type="integer", example=10002),
      *             example={
-     *                 "error_code": 10001,
-     *                 "message": "Unauthorized access"
+     *                 "success": false,
+     *                 "error": "Authentication token not provided.",
+     *                 "code": 10002
      *             }
      *         )
      *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Medication not found",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="error_code", type="integer", example=1004),
-     *             @OA\Property(property="message", type="string", example="Medication not found"),
-     *             example={
-     *                 "error_code": 1004,
-     *                 "message": "Medication not found"
-     *             }
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="error_code", type="integer", example=10022),
-     *             @OA\Property(property="message", type="string", example="Validation error"),
-     *             @OA\Property(
-     *                 property="errors",
-     *                 type="object",
-     *                 @OA\AdditionalProperties(
-     *                     type="array",
-     *                     @OA\Items(type="string")
-     *                 ),
-     *                 example={
-     *                     "medication_id": {"The medication id field is required.", "The medication id must be an integer."},
-     *                     "is_taken": {"The is taken field must be true or false."}
-     *                 }
-     *             )
-     *         )
-     *     )
      * )
      */
     public function confirmMedication(Request $request)
     {
-        try {
-          
-            $user = Auth::user();
-            if (!$user) {
-                return response()->json([
-                    'error_code' => 10001,
-                    'message' => 'Unauthorized access'
-                ], 401);
-            }
-
-            $validated = $request->validate([
-                'medication_id' => 'required|integer',
-                'is_taken' => 'required|boolean'
-            ]);
-
-        
-            $medication = PatientMedication::where('id', $validated['medication_id'])
-                ->where('user_id', $user->id)
-                ->first();
-
-            if (!$medication) {
-                return response()->json([
-                    'error_code' => 10404,
-                    'message' => 'Medication not found'
-                ], 404);
-            }
-
- 
-            $medication->is_taken = $validated['is_taken'];
-            $medication->save();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Medication status updated'
-            ]);
-
-        } catch (ValidationException $e) {
-            return response()->json([
-                'error_code' => 10022,
-                'message' => 'Validation error',
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error_code' => 10500,
-                'message' => 'Internal server error'
-            ], 500);
+        $user = auth()->user();
+        if (!$user || !isset($user->patient_id)) {
+            return $this->errorResponse(ApiErrorCodes::AUTH_FORBIDDEN, 'User is not properly configured as a patient.', 403);
         }
-    }
+        $patientId = $user->patient_id;
 
-    /**
-     * @OA\Get(
-     *     path="/api/medications/statistics",
-     *     summary="Medication intake statistics",
-     *     description="Returns the total number of medications and how many have been taken for a given date.",
-     *     operationId="getMedicationStats",
-     *     tags={"Medications"},
-     *     security={{"bearerAuth": {}}},
-     *     @OA\Parameter(
-     *         name="date",
-     *         in="query",
-     *         description="Date in format YYYY-MM-DD",
-     *         required=false,
-     *         @OA\Schema(type="string", format="date", example="2025-06-15")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Medication statistics",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="total", type="integer", example=5),
-     *             @OA\Property(property="taken", type="integer", example=3),
-     *             @OA\Property(property="percentage", type="number", format="float", example=60.0),
-     *             example={
-     *                 "total": 5,
-     *                 "taken": 3,
-     *                 "percentage": 60.0
-     *             }
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized access",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="error_code", type="integer", example=10001),
-     *             @OA\Property(property="message", type="string", example="Unauthorized access"),
-     *             example={
-     *                 "error_code": 10001,
-     *                 "message": "Unauthorized access"
-     *             }
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="error_code", type="integer", example=10022),
-     *             @OA\Property(property="message", type="string", example="Validation error"),
-     *             @OA\Property(
-     *                 property="errors",
-     *                 type="object",
-     *                 @OA\AdditionalProperties(
-     *                     type="array",
-     *                     @OA\Items(type="string")
-     *                 ),
-     *                 example={
-     *                     "date": {"The date must be a valid date.", "The date does not match the format Y-m-d."}
-     *                 }
-     *             )
-     *         )
-     *     )
-     * )
-     */
-    public function getMedicationStats(Request $request)
-    {
         try {
-          
-            $user = Auth::user();
-            if (!$user) {
-                return response()->json([
-                    'error_code' => 10001,
-                    'message' => 'Unauthorized access'
-                ], 401);
+            $validated = $request->validate([
+                'medication_ids'   => 'required|array|min:1',
+                'medication_ids.*' => [
+                    'required',
+                    'integer',
+                    'distinct',
+                    Rule::exists('patient_medications', 'id')->where(function ($query) use ($patientId) {
+                        return $query->where('patient_id', $patientId);
+                    }),
+                ],
+            ], [
+                'medication_ids.*.exists' => 'One or more medication IDs are invalid or do not belong to this patient.'
+            ]);
+
+            $medicationIdsToConfirm = $validated['medication_ids'];
+
+            $updatedCount = PatientMedication::where('patient_id', $patientId)
+                ->whereIn('id', $medicationIdsToConfirm)
+                ->where('is_taken', false) 
+                ->update(['is_taken' => true]);
+
+            if ($updatedCount > 0) {
+                return $this->successResponse([], $updatedCount . ' medication(s) confirmed successfully.');
+            } else {
+                return $this->successResponse([], 'No unconfirmed medications found for the provided IDs, or they were already confirmed.');
             }
 
-           
-            $validated = $request->validate([
-                'date' => 'nullable|date|date_format:Y-m-d'
-            ]);
-
-            $date = $validated['date'] ?? Carbon::today()->toDateString();
-
-           
-            $total = PatientMedication::where('user_id', $user->id)
-                ->whereDate('date', $date)
-                ->count();
-
-            $taken = PatientMedication::where('user_id', $user->id)
-                ->whereDate('date', $date)
-                ->where('is_taken', true)
-                ->count();
-
-           
-            $percentage = $total > 0 ? round(($taken / $total) * 100, 1) : 0;
-
-            return response()->json([
-                'total' => $total,
-                'taken' => $taken,
-                'percentage' => $percentage
-            ]);
-
         } catch (ValidationException $e) {
-            return response()->json([
-                'error_code' => 10022,
-                'message' => 'Validation error',
-                'errors' => $e->errors()
-            ], 422);
+            return $this->errorResponse(ApiErrorCodes::VALIDATION_FAILED, $e->errors());
         } catch (\Exception $e) {
-            return response()->json([
-                'error_code' => 10500,
-                'message' => 'Internal server error'
-            ], 500);
+            return $this->errorResponse(ApiErrorCodes::SERVER_ERROR);
         }
     }
 }

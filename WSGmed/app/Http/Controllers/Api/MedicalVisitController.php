@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
+use App\Common\ApiErrorCodes;
+use App\Http\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
@@ -14,7 +16,9 @@ use Firebase\JWT\SignatureInvalidException;
 
 class MedicalVisitController extends Controller
 {
-    private array $availableSpecialists = []; // pozostało bez zmian
+    use ApiResponseTrait;
+
+    private array $availableSpecialists = []; 
     private array $visits = [];
 
     /**
@@ -28,11 +32,9 @@ class MedicalVisitController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"specialist_type", "specialist_id", "date", "time", "reason"},
-     *             @OA\Property(property="specialist_type", type="string", example="doctor"),
-     *             @OA\Property(property="specialist_id", type="integer", example=1),
-     *             @OA\Property(property="date", type="string", format="date", example="2025-06-15"),
-     *             @OA\Property(property="time", type="string", example="14:30"),
+     *             required={"specialist_type", "date_time", "reason"},
+     *             @OA\Property(property="specialist_type", type="string", example="doctor", enum={"doctor", "nurse", "physiotherapist"}, description="Type of the specialist for the visit. Possible values: doctor, nurse, physiotherapist."),
+     *             @OA\Property(property="date_time", type="string", example="2025-06-15-14-30", description="Date and time of the visit in YYYY-MM-DD-HH-mm format."),
      *             @OA\Property(property="reason", type="string", example="Consultation about blood pressure")
      *         )
      *     ),
@@ -40,91 +42,74 @@ class MedicalVisitController extends Controller
      *         response=201,
      *         description="Appointment scheduled successfully",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Medical visit scheduled successfully"),
-     *             @OA\Property(property="data", type="object",
-     *                 @OA\Property(property="visit_id", type="string", example="visit_1622548800_1234"),
-     *                 @OA\Property(property="specialist_name", type="string", example="Dr. Anna Johnson"),
-     *                 @OA\Property(property="specialization", type="string", example="Family Medicine"),
-     *                 @OA\Property(property="date", type="string", example="2025-06-15"),
-     *                 @OA\Property(property="time", type="string", example="10:30"),
-     *                 @OA\Property(property="reason", type="string", example="General checkup")
-     *             )
+     *             @OA\Property(property="message", type="string", example="Medical visit scheduled successfully")
      *         )
      *     ),
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
      *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="Unauthorized"),
-     *             @OA\Property(property="code", type="integer", example=10001)
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="error", type="string", example="Authentication token not provided."),
+     *             @OA\Property(property="code", type="integer", example=10002)
      *         )
      *     ),
      *     @OA\Response(
      *         response=422,
      *         description="Validation error",
      *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="The given data was invalid."),
-     *             @OA\Property(property="errors", type="object"),
-     *             @OA\Property(property="code", type="integer", example=10022)
+     *             @OA\Property(property="code", type="integer", example=11000)
      *         )
      *     ),
      *     @OA\Response(
      *         response=404,
-     *         description="Specialist not found",
+     *         description="Specialist of the requested type not found",
      *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="Specialist not found"),
-     *             @OA\Property(property="code", type="integer", example=10004)
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="error", type="string", example="The requested resource was not found."),
+     *             @OA\Property(property="code", type="integer", example=13001)
      *         )
      *     )
      * )
      */
     public function scheduleVisit(Request $request): JsonResponse
     {
-        // Logika $this->authenticateRequest($request) jest już obsłużona
-        // przez middleware 'auth.jwt' zdefiniowane w routes/api.php.
-        // Można uzyskać dostęp do użytkownika przez Auth::user() lub $request->user().
+       
+       
+       
+        $user = auth()->user();
+        if (!$user) {
+         
+            return $this->errorResponse(ApiErrorCodes::AUTH_INVALID_OR_EXPIRED_TOKEN);
+        }
+
         $validator = Validator::make($request->all(), [
             'specialist_type' => 'required|in:doctor,nurse,physiotherapist',
-            'specialist_id' => 'required|integer',
-            'date' => 'required|date|after_or_equal:today',
-            'time' => 'required|date_format:H:i',
+            'date_time' => 'required|date_format:Y-m-d-H-i|after_or_equal:today',
             'reason' => 'required|string|min:3'
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'message' => 'The given data was invalid.',
-                'errors' => $validator->errors(),
-                'code' => 10022
-            ], 422);
+            return $this->errorResponse(ApiErrorCodes::VALIDATION_FAILED, $validator->errors());
         }
 
         $data = $validator->validated();
-        $specialist = collect($this->availableSpecialists)
-            ->first(fn($s) => $s['id'] === $data['specialist_id'] && $s['type'] === $data['specialist_type']);
+        
+        
+        $specialist = collect($this->availableSpecialists)->firstWhere('type', $data['specialist_type']);
 
         if (!$specialist) {
-            return response()->json([
-                'error' => 'Specialist not found',
-                'code' => 10004
-            ], 404);
+            return $this->errorResponse(ApiErrorCodes::RESOURCE_NOT_FOUND);
         }
 
         $visitId = 'visit_' . time() . '_' . rand(1000, 9999);
+       
         $this->visits[] = array_merge($data, ['visit_id' => $visitId]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Medical visit scheduled successfully',
-            'data' => [
-                'visit_id' => $visitId,
-                'specialist_name' => $specialist['name'],
-                'specialization' => $specialist['specialization'],
-                'date' => $data['date'],
-                'time' => $data['time'],
-                'reason' => $data['reason']
-            ]
-        ], 201);
+        return $this->successResponse([], 'Medical visit scheduled successfully', 201);
     }
 }

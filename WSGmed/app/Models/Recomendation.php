@@ -9,4 +9,9 @@ class Recomendation extends Model
 {
     /** @use HasFactory<\Database\Factories\RecomendationFactory> */
     use HasFactory;
+
+    public function staffPatient()
+    {
+        return $this->belongsTo(StaffPatient::class);
+    }
 }

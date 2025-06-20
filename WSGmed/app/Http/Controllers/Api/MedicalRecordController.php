@@ -71,7 +71,7 @@ class MedicalRecordController extends Controller
      * * @OA\Post(
      * path="/api/medical-records",
      * summary="Create a new medical record",
-     * description="Creates a new medical record for the authenticated patient. The `date_time` field is automatically set by the server, any value sent in the request for this field will be ignored.",
+     * description="Creates a new medical record for the authenticated patient.",
      * tags={"Medical Records"},
      * security={{"bearerAuth":{}}},
      * @OA\RequestBody(

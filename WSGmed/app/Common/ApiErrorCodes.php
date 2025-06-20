@@ -31,7 +31,8 @@ class ApiErrorCodes
     
     public const RESOURCE_NOT_FOUND = 13001; 
 
-   
+   public const VISIT_SLOT_UNAVAILABLE = 14001;
+
     public const CLIENT_TOO_MANY_REQUESTS = 15001; 
 
     
@@ -50,7 +51,7 @@ class ApiErrorCodes
 
         
         self::VALIDATION_FAILED => 'The given data was invalid.',
-
+        self::VISIT_SLOT_UNAVAILABLE => 'The selected specialist is unavailable at this time. Please choose a different time slot.',
         
         self::USER_NOT_FOUND => 'User not found.',
         self::USER_CREATION_FAILED => 'Failed to create user.',

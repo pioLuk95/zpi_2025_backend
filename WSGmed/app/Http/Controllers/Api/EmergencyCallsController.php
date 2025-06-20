@@ -55,13 +55,12 @@ class EmergencyCallsController extends Controller
      * @OA\JsonContent(
      * type="object",
      * @OA\Property(
-     * property="success",
-     * type="boolean",
-     * example=true,
-     * description="Indicates whether the operation was successful"
+     * property="success", type="boolean", example=true
      * ),
+     * @OA\Property(property="message", type="string", example="Emergency call created successfully"),
      * example={
-     * "success": true
+     * "success": true,
+     * "message": "Emergency call created successfully"
      * }
      * )
      * ),
@@ -158,7 +157,7 @@ class EmergencyCallsController extends Controller
 
            
            
-            return response()->json(['success' => true], 201);
+            return $this->successResponse([], 'Emergency call created successfully', 201);
             
         } catch (\Illuminate\Database\QueryException $e) {
            

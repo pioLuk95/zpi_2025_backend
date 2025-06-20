@@ -56,6 +56,7 @@ trait ApiResponseTrait
             ApiErrorCodes::AUTH_FORBIDDEN => 403,
             ApiErrorCodes::VALIDATION_FAILED => 422,
             ApiErrorCodes::RESOURCE_NOT_FOUND => 404,
+            ApiErrorCodes::VISIT_SLOT_UNAVAILABLE => 409,
             ApiErrorCodes::AUTH_PASSWORD_RESET_TOKEN_INVALID => 400,
             ApiErrorCodes::CLIENT_TOO_MANY_REQUESTS => 429,            
             ApiErrorCodes::AUTH_PASSWORD_RESET_LINK_SEND_FAILED, ApiErrorCodes::SERVER_ERROR => 500,

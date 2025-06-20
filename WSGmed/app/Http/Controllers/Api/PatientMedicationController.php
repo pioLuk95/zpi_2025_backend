@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use App\Models\PatientMedication;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 /**
@@ -74,6 +76,28 @@ class PatientMedicationController extends Controller
      *             }
      *         )
      *     ),
+     *     @OA\Response(
+     *         response=503,
+     *         description="Service Unavailable - Database connection issues",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="The service is temporarily unavailable. Please try again later."),
+     *             @OA\Property(property="code", type="integer", example=19002),
+     *             example={"success": false, "message": "The service is temporarily unavailable. Please try again later.", "code": 19002}
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="An unexpected error occurred on the server."),
+     *             @OA\Property(property="code", type="integer", example=19001),
+     *             example={"success": false, "message": "An unexpected error occurred on the server.", "code": 19001}
+     *         )
+     *     )
      * )
      */
     public function getMedicationsByDate(Request $request)
@@ -99,7 +123,11 @@ class PatientMedicationController extends Controller
                 ->get(['id as medication_id', 'name', 'dosage', 'part_of_day', 'is_taken']);
 
             return $this->successResponse($medications, 'Medications retrieved successfully.');
+        } catch (QueryException $e) {
+            Log::error('Service unavailable - DB connection issue in PatientMedicationController@getMedicationsByDate: ' . $e->getMessage());
+            return $this->errorResponse(ApiErrorCodes::SERVICE_UNAVAILABLE);
         } catch (\Exception $e) {
+            Log::error('Generic exception in PatientMedicationController@getMedicationsByDate: ' . $e->getMessage());
             return $this->errorResponse(ApiErrorCodes::SERVER_ERROR);
         }
     }
@@ -150,6 +178,28 @@ class PatientMedicationController extends Controller
      *             }
      *         )
      *     ),
+     *     @OA\Response(
+     *         response=503,
+     *         description="Service Unavailable - Database connection issues",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="The service is temporarily unavailable. Please try again later."),
+     *             @OA\Property(property="code", type="integer", example=19002),
+     *             example={"success": false, "message": "The service is temporarily unavailable. Please try again later.", "code": 19002}
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="An unexpected error occurred on the server."),
+     *             @OA\Property(property="code", type="integer", example=19001),
+     *             example={"success": false, "message": "An unexpected error occurred on the server.", "code": 19001}
+     *         )
+     *     )
      * )
      */
     public function confirmMedication(Request $request)
@@ -190,7 +240,11 @@ class PatientMedicationController extends Controller
 
         } catch (ValidationException $e) {
             return $this->errorResponse(ApiErrorCodes::VALIDATION_FAILED, $e->errors());
+        } catch (QueryException $e) {
+            Log::error('Service unavailable - DB connection issue in PatientMedicationController@confirmMedication: ' . $e->getMessage());
+            return $this->errorResponse(ApiErrorCodes::SERVICE_UNAVAILABLE);
         } catch (\Exception $e) {
+            Log::error('Generic exception in PatientMedicationController@confirmMedication: ' . $e->getMessage());
             return $this->errorResponse(ApiErrorCodes::SERVER_ERROR);
         }
     }

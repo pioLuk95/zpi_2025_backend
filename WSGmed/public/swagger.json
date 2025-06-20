@@ -343,15 +343,19 @@
                                 "schema": {
                                     "properties": {
                                         "success": {
-                                            "description": "Indicates whether the operation was successful",
                                             "type": "boolean",
                                             "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Emergency call created successfully"
                                         }
                                     },
                                     "type": "object"
                                 },
                                 "example": {
-                                    "success": true
+                                    "success": true,
+                                    "message": "Emergency call created successfully"
                                 }
                             }
                         }
@@ -486,7 +490,7 @@
                     "Medical Records"
                 ],
                 "summary": "Create a new medical record",
-                "description": "Creates a new medical record for the authenticated patient. The `date_time` field is automatically set by the server, any value sent in the request for this field will be ignored.",
+                "description": "Creates a new medical record for the authenticated patient.",
                 "operationId": "562a9bb1a3476fa3cd18ea0d9f82b4e4",
                 "requestBody": {
                     "required": true,
@@ -819,7 +823,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Authentication token not provided."
+                                            "example": "Unauthorized"
                                         },
                                         "code": {
                                             "type": "integer",
@@ -875,6 +879,93 @@
                                         }
                                     },
                                     "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict - Visit slot unavailable",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The selected specialist is unavailable at this time. Please choose a different time slot."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 14001
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "The selected specialist is unavailable at this time. Please choose a different time slot.",
+                                    "code": 14001
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable - Database connection issues",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The service is temporarily unavailable. Please try again later."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19002
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "The service is temporarily unavailable. Please try again later.",
+                                    "code": 19002
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred on the server."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19001
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "An unexpected error occurred on the server.",
+                                    "code": 19001
                                 }
                             }
                         }
@@ -982,6 +1073,64 @@
                                 }
                             }
                         }
+                    },
+                    "503": {
+                        "description": "Service Unavailable - Database connection issues",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The service is temporarily unavailable. Please try again later."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19002
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "The service is temporarily unavailable. Please try again later.",
+                                    "code": 19002
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred on the server."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19001
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "An unexpected error occurred on the server.",
+                                    "code": 19001
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -1085,6 +1234,64 @@
                                 }
                             }
                         }
+                    },
+                    "503": {
+                        "description": "Service Unavailable - Database connection issues",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The service is temporarily unavailable. Please try again later."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19002
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "The service is temporarily unavailable. Please try again later.",
+                                    "code": 19002
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred on the server."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19001
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "An unexpected error occurred on the server.",
+                                    "code": 19001
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -1161,6 +1368,40 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "Unauthorized",
+                                    "code": 10002
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable - Database connection issues",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The service is temporarily unavailable. Please try again later."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19002
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "The service is temporarily unavailable. Please try again later.",
+                                    "code": 19002
                                 }
                             }
                         }
@@ -1185,6 +1426,11 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "An unexpected error occurred on the server.",
+                                    "code": 19001
                                 }
                             }
                         }

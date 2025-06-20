@@ -10,7 +10,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use Firebase\JWT\JWT;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 use Firebase\JWT\Key;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\SignatureInvalidException;
 
@@ -52,7 +55,7 @@ class MedicalVisitController extends Controller
      *         description="Unauthorized",
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Authentication token not provided."),
+     *             @OA\Property(property="message", type="string", example="Unauthorized"),
      *             @OA\Property(property="code", type="integer", example=10002)
      *         )
      *     ),
@@ -73,43 +76,91 @@ class MedicalVisitController extends Controller
      *             @OA\Property(property="message", type="string", example="The requested resource was not found."),
      *             @OA\Property(property="code", type="integer", example=13001)
      *         )
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="Conflict - Visit slot unavailable",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="The selected specialist is unavailable at this time. Please choose a different time slot."),
+     *             @OA\Property(property="code", type="integer", example=14001),
+     *             example={"success": false, "message": "The selected specialist is unavailable at this time. Please choose a different time slot.", "code": 14001}
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=503,
+     *         description="Service Unavailable - Database connection issues",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="The service is temporarily unavailable. Please try again later."),
+     *             @OA\Property(property="code", type="integer", example=19002),
+     *             example={"success": false, "message": "The service is temporarily unavailable. Please try again later.", "code": 19002}
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="An unexpected error occurred on the server."),
+     *             @OA\Property(property="code", type="integer", example=19001),
+     *             example={"success": false, "message": "An unexpected error occurred on the server.", "code": 19001}
+     *         )
      *     )
      * )
      */
     public function scheduleVisit(Request $request): JsonResponse
     {
        
-       
-       
-        $user = auth()->user();
-        if (!$user) {
-         
-            return $this->errorResponse(ApiErrorCodes::AUTH_INVALID_OR_EXPIRED_TOKEN);
-        }
+        try {
+            $user = auth()->user();
+            if (!$user || !isset($user->patient_id)) {
+                return $this->errorResponse(ApiErrorCodes::AUTH_INVALID_OR_EXPIRED_TOKEN);
+            }
 
-        $validator = Validator::make($request->all(), [
-            'specialist_type' => 'required|in:doctor,nurse,physiotherapist',
-            'date_time' => 'required|date_format:Y-m-d-H-i|after_or_equal:today',
-            'reason' => 'required|string|min:3'
-        ]);
+            $validator = Validator::make($request->all(), [
+                'specialist_type' => 'required|in:doctor,nurse,physiotherapist',
+                'date_time' => 'required|date_format:Y-m-d-H-i|after_or_equal:today',
+                'reason' => 'required|string|min:3'
+            ]);
 
-        if ($validator->fails()) {
-            return $this->errorResponse(ApiErrorCodes::VALIDATION_FAILED, $validator->errors());
-        }
+            if ($validator->fails()) {
+                return $this->errorResponse(ApiErrorCodes::VALIDATION_FAILED, $validator->errors());
+            }
 
-        $data = $validator->validated();
-        
-        
-        $specialist = collect($this->availableSpecialists)->firstWhere('type', $data['specialist_type']);
+            $data = $validator->validated();
 
-        if (!$specialist) {
+            
+            foreach ($this->visits as $existingVisit) {
+                if (isset($existingVisit['specialist_type']) && $existingVisit['specialist_type'] === $data['specialist_type'] &&
+                    isset($existingVisit['date_time']) && $existingVisit['date_time'] === $data['date_time']) {
+                    return $this->errorResponse(ApiErrorCodes::VISIT_SLOT_UNAVAILABLE);
+                }
+            }
+            
+
+            $specialist = collect($this->availableSpecialists)->firstWhere('type', $data['specialist_type']);
+            
+            if (!$specialist && empty($this->availableSpecialists)) { 
+                
+            }
+
+            $visitId = 'visit_' . time() . '_' . rand(1000, 9999);
+            $this->visits[] = array_merge($data, ['visit_id' => $visitId, 'patient_id' => $user->patient_id]);
+
+            return $this->successResponse([], 'Medical visit scheduled successfully', 201);
+        } catch (QueryException $e) {
+            Log::error('Service unavailable - DB connection issue in MedicalVisitController@scheduleVisit: ' . $e->getMessage());
+            return $this->errorResponse(ApiErrorCodes::SERVICE_UNAVAILABLE);
+        } catch (ModelNotFoundException $e) {
+            Log::warning('Resource not found in MedicalVisitController@scheduleVisit: ' . $e->getMessage());
             return $this->errorResponse(ApiErrorCodes::RESOURCE_NOT_FOUND);
+        } catch (\Exception $e) {
+            Log::error('Generic exception in MedicalVisitController@scheduleVisit: ' . $e->getMessage());
+            return $this->errorResponse(ApiErrorCodes::SERVER_ERROR);
         }
-
-        $visitId = 'visit_' . time() . '_' . rand(1000, 9999);
-       
-        $this->visits[] = array_merge($data, ['visit_id' => $visitId]);
-
-        return $this->successResponse([], 'Medical visit scheduled successfully', 201);
     }
 }

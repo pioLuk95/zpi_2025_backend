@@ -13,6 +13,8 @@
 </head>
 <body>
 <div class="d-flex">
+
+  @if (Auth::check())
     <!-- Sidebar -->
     <nav class="sidebar">
         <div class="text-center py-4">
@@ -37,6 +39,7 @@
             <input type="submit" value="Wyloguj" class="btn btn-danger w-100 mt-3">
         </form>
     </nav>
+  @endif
 
     <!-- Main content -->
     <div class="flex-grow-1">

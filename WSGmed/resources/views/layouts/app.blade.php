@@ -7,59 +7,38 @@
     <title>Dashboard Kliniki</title>
     <!-- Bootstrap CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Twój custom CSS -->
     <link href="{{ asset('css/hospital.css') }}" rel="stylesheet">
     <link href="{{ asset('css/auth.css') }}" rel="stylesheet">
+    <!-- plugin css -->
+    <link rel="stylesheet" href="{{ asset('assets/plugins/@mdi/font/css/materialdesignicons.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/plugins/perfect-scrollbar/perfect-scrollbar.css') }}">
+
+    @stack('plugin-styles')
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+
+    @stack('style')
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+
 </head>
 <body>
-<div class="d-flex">
-    <!-- Sidebar -->
-    <nav class="sidebar">
-        <div class="text-center py-4">
-            <a href="/home" style="padding: 0px">
-                <img src="{{ asset('img/logo.png') }}" alt="Logo" width="100">
-            </a>
-        </div>
-        <a href="/home">Dashboard</a>
-        <a href="/patients">Pacjenci</a>
-        <a href="/medications">Leki</a>
-        <a href="/locations">Sale</a>
-        @if(auth()->check() && auth()->user()->role === 'admin')
-            <a href="{{route("staff.index")}}">Personel</a>
-        @endif
-        <a href="{{route("emergency_calls.index")}}">Emergency Calle</a>
-        @if(auth()->check() && auth()->user()->role === 'admin')
-            <a href="{{route("roles.index")}}">Role użytkowników</a>
-        @endif
-        <a href="{{route("profile.show")}}">Profil</a>
-        <form id="logout-form" action="{{ url('logout') }}" method="POST">
-            {{ csrf_field() }}
-            <input type="submit" value="Wyloguj" class="btn btn-danger w-100 mt-3">
-        </form>
-    </nav>
+<div class="">
 
-    <!-- Main content -->
-    <div class="flex-grow-1">
-        <!-- Top navbar -->
-        <nav class="navbar">
-            <div class="container-fluid">
-                {{--<button class="btn btn-outline-secondary" id="sidebarToggle">☰</button>--}}
-                <span class="navbar-brand mb-0 h1 ms-auto">WSGMed</span>
-            </div>
-        </nav>
-
-        <!-- Page content -->
-        <div class="content">
-            @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="container-scroller" id="app">
+        @include('layouts.header')
+        <div class="container-fluid page-body-wrapper">
+            @include('layouts.sidebar')
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    @yield('content')
                 </div>
-            @endif
-            
-            @yield('content')
+                @include('layouts.footer')
+            </div>
         </div>
     </div>
+
 </div>
 
 <!-- Bootstrap JS & Popper CDN -->

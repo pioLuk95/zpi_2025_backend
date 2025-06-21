@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Medication;
 use Illuminate\Http\Request;
+use App\Models\EmergencyCalls;
+use App\Models\Staff;
 
 class HomeController extends Controller
 {
@@ -26,7 +28,9 @@ class HomeController extends Controller
     {
 
         $medications = Medication::latest()->take(5)->get();
+        $calls = EmergencyCalls::latest()->take(8)->get();
+        $staff = Staff::latest()->take(6)->get();
 
-        return view('home', compact('medications'));
+        return view('home', compact('medications', 'calls', 'staff'));
     }
 }

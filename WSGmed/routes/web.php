@@ -3,8 +3,7 @@
 use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PatientMedicationController;
-
+use App\Http\Middleware\RequireTotpVerification;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -36,6 +35,8 @@ Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.up
 Route::post('/profile/disable-2fa', [ProfileController::class, 'disable2FA'])->name('profile.disable-2fa');
 Route::get('/2fa/setup', [TwoFactorController::class, 'showSetupForm'])->name('2fa.setup');
 Route::post('/2fa/completeSetup', [TwoFactorController::class, 'completeSetup'])->name('2fa.completeSetup');
+Route::get('/2fa/prompt', [TwoFactorController::class, 'showPrompt'])->name('2fa.prompt');
+Route::post('/2fa/verifyOtp', [TwoFactorController::class, 'verifyOtp'])->name('2fa.verifyOtp');
 
 // Patient Medications
 Route::get('/patients/{patient}/medications/create', [App\Http\Controllers\PatientMedicationController::class, 'create'])->name('patient-medications.create');
@@ -56,8 +57,3 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/roles', [App\Http\Controllers\UserRoleController::class, 'index'])->name('roles.index');
     Route::patch('/roles/{user}', [App\Http\Controllers\UserRoleController::class, 'update'])->name('roles.update');
 });
-
-Route::get('/patients_medications', [PatientMedicationController::class, 'landing'])->name('patients_medications.landing');
-Route::post('/patients_medications/{patient}', [App\Http\Controllers\PatientMedicationController::class, 'store'])->name('patients_medications.store');
-Route::put('/patients_medications/{patient}/{patientMedication}', [App\Http\Controllers\PatientMedicationController::class, 'update'])->name('patients_medications.update');
-Route::delete('/patients_medications/{patient}/{patientMedication}', [App\Http\Controllers\PatientMedicationController::class, 'destroy'])->name('patients_medications.destroy');

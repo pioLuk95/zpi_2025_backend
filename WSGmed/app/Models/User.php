@@ -49,6 +49,6 @@ class User extends Authenticatable
 
     public function is2FAEnabled(): bool
     {
-        return !empty($this->google2fa_secret);
+        return !empty($this->two_factor_confirmed_at);
     }
 }

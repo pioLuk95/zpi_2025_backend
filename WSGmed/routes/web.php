@@ -3,6 +3,7 @@
 use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\RequireTotpVerification;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -30,6 +31,8 @@ Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.up
 Route::post('/profile/disable-2fa', [ProfileController::class, 'disable2FA'])->name('profile.disable-2fa');
 Route::get('/2fa/setup', [TwoFactorController::class, 'showSetupForm'])->name('2fa.setup');
 Route::post('/2fa/completeSetup', [TwoFactorController::class, 'completeSetup'])->name('2fa.completeSetup');
+Route::get('/2fa/prompt', [TwoFactorController::class, 'showPrompt'])->name('2fa.prompt');
+Route::post('/2fa/verify', [TwoFactorController::class, 'verify'])->name('2fa.verify');
 
 // Others
 Route::get('/patients/{patient}/medical_records/create', [App\Http\Controllers\MedicalRecordController::class, 'create'])->name('medical-records.create');

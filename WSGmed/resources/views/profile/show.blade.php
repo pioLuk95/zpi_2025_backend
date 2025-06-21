@@ -15,7 +15,7 @@
             <p class="card-text"><strong>2FA Status: {{ ($user->is2FAEnabled()) ? "Enabled" : "Disabled" }}</strong></p>
             <br><br><br>
 
-            @if($user->google2fa_secret)
+            @if($user->is2FAEnabled())
                 <form id="logout-form" action="{{ route("profile.disable-2fa") }}" method="POST">
                     {{ csrf_field() }}
                     <input type="submit" value="Disable 2FA" class="btn btn-danger w-100 mt-3">

@@ -13,26 +13,27 @@
 </head>
 <body>
 <div class="d-flex">
-    <!-- Sidebar -->
-    <nav class="sidebar">
-        <div class="text-center py-4">
-            <a href="/home" style="padding: 0px">
-                <img src="{{ asset('img/logo.png') }}" alt="Logo" width="100">
-            </a>
-        </div>
-        <a href="/home">Dashboard</a>
-        <a href="/patients">Pacjenci</a>
-        <a href="/medications">Leki</a>
-        <a href="/locations">Sale</a>
-        <a href="{{route("staff.index")}}">Personel</a>
-        <a href="{{route("emergency_calls.index")}}">Emergency Calle</a>
-        <a href="{{route("profile.show")}}">Profil</a>
-        <form id="logout-form" action="{{ url('logout') }}" method="POST">
-            {{ csrf_field() }}
-            <input type="submit" value="Wyloguj" class="btn btn-danger w-100 mt-3">
-        </form>
-    </nav>
-
+    @if (Auth::check())
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="text-center py-4">
+                <a href="/home" style="padding: 0px">
+                    <img src="{{ asset('img/logo.png') }}" alt="Logo" width="100">
+                </a>
+            </div>
+            <a href="/home">Dashboard</a>
+            <a href="/patients">Pacjenci</a>
+            <a href="/medications">Leki</a>
+            <a href="/locations">Sale</a>
+            <a href="{{route("staff.index")}}">Personel</a>
+            <a href="{{route("emergency_calls.index")}}">Emergency Calle</a>
+            <a href="{{route("profile.show")}}">Profil</a>
+            <form id="logout-form" action="{{ url('logout') }}" method="POST">
+                {{ csrf_field() }}
+                <input type="submit" value="Wyloguj" class="btn btn-danger w-100 mt-3">
+            </form>
+        </nav>
+    @endif
     <!-- Main content -->
     <div class="flex-grow-1">
         <!-- Top navbar -->

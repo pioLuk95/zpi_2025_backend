@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\RequireTotpVerification;
 use App\Models\Patient;
 use Illuminate\Http\Request;
 use App\Models\Location;
@@ -10,6 +11,11 @@ use function Symfony\Component\String\b;
 
 class PatientController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(RequireTotpVerification::class)->only('index');
+    }
+    
     /**
      * Display a listing of the resource.
      */

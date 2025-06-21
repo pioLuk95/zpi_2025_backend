@@ -8,6 +8,7 @@ use OTPHP\TOTP;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use Illuminate\Support\Facades\Session;
 use BaconQrCode\Writer;
 
 class TwoFactorController extends Controller
@@ -50,7 +51,6 @@ class TwoFactorController extends Controller
         ]);
 
         $user = auth()->user();
-
         $totp = TOTP::create($user->google2fa_secret);
 
         if ($totp->verify($request->input('otp'))) {
@@ -62,6 +62,28 @@ class TwoFactorController extends Controller
         }
 
         return back()->withErrors(['otp' => 'Nieprawidłowy kod uwierzytelniający']);
+    }
+
+    public function verify(Request $request)
+    {
+        $request->validate([
+            'otp' => 'required|digits:6',
+        ]);
+
+        $user = auth()->user();
+        $totp = TOTP::create($user->google2fa_secret);
+
+        if ($totp->verify($request->input('otp'))) {
+            Session::put('2fa_passed', true);
+            return redirect()->intended();
+        }
+
+        return redirect()->back()->withErrors(['otp' => 'Invalid authentication code']);
+    }
+
+    public function showPrompt()
+    {
+        return view('2fa.2fa-prompt');
     }
 }
 

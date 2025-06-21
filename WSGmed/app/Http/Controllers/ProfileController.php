@@ -56,9 +56,4 @@ class ProfileController extends Controller
 
         return Redirect::route("profile.show");
     }
-
-    public function logout(Request $request) {
-        Auth::logout();
-        return view('auth.login');
-    }
 }

@@ -24,8 +24,13 @@
         <a href="/patients">Pacjenci</a>
         <a href="/medications">Leki</a>
         <a href="/locations">Sale</a>
-        <a href="{{route("staff.index")}}">Personel</a>
+        @if(auth()->check() && auth()->user()->role === 'admin')
+            <a href="{{route("staff.index")}}">Personel</a>
+        @endif
         <a href="{{route("emergency_calls.index")}}">Emergency Calle</a>
+        @if(auth()->check() && auth()->user()->role === 'admin')
+            <a href="{{route("roles.index")}}">Role użytkowników</a>
+        @endif
         <a href="{{route("profile.show")}}">Profil</a>
         <form id="logout-form" action="{{ url('logout') }}" method="POST">
             {{ csrf_field() }}
@@ -45,6 +50,13 @@
 
         <!-- Page content -->
         <div class="content">
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+            
             @yield('content')
         </div>
     </div>

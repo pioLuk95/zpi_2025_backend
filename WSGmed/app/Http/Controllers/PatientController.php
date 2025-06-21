@@ -53,7 +53,10 @@ class PatientController extends Controller
     {
         $staff = $patient->staff;
         $records = $patient->records()->get();
-        return view('patients.show', compact('patient', 'records', 'staff'));
+        $medications = $patient->medications;
+        $patientMedications = $patient->patientMedications;
+        $allMedications = \App\Models\Medication::all();
+        return view('patients.show', compact('patient', 'records', 'staff', 'medications', 'patientMedications', 'allMedications'));
     }
 
     /**

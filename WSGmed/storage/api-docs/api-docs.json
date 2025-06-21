@@ -7,7 +7,7 @@
     },
     "servers": [
         {
-            "url": "/api/v1",
+            "url": "/api/",
             "description": "Medical Visit API Server"
         },
         {
@@ -158,28 +158,8 @@
                     "Auth"
                 ],
                 "summary": "Refresh the JWT token",
-                "description": "Provides a new access token and a new refresh token in exchange for a valid refresh token.",
+                "description": "Provides a new access token and a new refresh token. The current (soon to be expired) refresh token must be sent in the Authorization header.",
                 "operationId": "47d6ecf1aa5d59780a66a97113e085e1",
-                "requestBody": {
-                    "description": "Requires a valid refresh_token.",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "refresh_token"
-                                ],
-                                "properties": {
-                                    "refresh_token": {
-                                        "type": "string",
-                                        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
                 "responses": {
                     "200": {
                         "description": "Token refreshed successfully",
@@ -209,29 +189,13 @@
                                 }
                             }
                         }
-                    },
-                    "401": {
-                        "description": "Refresh token not provided, invalid, or expired",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "messagee": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        },
-                                        "code": {
-                                            "type": "integer",
-                                            "example": 10002
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
                     }
                 },
-                "security": []
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/password/email": {
@@ -276,30 +240,6 @@
                                 }
                             }
                         }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "The given data was invalid."
-                                        },
-                                        "code": {
-                                            "type": "integer",
-                                            "example": 11000
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
                     }
                 },
                 "security": []
@@ -311,30 +251,8 @@
                     "EmergencyCalls"
                 ],
                 "summary": "Create a new emergency call",
-                "description": "Creates a new emergency call for the authenticated user. The patient_id is automatically assigned based on the logged-in user.",
+                "description": "Creates a new emergency call for the authenticated user. The patient_id is automatically assigned based on the logged-in user. This endpoint does not require a request body.",
                 "operationId": "createEmergencyCall",
-                "requestBody": {
-                    "description": "Request body for creating emergency call",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "date_time"
-                                ],
-                                "properties": {
-                                    "date_time": {
-                                        "description": "Emergency call date and time in YYYY-MM-DD-HH-mm-ss format. This field is IGNORED - the server will automatically use the current timestamp.",
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2025-06-15-10-30-45"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
                 "responses": {
                     "201": {
                         "description": "Emergency call created successfully",
@@ -498,7 +416,6 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "date_time",
                                     "blood_pressure",
                                     "temperature",
                                     "pulse",
@@ -508,12 +425,6 @@
                                     "oxygen_saturation"
                                 ],
                                 "properties": {
-                                    "date_time": {
-                                        "description": "Date and time of the record in YYYY-MM-DD-HH-mm-ss format. This field is IGNORED - the server will automatically use the current timestamp.",
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2025-07-15-10-30-00"
-                                    },
                                     "blood_pressure": {
                                         "type": "integer",
                                         "example": 120
@@ -538,12 +449,12 @@
                                         "description": "Patient's mood rating.",
                                         "type": "string",
                                         "enum": [
-                                            "Very bad",
-                                            "Bad",
-                                            "Good",
-                                            "Very good"
+                                            "very_bad",
+                                            "bad",
+                                            "good",
+                                            "very_good"
                                         ],
-                                        "example": "Good"
+                                        "example": "good"
                                     },
                                     "pain_level": {
                                         "description": "Pain level on a scale of 1 (no pain) to 10 (worst pain).",
@@ -1440,6 +1351,52 @@
         }
     },
     "components": {
+        "responses": {
+            "401": {
+                "description": "Refresh token not provided, invalid, or expired",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Unauthorized"
+                                },
+                                "code": {
+                                    "type": "integer",
+                                    "example": 10002
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "422": {
+                "description": "Validation error",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "properties": {
+                                "success": {
+                                    "type": "boolean",
+                                    "example": false
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "The given data was invalid."
+                                },
+                                "code": {
+                                    "type": "integer",
+                                    "example": 11000
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
         "securitySchemes": {
             "bearerAuth": {
                 "type": "http",

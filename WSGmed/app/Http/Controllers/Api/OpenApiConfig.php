@@ -1,5 +1,4 @@
 <?php
-// filepath: c:\Users\Administrator\Documents\GitHub\zpi_2025_backend\WSGmed\app\Http\Controllers\Api\OpenApiConfig.php
 
 
 namespace App\Http\Controllers\Api;
@@ -12,7 +11,7 @@ namespace App\Http\Controllers\Api;
  * )
  * 
  * @OA\Server(
- *     url="/api/v1",
+ *     url="/api/",
  *     description="Medical Visit API Server"
  * )
  */

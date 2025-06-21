@@ -103,8 +103,7 @@ class PatientMedicationController extends Controller
     public function getMedicationsByDate(Request $request)
     {
         $user = auth()->user();
-        if (!$user || !isset($user->patient_id)) {
-            
+        if (!$user || !isset($user->patient_id)) { 
             return $this->errorResponse(ApiErrorCodes::AUTH_FORBIDDEN, 'User is not properly configured as a patient.', 403);
         }
         $patientId = $user->patient_id;
@@ -205,7 +204,7 @@ class PatientMedicationController extends Controller
     public function confirmMedication(Request $request)
     {
         $user = auth()->user();
-        if (!$user || !isset($user->patient_id)) {
+        if (!$user || !isset($user->patient_id)) { 
             return $this->errorResponse(ApiErrorCodes::AUTH_FORBIDDEN, 'User is not properly configured as a patient.', 403);
         }
         $patientId = $user->patient_id;

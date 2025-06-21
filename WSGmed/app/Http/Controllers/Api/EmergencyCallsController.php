@@ -7,6 +7,7 @@ use App\Common\ApiErrorCodes;
 use App\Http\Traits\ApiResponseTrait;
 use App\Models\EmergencyCalls;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
 /**
@@ -24,7 +25,7 @@ class EmergencyCallsController extends Controller
      *
      * Creates a new emergency call for the authenticated user. 
      * The patient_id is automatically assigned based on the logged-in user.
-     * The date_time field is automatically set to the current server timestamp.
+     * The creation timestamp is automatically set by the server.
      *
      * @group EmergencyCalls
      * * @OA\Post(
@@ -32,23 +33,8 @@ class EmergencyCallsController extends Controller
      * operationId="createEmergencyCall",
      * tags={"EmergencyCalls"},
      * summary="Create a new emergency call",
-     * description="Creates a new emergency call for the authenticated user. The patient_id is automatically assigned based on the logged-in user.",
+     * description="Creates a new emergency call for the authenticated user. The patient_id is automatically assigned based on the logged-in user. This endpoint does not require a request body.",
      * security={{"bearerAuth": {}}},
-     * @OA\RequestBody(
-     * required=true,
-     * description="Request body for creating emergency call",
-     * @OA\JsonContent(
-     * type="object",
-     * required={"date_time"},
-     * @OA\Property(
-     * property="date_time",
-     * type="string",
-     * format="date-time",
-     * example="2025-06-15-10-30-45",
-     * description="Emergency call date and time in YYYY-MM-DD-HH-mm-ss format. This field is IGNORED - the server will automatically use the current timestamp."
-     * )
-     * )
-     * ),
      * @OA\Response(
      * response=201,
      * description="Emergency call created successfully",
@@ -128,42 +114,21 @@ class EmergencyCallsController extends Controller
      */
     public function store(Request $request)
     {
-       
-       
-        $user = auth()->user();
-        
-        
-        
-        if (!$user || !isset($user->patient_id)) {
-            
-            return $this->errorResponse(
-                ApiErrorCodes::AUTH_INVALID_OR_EXPIRED_TOKEN,
-                'Invalid authentication token.',
-                401
-            );
-        }
-
+        $user = auth()->user(); 
         $patientId = $user->patient_id;
 
         try {
-            
-            
-        
-            
-            $emergencyCall = EmergencyCalls::create([
+            EmergencyCalls::create([
                 'patient_id' => $patientId,
                 'date' => Carbon::now(),
+                'status' => 0, 
             ]);
-
-           
            
             return $this->successResponse([], 'Emergency call created successfully', 201);
             
         } catch (\Illuminate\Database\QueryException $e) {
-           
             $sqlState = $e->errorInfo[0] ?? null;
             
-           
             if (in_array($sqlState, ['08001', '08003', '08004', '08006', '08007', '08S01'])) {
                 \Illuminate\Support\Facades\Log::error('Service unavailable - DB connection issue: ' . $e->getMessage());
                 return $this->errorResponse(ApiErrorCodes::SERVICE_UNAVAILABLE);

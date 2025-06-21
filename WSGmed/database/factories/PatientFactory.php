@@ -1,6 +1,7 @@
 <?php
 
 namespace Database\Factories;
+use App\Models\Location; // Import modelu Location
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -22,7 +23,8 @@ class PatientFactory extends Factory
             'name' => $this->faker->firstName,
             's_name' => $this->faker->lastName,
             'date_of_birth' => $this->faker->date('Y-m-d', '2005-01-01'),
-            'location_id' => \App\Models\Location::inRandomOrder()->first()->id,
+            // Użyj istniejącej lokalizacji lub stwórz nową, jeśli żadna nie istnieje
+            'location_id' => Location::inRandomOrder()->first()->id ?? Location::factory()->create()->id,
         ];
     }
 }

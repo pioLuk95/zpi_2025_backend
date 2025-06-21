@@ -9,13 +9,13 @@ use App\Http\Controllers\Api\AuthTokenController;
 use App\Http\Controllers\Api\MedicalVisitController;
 
 Route::post('login', [AuthTokenController::class, 'login']);
-Route::post('refresh', [AuthTokenController::class, 'refresh']);
+Route::post('refresh', [AuthTokenController::class, 'refresh'])->middleware('jwt.refresh');
 Route::post('password/email', [AuthTokenController::class, 'sendResetLinkEmail']);
 
-Route::group(['middleware' => 'auth.jwt'], function () {
+Route::group(['middleware' => 'auth:api'], function () { 
     Route::post('logout', [AuthTokenController::class, 'logout']);
     Route::post('emergency-calls', [EmergencyCallsController::class, 'store'])->middleware('throttle:5,1');
-    Route::apiResource('medical-records', MedicalRecordController::class)->only(['store'])->middleware('throttle:5,1');
+    Route::apiResource('medical-records', MedicalRecordController::class)->only(['store'])->middleware('throttle:5,1'); 
     Route::get('medications', [PatientMedicationController::class, 'getMedicationsByDate']); 
     Route::post('medications/confirm', [PatientMedicationController::class, 'confirmMedication']);
     Route::post('medical-visits/schedule', [MedicalVisitController::class, 'scheduleVisit']);

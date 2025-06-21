@@ -43,22 +43,18 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        // Obsługa błędu 404 (Not Found)
         if ($exception instanceof ModelNotFoundException) {
             return response()->json(['error' => 'Resource not found'], 404);
         }
 
-        // Obsługa błędu 400 (Bad Request) dla walidacji
         if ($exception instanceof ValidationException) {
             return response()->json(['error' => $exception->errors()], 400);
         }
 
-        // Obsługa błędów HTTP (np. brak uprawnień, błędne żądanie)
         if ($exception instanceof HttpException) {
             return response()->json(['error' => $exception->getMessage()], $exception->getStatusCode());
         }
 
-        // Obsługa błędu 500 (Internal Server Error)
         return response()->json(['error' => 'Internal Server Error'], 500);
     }
 }

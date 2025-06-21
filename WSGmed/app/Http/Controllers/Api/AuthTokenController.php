@@ -10,9 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
-use Illuminate\Auth\Events\PasswordReset;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Common\ApiErrorCodes;
 use App\Http\Traits\ApiResponseTrait;
 
@@ -33,32 +31,7 @@ use App\Http\Traits\ApiResponseTrait;
  */
 class AuthTokenController extends Controller
 {
-    use ApiResponseTrait;
-
-    private function generateAccessToken(User $user): string
-    {
-        $payload = [
-            'iss' => "WSGmed", 
-            'sub' => $user->id, 
-            'type' => 'access',
-            'iat' => time(), 
-            'exp' => time() + env('JWT_ACCESS_TOKEN_TTL', 3600) 
-        ];
-        return JWT::encode($payload, env('JWT_SECRET'), 'HS256');
-    }
-
-    private function generateRefreshToken(User $user): string
-    {
-        $payload = [
-            'iss' => "WSGmed", 
-            'sub' => $user->id, 
-            'type' => 'refresh', 
-            'jti' => Str::random(32), 
-            'iat' => time(), 
-            'exp' => time() + env('JWT_REFRESH_TOKEN_TTL', 604800) 
-        ];
-        return JWT::encode($payload, env('JWT_SECRET'), 'HS256');
-    }
+    use ApiResponseTrait; 
 
     /**
      * @OA\Post(
@@ -98,21 +71,21 @@ class AuthTokenController extends Controller
     {
         $credentials = $request->only('email', 'password');
 
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
-            $accessToken = $this->generateAccessToken($user);
-            $refreshToken = $this->generateRefreshToken($user);
-
-            $responseData = [
-                'access_token' => $accessToken,
-                'refresh_token' => $refreshToken,
-                'token_type' => 'bearer',
-                'expires_in' => env('JWT_ACCESS_TOKEN_TTL', 3600)
-            ];
-            return $this->successResponse($responseData, 'Login successful');
+        if (!$token = JWTAuth::attempt($credentials)) {
+            return $this->errorResponse(ApiErrorCodes::AUTH_LOGIN_FAILED);
         }
 
-        return $this->errorResponse(ApiErrorCodes::AUTH_LOGIN_FAILED);
+        $user = JWTAuth::user();
+
+        $refreshToken = JWTAuth::fromUser($user);
+
+        $responseData = [
+            'access_token' => $token,
+            'refresh_token' => $refreshToken,
+            'token_type' => 'bearer',
+            'expires_in' => JWTAuth::factory()->getTTL() * 60 
+        ];
+        return $this->successResponse($responseData, 'Login successful');
     }
 
     /**
@@ -140,21 +113,9 @@ class AuthTokenController extends Controller
      */
     public function logout(Request $request)
     {
-      
-       
-        $token = $request->bearerToken();
-        if (!$token) {
-            return $this->errorResponse(ApiErrorCodes::AUTH_TOKEN_NOT_PROVIDED);
-        }
-        
-        try {
-            JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
-       
-            Auth::logout();
-            return $this->successResponse([], 'Successfully logged out');
-        } catch (\Exception $e) {
-            return $this->errorResponse(ApiErrorCodes::AUTH_INVALID_OR_EXPIRED_TOKEN);
-        }
+        JWTAuth::invalidate(JWTAuth::getToken());
+
+        return $this->successResponse([], 'Successfully logged out');
     }
 
     /**
@@ -162,16 +123,8 @@ class AuthTokenController extends Controller
      * path="/api/refresh",
      * tags={"Auth"},
      * summary="Refresh the JWT token",
-     * description="Provides a new access token and a new refresh token in exchange for a valid refresh token.",
-     * security={},
-     * @OA\RequestBody(
-     * required=true,
-     * description="Requires a valid refresh_token.",
-     * @OA\JsonContent(
-     * required={"refresh_token"},
-     * @OA\Property(property="refresh_token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
-     * )
-     * ),
+     * description="Provides a new access token and a new refresh token. The current (soon to be expired) refresh token must be sent in the Authorization header.",
+     * security={{"bearerAuth":{}}},
      * @OA\Response(
      * response=200,
      * description="Token refreshed successfully",
@@ -181,47 +134,29 @@ class AuthTokenController extends Controller
      * @OA\Property(property="token_type", type="string", example="bearer"),
      * @OA\Property(property="expires_in", type="integer", example=3600, description="New access token lifetime in seconds")
      * )
+     * )
      * ),
      * @OA\Response(
      * response=401,
      * description="Refresh token not provided, invalid, or expired",
      * @OA\JsonContent(
-     * @OA\Property(property="messagee", type="string", example="Unauthorized"),
+     * @OA\Property(property="message", type="string", example="Unauthorized"),
      * @OA\Property(property="code", type="integer", example=10002)
      * )
      * )
      * )
      */
     public function refresh(Request $request)
-    {        
-        $refreshToken = $request->input('refresh_token');
-
-        if (!$refreshToken) {
-            return $this->errorResponse(ApiErrorCodes::AUTH_TOKEN_NOT_PROVIDED);
-        }
-
+    {
         try {
-            $decodedRefreshToken = JWT::decode($refreshToken, new Key(env('JWT_SECRET'), 'HS256'));
-
-           
-            if (!isset($decodedRefreshToken->type) || $decodedRefreshToken->type !== 'refresh') {
-                return $this->errorResponse(ApiErrorCodes::AUTH_INVALID_OR_EXPIRED_TOKEN, 'Invalid token type provided for refresh.');
-            }
-
-            $user = User::find($decodedRefreshToken->sub);
-            if (!$user) {
-                
-                return $this->errorResponse(ApiErrorCodes::AUTH_INVALID_OR_EXPIRED_TOKEN, 'User not found for refresh token.');
-            }
-
-            $newAccessToken = $this->generateAccessToken($user);
-            $newRefreshToken = $this->generateRefreshToken($user); 
+            $token = JWTAuth::refresh();
+            $refreshToken = JWTAuth::fromUser(JWTAuth::user()); 
 
             $responseData = [
-                'access_token' => $newAccessToken,
-                'refresh_token' => $newRefreshToken,
+                'access_token' => $token,
+                'refresh_token' => $refreshToken,
                 'token_type' => 'bearer',
-                'expires_in' => env('JWT_ACCESS_TOKEN_TTL', 3600)
+                'expires_in' => JWTAuth::factory()->getTTL() * 60
             ];
             return $this->successResponse($responseData, 'Token refreshed successfully');
         } catch (\Exception $e) {
@@ -247,6 +182,7 @@ class AuthTokenController extends Controller
      * description="Password reset link sent",
      * @OA\JsonContent(
      * @OA\Property(property="message", type="string", example="Password reset link sent")
+     * )
      * )
      * ),
      * @OA\Response(

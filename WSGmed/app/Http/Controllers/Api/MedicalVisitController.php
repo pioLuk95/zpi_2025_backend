@@ -7,15 +7,12 @@ use App\Common\ApiErrorCodes;
 use App\Http\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon;
-use Firebase\JWT\JWT;
-use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Validator; 
 use Illuminate\Support\Facades\Log;
-use Firebase\JWT\Key;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Firebase\JWT\ExpiredException;
-use Firebase\JWT\SignatureInvalidException;
+use Illuminate\Database\QueryException; 
+use Illuminate\Database\Eloquent\ModelNotFoundException; 
+use Carbon\Carbon; 
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class MedicalVisitController extends Controller
 {
@@ -115,7 +112,7 @@ class MedicalVisitController extends Controller
     public function scheduleVisit(Request $request): JsonResponse
     {
        
-        try {
+        try { 
             $user = auth()->user();
             if (!$user || !isset($user->patient_id)) {
                 return $this->errorResponse(ApiErrorCodes::AUTH_INVALID_OR_EXPIRED_TOKEN);

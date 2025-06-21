@@ -64,7 +64,7 @@ class TwoFactorController extends Controller
         return back()->withErrors(['otp' => 'Nieprawidłowy kod uwierzytelniający']);
     }
 
-    public function verify(Request $request)
+    public function verifyOtp(Request $request)
     {
         $request->validate([
             'otp' => 'required|digits:6',

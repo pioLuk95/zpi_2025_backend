@@ -32,7 +32,7 @@ Route::post('/profile/disable-2fa', [ProfileController::class, 'disable2FA'])->n
 Route::get('/2fa/setup', [TwoFactorController::class, 'showSetupForm'])->name('2fa.setup');
 Route::post('/2fa/completeSetup', [TwoFactorController::class, 'completeSetup'])->name('2fa.completeSetup');
 Route::get('/2fa/prompt', [TwoFactorController::class, 'showPrompt'])->name('2fa.prompt');
-Route::post('/2fa/verify', [TwoFactorController::class, 'verify'])->name('2fa.verify');
+Route::post('/2fa/verifyOtp', [TwoFactorController::class, 'verifyOtp'])->name('2fa.verifyOtp');
 
 // Others
 Route::get('/patients/{patient}/medical_records/create', [App\Http\Controllers\MedicalRecordController::class, 'create'])->name('medical-records.create');

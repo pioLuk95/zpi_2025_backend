@@ -20,7 +20,11 @@ Route::resource('patients', App\Http\Controllers\PatientController::class);
 Route::resource('medications', App\Http\Controllers\MedicationController::class);
 Route::resource('locations', App\Http\Controllers\LocationController::class);
 Route::resource('emergency_calls', App\Http\Controllers\EmergencyCallsController::class);
-Route::resource('staff', App\Http\Controllers\StaffController::class);
+
+// Staff routes - Admin only
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::resource('staff', App\Http\Controllers\StaffController::class);
+});
 
 // Profile
 Route::get('/profile/show', [ProfileController::class, 'show'])->name('profile.show');
@@ -34,6 +38,11 @@ Route::post('/2fa/completeSetup', [TwoFactorController::class, 'completeSetup'])
 Route::get('/2fa/prompt', [TwoFactorController::class, 'showPrompt'])->name('2fa.prompt');
 Route::post('/2fa/verifyOtp', [TwoFactorController::class, 'verifyOtp'])->name('2fa.verifyOtp');
 
+// Patient Medications
+Route::get('/patients/{patient}/medications/create', [App\Http\Controllers\PatientMedicationController::class, 'create'])->name('patient-medications.create');
+Route::post('/patients/{patient}/medications', [App\Http\Controllers\PatientMedicationController::class, 'store'])->name('patient-medications.store');
+Route::delete('/patients/{patient}/medications/{patientMedication}', [App\Http\Controllers\PatientMedicationController::class, 'destroy'])->name('patient-medications.destroy');
+
 // Others
 Route::get('/patients/{patient}/medical_records/create', [App\Http\Controllers\MedicalRecordController::class, 'create'])->name('medical-records.create');
 Route::post('medical-records', [App\Http\Controllers\MedicalRecordController::class, 'store'])->name('medical-records.store');
@@ -42,3 +51,9 @@ Route::get('/patients/{patient}/show_emergency_calls', [App\Http\Controllers\Eme
 Route::delete('staff_patients/{staff}/{patient}', [App\Http\Controllers\StaffPatientController::class, 'unassign'])->name('staff_patients.unassign');
 Route::get('patients/{patient}/assign', [App\Http\Controllers\StaffPatientController::class, 'renderAssign'])->name('staff_patients.renderAssign');
 Route::post('patients/{patient}/assign', [App\Http\Controllers\StaffPatientController::class, 'assign'])->name('staff_patients.assign');
+
+// User Role Management
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/roles', [App\Http\Controllers\UserRoleController::class, 'index'])->name('roles.index');
+    Route::patch('/roles/{user}', [App\Http\Controllers\UserRoleController::class, 'update'])->name('roles.update');
+});

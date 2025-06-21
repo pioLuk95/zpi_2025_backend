@@ -13,27 +13,34 @@
 </head>
 <body>
 <div class="d-flex">
-    @if (Auth::check())
-        <!-- Sidebar -->
-        <nav class="sidebar">
-            <div class="text-center py-4">
-                <a href="/home" style="padding: 0px">
-                    <img src="{{ asset('img/logo.png') }}" alt="Logo" width="100">
-                </a>
-            </div>
-            <a href="/home">Dashboard</a>
-            <a href="/patients">Pacjenci</a>
-            <a href="/medications">Leki</a>
-            <a href="/locations">Sale</a>
+
+  @if (Auth::check())
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="text-center py-4">
+            <a href="/home" style="padding: 0px">
+                <img src="{{ asset('img/logo.png') }}" alt="Logo" width="100">
+            </a>
+        </div>
+        <a href="/home">Dashboard</a>
+        <a href="/patients">Pacjenci</a>
+        <a href="/medications">Leki</a>
+        <a href="/locations">Sale</a>
+        @if(auth()->check() && auth()->user()->role === 'admin')
             <a href="{{route("staff.index")}}">Personel</a>
-            <a href="{{route("emergency_calls.index")}}">Emergency Calle</a>
-            <a href="{{route("profile.show")}}">Profil</a>
-            <form id="logout-form" action="{{ url('logout') }}" method="POST">
-                {{ csrf_field() }}
-                <input type="submit" value="Wyloguj" class="btn btn-danger w-100 mt-3">
-            </form>
-        </nav>
-    @endif
+        @endif
+        <a href="{{route("emergency_calls.index")}}">Emergency Calle</a>
+        @if(auth()->check() && auth()->user()->role === 'admin')
+            <a href="{{route("roles.index")}}">Role użytkowników</a>
+        @endif
+        <a href="{{route("profile.show")}}">Profil</a>
+        <form id="logout-form" action="{{ url('logout') }}" method="POST">
+            {{ csrf_field() }}
+            <input type="submit" value="Wyloguj" class="btn btn-danger w-100 mt-3">
+        </form>
+    </nav>
+  @endif
+
     <!-- Main content -->
     <div class="flex-grow-1">
         <!-- Top navbar -->
@@ -46,6 +53,13 @@
 
         <!-- Page content -->
         <div class="content">
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+            
             @yield('content')
         </div>
     </div>

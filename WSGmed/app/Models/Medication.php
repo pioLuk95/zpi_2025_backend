@@ -13,4 +13,11 @@ class Medication extends Model
         'name',
         'info'
     ];
+
+    public function patients()
+    {
+        return $this->belongsToMany(Patient::class, 'patient_medications', 'medication_id', 'patient_id')
+                    ->withPivot('dosage', 'frequency', 'start_date', 'end_date')
+                    ->withTimestamps();
+    }
 }

@@ -189,7 +189,7 @@ class MedicalRecordController extends Controller
             }
 
             $validatedData = $validator->validated();
-            $validatedData['patient_id'] = $user->patient_id;
+            $validatedData['patient_id'] = $user->id;
 
              
              $validatedData['record_date'] = Carbon::now();

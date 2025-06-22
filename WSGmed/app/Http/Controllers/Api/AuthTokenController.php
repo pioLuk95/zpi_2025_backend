@@ -71,6 +71,7 @@ class AuthTokenController extends Controller
     {
         $credentials = $request->only('email', 'password');
 
+        Auth::shouldUse('api');
         if (!$token = JWTAuth::attempt($credentials)) {
             return $this->errorResponse(ApiErrorCodes::AUTH_LOGIN_FAILED);
         }

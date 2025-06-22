@@ -37,7 +37,7 @@ class PatientMedicationController extends Controller
             'patient_id' => $patientId,
             'medication_id' => $validated['medication_id'],
             'dosage' => $validated['dosage'],
-            'start_date' => now(),
+            'start_date' => now()->toDateString(),
             'end_date' => null,
             'frequency' => 1
         ]);

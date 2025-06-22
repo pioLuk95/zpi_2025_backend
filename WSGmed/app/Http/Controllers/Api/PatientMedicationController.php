@@ -111,7 +111,6 @@ class PatientMedicationController extends Controller
         try {
             $today = Carbon::today()->toDateString();
 
-            
             $medications = PatientMedication::where('patient_id', $patientId)
                 
                 ->where('start_date', '<=', $today)

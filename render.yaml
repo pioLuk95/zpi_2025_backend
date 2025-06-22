@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: laravel-demo
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile

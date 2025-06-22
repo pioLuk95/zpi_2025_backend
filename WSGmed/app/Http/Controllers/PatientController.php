@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\RequireTotpVerification;
 use App\Models\Patient;
 use Illuminate\Http\Request;
 use App\Models\Location;
@@ -10,14 +11,18 @@ use function Symfony\Component\String\b;
 
 class PatientController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(RequireTotpVerification::class)->only('index');
+    }
+    
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return view('patients.index', [
-            'patients' => Patient::all(),
-        ]);
+        $patients = Patient::paginate(10);
+        return view('patients.index', compact('patients'));
     }
 
     /**
@@ -52,8 +57,12 @@ class PatientController extends Controller
      */
     public function show(Patient $patient)
     {
+        $staff = $patient->staff;
         $records = $patient->records()->get();
-        return view('patients.show', compact('patient', 'records'));
+        $medications = $patient->medications;
+        $patientMedications = $patient->patientMedications;
+        $allMedications = \App\Models\Medication::all();
+        return view('patients.show', compact('patient', 'records', 'staff', 'medications', 'patientMedications', 'allMedications'));
     }
 
     /**

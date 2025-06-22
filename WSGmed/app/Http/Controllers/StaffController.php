@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\Staff;
 use Illuminate\Http\Request;
 
@@ -13,7 +14,8 @@ class StaffController extends Controller
      */
     public function index()
     {
-        //
+        $staff = Staff::paginate(10);
+        return view('staff.index', compact('staff'));
     }
 
     /**
@@ -21,7 +23,8 @@ class StaffController extends Controller
      */
     public function create()
     {
-        //
+        $roles = Role::all();
+        return view('staff.create', compact('roles'));
     }
 
     /**
@@ -29,7 +32,17 @@ class StaffController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            's_name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:patients',
+            'date_of_birth' => 'required|date',
+            'role_id' => 'required|exists:roles,id'
+        ]);
+
+        $validated['password'] = bcrypt("saa2fasg3as");
+        Staff::create($validated);
+        return redirect()->route('staff.index')->with('success', 'Worker został dodany.');
     }
 
     /**
@@ -37,7 +50,8 @@ class StaffController extends Controller
      */
     public function show(Staff $staff)
     {
-        //
+        $patients = $staff->patients;
+        return view('staff.show', compact('staff', 'patients'));
     }
 
     /**
@@ -45,7 +59,8 @@ class StaffController extends Controller
      */
     public function edit(Staff $staff)
     {
-        //
+        $roles = Role::all();
+        return view('staff.create', compact('roles', 'staff'));
     }
 
     /**
@@ -53,7 +68,16 @@ class StaffController extends Controller
      */
     public function update(Request $request, Staff $staff)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            's_name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:patients',
+            'date_of_birth' => 'required|date',
+            'role_id' => 'required|exists:roles,id'
+        ]);
+
+        $staff->update($validated);
+        return redirect()->route('staff.index')->with('success', 'Worker został zaktualizowany.');
     }
 
     /**
@@ -61,6 +85,7 @@ class StaffController extends Controller
      */
     public function destroy(Staff $staff)
     {
-        //
+        $staff->delete();
+        return redirect()->route('staff.index');
     }
 }

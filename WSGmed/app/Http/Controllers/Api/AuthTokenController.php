@@ -199,7 +199,7 @@ class AuthTokenController extends Controller
     public function sendResetLinkEmail(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => ['required', 'email', 'exists:users,email'],
+            'email' => ['required', 'email', 'exists:patients'],
         ]);
         if ($validator->fails()) {
             return $this->errorResponse(ApiErrorCodes::VALIDATION_FAILED, $validator->errors());

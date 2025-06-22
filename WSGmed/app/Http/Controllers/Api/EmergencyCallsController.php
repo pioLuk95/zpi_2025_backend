@@ -115,7 +115,7 @@ class EmergencyCallsController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user(); 
-        $patientId = $user->patient_id;
+        $patientId = $user->id;
 
         try {
             EmergencyCalls::create([

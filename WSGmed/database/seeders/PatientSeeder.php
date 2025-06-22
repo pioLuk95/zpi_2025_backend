@@ -15,10 +15,19 @@ class PatientSeeder extends Seeder
     public function run(): void
     {
          Patient::create([
-            'name' => 'Piotr2',
-            's_name' => 'Test2',
+            'name' => 'Piotr',
+            's_name' => 'Test',
             'password' => Hash::make('password123'),
             'email' => 'p.lukaszewski95@gmail.com',
+            'date_of_birth' => '1973-05-12',
+            'location_id' => '1'
+        ]);
+
+        Patient::create([
+            'name' => 'Dominik',
+            's_name' => 'Test',
+            'password' => bcrypt('password123'),
+            'email' => 'raisecreed@gmail.com',
             'date_of_birth' => '1973-05-12',
             'location_id' => '1'
         ]);

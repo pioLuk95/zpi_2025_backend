@@ -3,7 +3,8 @@
 use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Middleware\RequireTotpVerification;
+use App\Http\Controllers\PatientMedicationController;
+
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -57,3 +58,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/roles', [App\Http\Controllers\UserRoleController::class, 'index'])->name('roles.index');
     Route::patch('/roles/{user}', [App\Http\Controllers\UserRoleController::class, 'update'])->name('roles.update');
 });
+
+Route::get('/patients_medications', [PatientMedicationController::class, 'landing'])->name('patients_medications.landing');
+Route::post('/patients_medications/{patient}', [App\Http\Controllers\PatientMedicationController::class, 'store'])->name('patients_medications.store');
+Route::put('/patients_medications/{patient}/{patientMedication}', [App\Http\Controllers\PatientMedicationController::class, 'update'])->name('patients_medications.update');
+Route::delete('/patients_medications/{patient}/{patientMedication}', [App\Http\Controllers\PatientMedicationController::class, 'destroy'])->name('patients_medications.destroy');

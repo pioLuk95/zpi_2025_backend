@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Patient;
-use App\Models\Medication;
 use App\Models\PatientMedication;
 use Illuminate\Http\Request;
 
@@ -18,46 +16,31 @@ class PatientMedicationController extends Controller
     }
 
     /**
-     * Show the form for assigning medications to a patient
+     * Show the form for creating a new resource.
      */
-    public function create(Patient $patient)
+    public function create()
     {
-        $medications = Medication::all();
-        $assignedMedications = $patient->medications->pluck('id')->toArray();
-        
-        return view('patient_medications.create', compact('patient', 'medications', 'assignedMedications'));
+        return redirect()->route('patients_medications.create');
     }
 
     /**
-     * Store a newly assigned medication
+     * Store a newly created resource in storage.
      */
-    public function store(Request $request, Patient $patient)
+    public function store(Request $request, $patientId)
     {
         $validated = $request->validate([
             'medication_id' => 'required|exists:medications,id',
-            'dosage' => 'required|string|max:255',
-            'frequency' => 'required|string|max:255',
-            'start_date' => 'required|date',
-            'end_date' => 'nullable|date|after:start_date',
+            'dosage' => 'required|integer|min:0',
         ]);
 
-        // Check if medication is already assigned
-        $existing = PatientMedication::where('patient_id', $patient->id)
-                                    ->where('medication_id', $validated['medication_id'])
-                                    ->first();
-
-        if ($existing) {
-            return redirect()->back()->with('error', 'Ten lek jest już przypisany do tego pacjenta.');
-        }
-
-        $patient->medications()->attach($validated['medication_id'], [
+        \App\Models\PatientMedication::create([
+            'patient_id' => $patientId,
+            'medication_id' => $validated['medication_id'],
             'dosage' => $validated['dosage'],
-            'frequency' => $validated['frequency'],
-            'start_date' => $validated['start_date'],
-            'end_date' => $validated['end_date'],
+            'start_date' => now(),
+            'end_date' => null,
         ]);
-
-        return redirect()->route('patients.show', $patient)->with('success', 'Lek został przypisany do pacjenta.');
+        return redirect()->route('patients_medications.landing')->with('success', 'Medication assigned to patient.');
     }
 
     /**
@@ -85,12 +68,22 @@ class PatientMedicationController extends Controller
     }
 
     /**
-     * Remove a medication assignment
+     * Remove the specified resource from storage.
      */
-    public function destroy(Patient $patient, PatientMedication $patientMedication)
+    public function destroy($patientId, $patientMedicationId)
     {
-        $patient->medications()->detach($patientMedication->medication_id);
-        
-        return redirect()->route('patients.show', $patient)->with('success', 'Lek został usunięty z listy pacjenta.');
+        $patientMedication = \App\Models\PatientMedication::findOrFail($patientMedicationId);
+        $patientMedication->delete();
+        return redirect()->back()->with('success', 'Lek został usunięty.');
+    }
+
+    public function landing()
+    {
+        if (auth()->user()->role === 'user') {
+            abort(403);
+        }
+        $patients = \App\Models\Patient::paginate(10);
+        $medications = \App\Models\Medication::paginate(10);
+        return view('patients_medications.landing', compact('patients', 'medications'));
     }
 }

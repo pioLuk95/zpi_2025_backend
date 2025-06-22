@@ -1,0 +1,10 @@
+{
+    "require": {
+        "mpociot/laravel-apidoc-generator": "^2.1"
+    },
+    "config": {
+        "allow-plugins": {
+            "kylekatarnls/update-helper": true
+        }
+    }
+}

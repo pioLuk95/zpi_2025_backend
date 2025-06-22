@@ -1,6 +1,5 @@
-
+@if(Auth::check())
 <nav class="sidebar sidebar-offcanvas dynamic-active-class-disabled" id="sidebar">
-    @if(Auth::check())
   <ul class="nav">
     <li class="nav-item nav-profile not-navigation-link">
       <div class="nav-link">
@@ -102,5 +101,5 @@
       </div>
     </li>--}}
   </ul>
-    @endif
 </nav>
+@endif

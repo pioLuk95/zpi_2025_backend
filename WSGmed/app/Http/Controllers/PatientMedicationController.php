@@ -20,7 +20,7 @@ class PatientMedicationController extends Controller
      */
     public function create()
     {
-        //
+        return redirect()->route('patients_medications.create');
     }
 
     /**

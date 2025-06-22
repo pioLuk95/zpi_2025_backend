@@ -178,7 +178,7 @@ class MedicalRecordController extends Controller
                 'pulse' => 'required|integer',
                 'weight' => 'required|numeric',
                 'mood' => 'required|string|in:very_bad,bad,good,very_good',
-                'pain_level' => 'required|integer|between:1,10',
+                'pain_level' => 'required|integer|between:0,10',
                 'oxygen_saturation' => 'required|integer|between:0,100',
 
 

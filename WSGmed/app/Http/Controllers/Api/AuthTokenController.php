@@ -150,9 +150,8 @@ class AuthTokenController extends Controller
     public function refresh(Request $request)
     {
         try {
-            $token = JWTAuth::refresh();
-            $refreshToken = JWTAuth::fromUser(JWTAuth::user()); 
-
+            $token = JWTAuth::refresh($request->input('refresh_token'));
+            $refreshToken = JWTAuth::fromUser(JWTAuth::user());
             $responseData = [
                 'access_token' => $token,
                 'refresh_token' => $refreshToken,

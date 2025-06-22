@@ -39,6 +39,7 @@ class PatientMedicationController extends Controller
             'dosage' => $validated['dosage'],
             'start_date' => now(),
             'end_date' => null,
+            'frequency' => 1
         ]);
         return redirect()->route('patients_medications.landing')->with('success', 'Medication assigned to patient.');
     }
@@ -83,7 +84,7 @@ class PatientMedicationController extends Controller
             abort(403);
         }
         $patients = \App\Models\Patient::paginate(10);
-        $medications = \App\Models\Medication::paginate(10);
+        $medications = \App\Models\Medication::all();
         return view('patients_medications.landing', compact('patients', 'medications'));
     }
 }

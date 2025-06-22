@@ -11,7 +11,8 @@
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "laravel/ui": "^4.6",
-        "spomky-labs/otphp": "^11.3"
+        "spomky-labs/otphp": "^11.3",
+        "tymon/jwt-auth": "^2.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

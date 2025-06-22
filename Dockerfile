@@ -22,5 +22,6 @@ RUN chmod -R 775 storage bootstrap/cache
 RUN touch database/database.sqlite
 RUN php artisan migrate --force || true
 RUN php artisan db:seed --force || true
+RUN composer dump-autoload
 
 CMD php artisan serve --host=0.0.0.0 --port=10000

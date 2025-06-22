@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Patient;
+use Illuminate\Support\Facades\Hash;
 
 class PatientSeeder extends Seeder
 {
@@ -12,6 +14,13 @@ class PatientSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+         Patient::create([
+            'name' => 'Piotr2',
+            's_name' => 'Test2',
+            'password' => Hash::make('password123'),
+            'email' => 'p.lukaszewski95@gmail.com',
+            'date_of_birth' => '1973-05-12',
+            'location_id' => '1'
+        ]);
     }
 }

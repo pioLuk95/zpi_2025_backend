@@ -114,7 +114,7 @@ class MedicalVisitController extends Controller
        
         try { 
             $user = auth()->user();
-            if (!$user || !isset($user->patient_id)) {
+            if (!$user || !isset($user->id)) {
                 return $this->errorResponse(ApiErrorCodes::AUTH_INVALID_OR_EXPIRED_TOKEN);
             }
 
@@ -146,7 +146,7 @@ class MedicalVisitController extends Controller
             }
 
             $visitId = 'visit_' . time() . '_' . rand(1000, 9999);
-            $this->visits[] = array_merge($data, ['visit_id' => $visitId, 'patient_id' => $user->patient_id]);
+            $this->visits[] = array_merge($data, ['visit_id' => $visitId, 'patient_id' => $user->id]);
 
             return $this->successResponse([], 'Medical visit scheduled successfully', 201);
         } catch (QueryException $e) {

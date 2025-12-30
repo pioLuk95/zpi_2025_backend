@@ -4,12 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Notifications\Notifiable;
+
 use App\Models\Location;
 
-class Patient extends Model
+class Patient extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\PatientFactory> */
     use HasFactory;
+    use Notifiable;
     protected $fillable = [
         'name',
         's_name',
@@ -50,5 +55,15 @@ class Patient extends Model
     public function patientMedications()
     {
         return $this->hasMany(PatientMedication::class);
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
     }
 }

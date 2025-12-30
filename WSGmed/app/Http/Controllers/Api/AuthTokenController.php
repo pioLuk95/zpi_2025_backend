@@ -71,6 +71,7 @@ class AuthTokenController extends Controller
     {
         $credentials = $request->only('email', 'password');
 
+        Auth::shouldUse('api');
         if (!$token = JWTAuth::attempt($credentials)) {
             return $this->errorResponse(ApiErrorCodes::AUTH_LOGIN_FAILED);
         }
@@ -149,9 +150,8 @@ class AuthTokenController extends Controller
     public function refresh(Request $request)
     {
         try {
-            $token = JWTAuth::refresh();
-            $refreshToken = JWTAuth::fromUser(JWTAuth::user()); 
-
+            $token = JWTAuth::refresh($request->input('refresh_token'));
+            $refreshToken = JWTAuth::fromUser(JWTAuth::user());
             $responseData = [
                 'access_token' => $token,
                 'refresh_token' => $refreshToken,
@@ -199,7 +199,7 @@ class AuthTokenController extends Controller
     public function sendResetLinkEmail(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => ['required', 'email', 'exists:users,email'],
+            'email' => ['required', 'email', 'exists:patients'],
         ]);
         if ($validator->fails()) {
             return $this->errorResponse(ApiErrorCodes::VALIDATION_FAILED, $validator->errors());

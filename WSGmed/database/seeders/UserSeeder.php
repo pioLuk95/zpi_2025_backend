@@ -14,14 +14,28 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Upewnij się, że istnieje co najmniej jeden pacjent, do którego można przypisać użytkownika
-        $patient = Patient::first() ?? Patient::factory()->create();
+        User::create([
+            'name' => 'Test Patient',
+            'email' => 'patient@example.com',
+            'password' => Hash::make('password123'),
+            'patient_id' => null,
+            'role' => 'patient',
+        ]);
 
         User::create([
-            'name' => 'Test User',
-            'email' => 'user@example.com',
+            'name' => 'Test Staff',
+            'email' => 'staff@example.com',
             'password' => Hash::make('password123'),
-            'patient_id' => $patient->id, // Przypisz ID istniejącego pacjenta
+            'patient_id' => null,
+            'role' => 'staff',
+        ]);
+
+        User::create([
+            'name' => 'Test Admin',
+            'email' => 'admin@example.com',
+            'password' => Hash::make('password123'),
+            'patient_id' => null,
+            'role' => 'admin',
         ]);
     }
 }

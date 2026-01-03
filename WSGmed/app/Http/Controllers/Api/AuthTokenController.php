@@ -69,8 +69,6 @@ class AuthTokenController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
-
-        Auth::shouldUse('api');
         if (!$token = Auth::guard('api')->attempt($credentials)) {
             return $this->errorResponse(ApiErrorCodes::AUTH_LOGIN_FAILED);
         }
@@ -117,7 +115,7 @@ class AuthTokenController extends Controller
      * path="/api/refresh",
      * tags={"Auth"},
      * summary="Refresh the JWT token",
-     * description="Provides a new access token and a new refresh token. The current (soon to be expired) refresh token must be sent in the Authorization header.",
+     * description="Provides a new access token. Current token (valid or expired) must be sent in the Authorization header.",
      * security={{"bearerAuth":{}}},
      * @OA\Response(
      * response=200,

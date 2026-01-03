@@ -52,7 +52,6 @@ class AuthTokenController extends Controller
      * description="Successful login",
      * @OA\JsonContent(
      * @OA\Property(property="access_token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."),
-     * @OA\Property(property="refresh_token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."),
      * @OA\Property(property="token_type", type="string", example="bearer"),
      * @OA\Property(property="expires_in", type="integer", example=3600, description="Access token lifetime in seconds")
      * )
@@ -72,17 +71,12 @@ class AuthTokenController extends Controller
         $credentials = $request->only('email', 'password');
 
         Auth::shouldUse('api');
-        if (!$token = JWTAuth::attempt($credentials)) {
+        if (!$token = Auth::guard('api')->attempt($credentials)) {
             return $this->errorResponse(ApiErrorCodes::AUTH_LOGIN_FAILED);
         }
 
-        $user = JWTAuth::user();
-
-        $refreshToken = JWTAuth::fromUser($user);
-
         $responseData = [
             'access_token' => $token,
-            'refresh_token' => $refreshToken,
             'token_type' => 'bearer',
             'expires_in' => JWTAuth::factory()->getTTL() * 60 
         ];
@@ -115,7 +109,6 @@ class AuthTokenController extends Controller
     public function logout(Request $request)
     {
         JWTAuth::invalidate(JWTAuth::getToken());
-
         return $this->successResponse([], 'Successfully logged out');
     }
 
@@ -131,7 +124,6 @@ class AuthTokenController extends Controller
      * description="Token refreshed successfully",
      * @OA\JsonContent(
      * @OA\Property(property="access_token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."),
-     * @OA\Property(property="refresh_token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."),
      * @OA\Property(property="token_type", type="string", example="bearer"),
      * @OA\Property(property="expires_in", type="integer", example=3600, description="New access token lifetime in seconds")
      * )
@@ -150,11 +142,9 @@ class AuthTokenController extends Controller
     public function refresh(Request $request)
     {
         try {
-            $token = JWTAuth::refresh($request->input('refresh_token'));
-            $refreshToken = JWTAuth::fromUser(JWTAuth::user());
+            $newToken = JWTAuth::refresh(JWTAuth::getToken());
             $responseData = [
-                'access_token' => $token,
-                'refresh_token' => $refreshToken,
+                'access_token' => $newToken,
                 'token_type' => 'bearer',
                 'expires_in' => JWTAuth::factory()->getTTL() * 60
             ];

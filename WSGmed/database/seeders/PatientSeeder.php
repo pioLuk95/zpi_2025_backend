@@ -14,7 +14,7 @@ class PatientSeeder extends Seeder
      */
     public function run(): void
     {
-         Patient::create([
+         Patient::factory()->create([
             'name' => 'Piotr',
             's_name' => 'Test',
             'password' => Hash::make('password123'),
@@ -23,7 +23,7 @@ class PatientSeeder extends Seeder
             'location_id' => '1'
         ]);
 
-        Patient::create([
+        Patient::factory()->create([
             'name' => 'Dominik',
             's_name' => 'Test',
             'password' => bcrypt('password123'),

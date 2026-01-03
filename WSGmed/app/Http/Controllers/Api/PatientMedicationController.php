@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Common\ApiErrorCodes;
 use App\Http\Traits\ApiResponseTrait;
+use App\Models\EmergencyCalls;
 use Illuminate\Http\Request;
 use App\Models\PatientMedication;
 use Carbon\Carbon;
@@ -108,26 +109,27 @@ class PatientMedicationController extends Controller
         }
         $patientId = $user->id;
 
-        try {
-            $today = Carbon::today()->toDateString();
+        $medications = EmergencyCalls::where('patient_id', $patientId)->get();
+        // try {
+        //     $today = Carbon::today()->toDateString();
 
-            $medications = PatientMedication::where('patient_id', $patientId)
+        //     $medications = PatientMedication::where('patient_id', $patientId)
                 
-                ->where('start_date', '<=', $today)
-                ->where(function ($query) use ($today) {
-                    $query->whereNull('end_date')
-                          ->orWhere('end_date', '>=', $today);
-                })
-                ->get(['id as medication_id', 'name', 'dosage', 'part_of_day', 'is_taken']);
+        //         ->where('start_date', '<=', $today)
+        //         ->where(function ($query) use ($today) {
+        //             $query->whereNull('end_date')
+        //                   ->orWhere('end_date', '>=', $today);
+        //         })
+        //         ->get(['id as medication_id', 'name', 'dosage', 'part_of_day', 'is_taken']);
 
-            return $this->successResponse($medications, 'Medications retrieved successfully.');
-        } catch (QueryException $e) {
-            Log::error('Service unavailable - DB connection issue in PatientMedicationController@getMedicationsByDate: ' . $e->getMessage());
-            return $this->errorResponse(ApiErrorCodes::SERVICE_UNAVAILABLE);
-        } catch (\Exception $e) {
-            Log::error('Generic exception in PatientMedicationController@getMedicationsByDate: ' . $e->getMessage());
-            return $this->errorResponse(ApiErrorCodes::SERVER_ERROR);
-        }
+        return $this->successResponse($medications, 'Medications retrieved successfully.');
+        // } catch (QueryException $e) {
+        //     Log::error('Service unavailable - DB connection issue in PatientMedicationController@getMedicationsByDate: ' . $e->getMessage());
+        //     return $this->errorResponse(ApiErrorCodes::SERVICE_UNAVAILABLE);
+        // } catch (\Exception $e) {
+        //     Log::error('Generic exception in PatientMedicationController@getMedicationsByDate: ' . $e->getMessage());
+        //     return $this->errorResponse(ApiErrorCodes::SERVER_ERROR);
+        // }
     }
 
     /**

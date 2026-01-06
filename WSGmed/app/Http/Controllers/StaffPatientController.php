@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Staff;
 use App\Models\StaffPatient;
-use Exception;
 use Illuminate\Http\Request;
 
 

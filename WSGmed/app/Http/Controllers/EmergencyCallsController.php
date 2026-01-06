@@ -20,9 +20,7 @@ class EmergencyCallsController extends Controller
     public function showEmergencies(Patient $patient)
     {   
         $calls = EmergencyCalls::where('patient_id', $patient->id)->paginate(10);
-        return view('emergencyCalls.index', [
-            'calls' => $calls
-        ]);
+        return view('emergencyCalls.index', ['calls' => $calls]);
     }
 
     /**

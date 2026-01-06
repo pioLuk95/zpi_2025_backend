@@ -33,7 +33,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse ($staff as $staffMember)
+                @forelse ($patient->staff as $staffMember)
                 <tr>
                     <td><a href="{{ route("staff.show", $staffMember) }}">{{ $staffMember->name }} {{ $staffMember->s_name }}</a></td>
                     <td>{{ ucfirst($staffMember->role->name) }}</td>
@@ -67,7 +67,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse ($patientMedications as $patientMedication)
+                @forelse ($patient->patientMedications as $patientMedication)
                 <tr>
                     <td>{{ $patientMedication->medication->name }}</td>
                     <td>{{ $patientMedication->medication->info }}</td>

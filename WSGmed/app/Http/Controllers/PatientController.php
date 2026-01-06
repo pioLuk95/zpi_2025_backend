@@ -7,8 +7,6 @@ use App\Models\Patient;
 use Illuminate\Http\Request;
 use App\Models\Location;
 
-use function Symfony\Component\String\b;
-
 class PatientController extends Controller
 {
     public function __construct()
@@ -57,12 +55,9 @@ class PatientController extends Controller
      */
     public function show(Patient $patient)
     {
-        $staff = $patient->staff;
         $records = $patient->records()->get();
-        $medications = $patient->medications;
-        $patientMedications = $patient->patientMedications;
         $allMedications = \App\Models\Medication::all();
-        return view('patients.show', compact('patient', 'records', 'staff', 'medications', 'patientMedications', 'allMedications'));
+        return view('patients.show', compact('patient', 'records', 'allMedications'));
     }
 
     /**

@@ -40,7 +40,7 @@ class StaffController extends Controller
             'role_id' => 'required|exists:roles,id'
         ]);
 
-        $validated['password'] = bcrypt("saa2fasg3as");
+        $validated['password'] = bcrypt("saa2fasg3as"); //TODO
         Staff::create($validated);
         return redirect()->route('staff.index')->with('success', 'Worker został dodany.');
     }

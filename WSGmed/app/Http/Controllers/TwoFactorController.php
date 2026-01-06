@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use OTPHP\TOTP;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
-use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use Illuminate\Support\Facades\Session;
 use BaconQrCode\Writer;
 

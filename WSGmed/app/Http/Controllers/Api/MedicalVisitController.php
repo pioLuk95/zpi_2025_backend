@@ -11,8 +11,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\QueryException; 
 use Illuminate\Database\Eloquent\ModelNotFoundException; 
-use Carbon\Carbon; 
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class MedicalVisitController extends Controller
 {

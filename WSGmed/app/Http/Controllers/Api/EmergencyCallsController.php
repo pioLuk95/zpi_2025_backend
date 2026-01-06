@@ -7,7 +7,6 @@ use App\Common\ApiErrorCodes;
 use App\Http\Traits\ApiResponseTrait;
 use App\Models\EmergencyCalls;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
 /**

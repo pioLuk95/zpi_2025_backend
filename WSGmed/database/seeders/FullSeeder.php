@@ -11,6 +11,7 @@ use App\Models\MedicalRecord;
 use App\Models\EmergencyCalls;
 use App\Models\Location;
 use App\Models\StaffPatient;
+use Illuminate\Support\Facades\Hash;
 
 class FullSeeder extends Seeder
 {
@@ -19,14 +20,31 @@ class FullSeeder extends Seeder
      */
     public function run(): void
     {
-        $locations = Location::factory()->count(20)->create();
-        $medications = Medication::factory()->count(15)->create();
+        Location::factory()->count(20)->create();
+        Medication::factory()->count(15)->create();
         $staff = Staff::factory()->count(10)->create();
-
-
         $patients = Patient::factory()->count(50)->create();
+        
+        $patients->push(
+            Patient::factory()->create([
+                'name' => 'Piotr',
+                's_name' => 'Test',
+                'password' => Hash::make('password123'),
+                'email' => 'p.lukaszewski95@gmail.com',
+                'date_of_birth' => '1973-05-12',
+                'location_id' => '1'
+            ]),
+            Patient::factory()->create([
+                'name' => 'Dominik',
+                's_name' => 'Test',
+                'password' => bcrypt('password123'),
+                'email' => 'raisecreed@gmail.com',
+                'date_of_birth' => '1973-05-12',
+                'location_id' => '1'
+            ])
+        );
+
         foreach ($patients as $patient) {
-            
             $recordsCount = rand(1, 5);
             for ($i = 0; $i < $recordsCount; $i++) {
                 MedicalRecord::factory()->create([

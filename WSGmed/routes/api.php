@@ -21,5 +21,5 @@ Route::post('medications/confirm', [PatientMedicationController::class, 'confirm
 Route::post('medical-visits/schedule', [MedicalVisitController::class, 'scheduleVisit']);
 
 Route::apiResource('recommendations', RecomendationController::class)->only(['index']);
-//Route::apiResource('medical-records', MedicalRecordController::class)->only(['store'])->middleware('throttle:5,1'); 
+Route::post('medical-records', [MedicalRecordController::class, "save"])->middleware('throttle:5,1'); 
 });

@@ -167,7 +167,7 @@ class MedicalRecordController extends Controller
      * )
      * )
      */
-    public function store(Request $request): JsonResponse
+    public function save(Request $request): JsonResponse
     {
         try {
             $user = auth()->user(); 

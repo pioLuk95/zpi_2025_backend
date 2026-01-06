@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Common\ApiErrorCodes;
 use App\Http\Traits\ApiResponseTrait;
-use App\Models\EmergencyCalls;
 use Illuminate\Http\Request;
 use App\Models\PatientMedication;
 use Carbon\Carbon;

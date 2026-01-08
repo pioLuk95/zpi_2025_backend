@@ -18,7 +18,8 @@ class PatientMedication extends Pivot
         'dosage',
         'frequency',
         'start_date',
-        'end_date'
+        'end_date',
+        'unit',
     ];
 
     protected $casts = [

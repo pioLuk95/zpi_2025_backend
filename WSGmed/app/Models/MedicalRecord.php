@@ -11,14 +11,19 @@ class MedicalRecord extends Model
     use HasFactory;
     protected $fillable = [
         'patient_id',
-        'record_date',
-        'blood_pressure',
+        'insert_date',
         'temperature',
         'pulse',
         'weight',
         'mood',
         'pain_level',
         'oxygen_saturation',
+        'systolic_pressure',
+        'diastolic_pressure',
+    ];
+
+    public $casts = [
+        'insert_date' => 'datetime',
     ];
 
     public function patient()

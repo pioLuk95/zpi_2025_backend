@@ -11,9 +11,12 @@ class EmergencyCalls extends Model
     use HasFactory;
     protected $fillable = [
         'patient_id',
-        'date',
+        'insert_date',
         'status',
-        'description'
+    ];
+
+    protected $casts = [
+        'insert_date' => 'datetime',
     ];
 
     public function patient()

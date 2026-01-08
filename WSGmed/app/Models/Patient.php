@@ -20,14 +20,8 @@ class Patient extends Authenticatable implements JWTSubject
         's_name',
         'email',
         'date_of_birth',
-        'location_id',
         'password',
     ];
-
-    public function location()
-    {
-        return $this->belongsTo(Location::class);
-    }
 
     public function records()
     {

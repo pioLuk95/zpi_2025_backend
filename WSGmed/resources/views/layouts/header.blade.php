@@ -4,8 +4,6 @@
       <img src="{{ asset('img/logo.png') }}"  alt="TUTAJ LOGO" /></a>
   </div>
   <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
-
-
       @if(Auth::check())
     <ul class="navbar-nav navbar-nav-right">
       <li class="nav-item dropdown d-none d-xl-inline-block">

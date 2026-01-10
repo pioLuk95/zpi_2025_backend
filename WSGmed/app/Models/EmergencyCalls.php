@@ -23,4 +23,15 @@ class EmergencyCalls extends Model
     {
         return $this->belongsTo(Patient::class);
     }
+
+    public function getStatusNameAttribute()
+    {
+        $statuses = [
+            0 => 'Nowy',
+            1 => 'W trakcie',
+            2 => 'Zakończony',
+        ];
+
+        return $statuses[$this->status] ?? 'Nieznany';
+    }
 }

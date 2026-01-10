@@ -20,14 +20,14 @@
             <tr>
                 <td>{{ $call->patient->name }} {{ $call->patient->s_name }}</td>
                 <td>{{ $call->date }}</td>
-                <td>{{ $call->status }}</td>
+                <td>{{ $call->status_name }}</td>
                 <td>
-                    <form action="{{ route('emergency_calls.destroy', $call->id) }}" method="POST" class="d-inline">
+                    <a href="{{ route('emergency_calls.show', $call) }}" class="btn btn-primary btn-sm">Pokaż</a>
+                    <form action="{{ route('emergency_calls.destroy', $call->id) }}" method="POST" class="d-inline ms-2">
                         @csrf
                         @method('DELETE')
                         <button class="btn btn-danger btn-sm">Usuń</button>
                     </form>
-                    <a href="{{ route('emergency_calls.show', $call) }}" class="btn btn-primary mb-3">Pokaż</a>
                 </td>
             </tr>
             @endforeach

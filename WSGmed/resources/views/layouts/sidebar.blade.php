@@ -3,21 +3,7 @@
   <ul class="nav">
     <li class="nav-item nav-profile not-navigation-link">
       <div class="nav-link">
-        <div class="user-wrapper">
-          <div class="profile-image">
-              <span class="mdi mdi-account-circle"></span>
-          </div>
-          <div class="text-wrapper">
-            <p class="profile-name">{{Auth::user()->name}}</p>
-            <div class="dropdown" data-display="static">
-              <a href="#" class="nav-link d-flex user-switch-dropdown-toggler" id="UsersettingsDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
-                <small class="designation text-muted">{{Auth::user()->role}}</small>
-              </a>
-            </div>
-          </div>
-        </div>
           <a class="btn btn-success btn-block text-white" href="{{ route('patients.create') }}">Nowy pacjent <i class="mdi mdi-plus"></i>
-
           </a>
       </div>
     </li>

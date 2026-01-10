@@ -19,9 +19,11 @@
 
         <h2 class="mb-4">Ostatnio dodani pacjenci</h2>
 
+        {{-- UKRYTA LISTA PACJENTÓW --}}
+        {{--
         @php($patients = \App\Models\Patient::latest()->take(8)->get())
         @include('patients._list', ['patients' => $patients])
-
+        --}}
 
         <div class="mt-3">
             <a href="{{ route('patients.index') }}" class="btn btn-outline-primary">

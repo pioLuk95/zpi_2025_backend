@@ -15,27 +15,28 @@
             <a href="{{ route('staff.index') }}" class="btn btn-secondary">Powrót</a>
         </div>
 
-        Przypisani pacjenci:
+        <div class="p-3"> <!-- dodany padding -->
+            <strong>Przypisani pacjenci:</strong>
 
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Imię i nazwisko</th>
-                    <th>Sala</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($patients as $patient)
-                <tr>
-                    <td> <a href="{{ route('patients.show', $patient)}}">{{ $patient->name }} {{ $patient->s_name }}</a></td>
-                    <td>{{ $patient->location->name }}</td>
-                </tr>
-                @empty
-                <tr><td colspan="10">Brak wpisów</td></tr>
-                @endforelse
-            </tbody>
-        </table>    
-
+            <table class="table table-bordered table-striped mt-2"> <!-- dodana klasa table-striped -->
+                <thead>
+                    <tr>
+                        <th>Imię i nazwisko</th>
+                        <th>Sala</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($patients as $patient)
+                    <tr>
+                        <td><a href="{{ route('patients.show', $patient) }}">{{ $patient->name }} {{ $patient->s_name }}</a></td>
+                        <td>{{ $patient->location->name }}</td>
+                    </tr>
+                    @empty
+                    <tr><td colspan="2">Brak wpisów</td></tr>
+                    @endforelse
+                </tbody>
+            </table>    
+        </div>
     </div>
 </div>
 @endsection

@@ -11,7 +11,7 @@
         <tr>
             <td> {{ $patient->name }} {{ $patient->s_name }} </td>
             <td> {{ $patient->date_of_birth }} </td>
-            <td> {{ $patient->location->name }} </td>
+            <td> {{ optional($patient->location)->name ?? 'Brak' }} </td>
         </tr>
     @endforeach
     <tbody>

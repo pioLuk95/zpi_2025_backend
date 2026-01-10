@@ -18,9 +18,13 @@ class PatientMedicationController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create($patientId)
     {
-        return redirect()->route('patients_medications.create');
+        $patient = \App\Models\Patient::findOrFail($patientId);
+        $medications = \App\Models\Medication::all();
+        $assignedMedications = $patient->patientMedications->pluck('medication_id')->toArray();
+        
+        return view('patients_medications.create', compact('patient', 'medications', 'assignedMedications'));
     }
 
     /**
@@ -30,18 +34,22 @@ class PatientMedicationController extends Controller
     {
         $validated = $request->validate([
             'medication_id' => 'required|exists:medications,id',
-            'dosage' => 'required|integer|min:0',
+            'dosage' => 'required|numeric|min:0',
+            'frequency' => 'required|string',
+            'start_date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
         \App\Models\PatientMedication::create([
             'patient_id' => $patientId,
             'medication_id' => $validated['medication_id'],
             'dosage' => $validated['dosage'],
-            'start_date' => now()->toDateString(),
-            'end_date' => null,
-            'frequency' => 1
+            'frequency' => $validated['frequency'],
+            'start_date' => $validated['start_date'],
+            'end_date' => $validated['end_date'] ?? null,
         ]);
-        return redirect()->route('patients_medications.landing')->with('success', 'Medication assigned to patient.');
+        
+        return redirect()->route('patients.show', $patientId)->with('success', 'Lek został przypisany do pacjenta.');
     }
 
     /**

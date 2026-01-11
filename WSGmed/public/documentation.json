@@ -1,0 +1,1432 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API Documentation",
+        "description": "API for managing medical appointments with doctors, nurses, and physiotherapists. All endpoints require JWT authentication.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/api/",
+            "description": "Medical Visit API Server"
+        },
+        {
+            "url": "/api"
+        }
+    ],
+    "paths": {
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Log in and get a JWT token",
+                "operationId": "c1530903f2ec8a1c13dd5e7f775cd2a8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful login",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "access_token": {
+                                            "type": "string",
+                                            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "bearer"
+                                        },
+                                        "expires_in": {
+                                            "description": "Access token lifetime in seconds",
+                                            "type": "integer",
+                                            "example": 3600
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 10001
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Log out the user",
+                "operationId": "06f0f5006d5a53da7bdcde6381cd084f",
+                "responses": {
+                    "200": {
+                        "description": "Successfully logged out",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Successfully logged out"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 10002
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/refresh": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Refresh the JWT token",
+                "description": "Provides a new access token. Current token (valid or expired) must be sent in the Authorization header.",
+                "operationId": "47d6ecf1aa5d59780a66a97113e085e1",
+                "responses": {
+                    "200": {
+                        "description": "Token refreshed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "access_token": {
+                                            "type": "string",
+                                            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "bearer"
+                                        },
+                                        "expires_in": {
+                                            "description": "New access token lifetime in seconds",
+                                            "type": "integer",
+                                            "example": 3600
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/password/email": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Send password reset email",
+                "operationId": "f3e0661ab6737f195838817c62fe896f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password reset link sent",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Password reset link sent"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/api/emergency-calls": {
+            "post": {
+                "tags": [
+                    "EmergencyCalls"
+                ],
+                "summary": "Create a new emergency call",
+                "description": "Creates a new emergency call for the authenticated user. The patient_id is automatically assigned based on the logged-in user. This endpoint does not require a request body.",
+                "operationId": "createEmergencyCall",
+                "responses": {
+                    "201": {
+                        "description": "Emergency call created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Emergency call created successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": true,
+                                    "message": "Emergency call created successfully"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Authentication required",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 10002
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "Unauthorized",
+                                    "code": 10002
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests - Rate limit exceeded",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 15001
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You have made too many requests in a short period. Please try again later."
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": " You have made too many requests in a short period. Please try again later.",
+                                    "code": 15001
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred on the server."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19001
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "An unexpected error occurred on the server.",
+                                    "code": 19001
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable - Database connection issues",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The service is temporarily unavailable. Please try again later."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19002
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "The service is temporarily unavailable. Please try again later.",
+                                    "code": 19002
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/medical-records": {
+            "post": {
+                "tags": [
+                    "Medical Records"
+                ],
+                "summary": "Create a new medical record",
+                "description": "Creates a new medical record for the authenticated patient.",
+                "operationId": "90286e3b5bafe635120624e73d9e6d65",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "blood_pressure",
+                                    "temperature",
+                                    "pulse",
+                                    "weight",
+                                    "mood",
+                                    "pain_level",
+                                    "oxygen_saturation"
+                                ],
+                                "properties": {
+                                    "blood_pressure": {
+                                        "type": "integer",
+                                        "example": 120
+                                    },
+                                    "temperature": {
+                                        "description": "Body temperature in Celsius, e.g., up to one decimal place.",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 36.6
+                                    },
+                                    "pulse": {
+                                        "type": "integer",
+                                        "example": 75
+                                    },
+                                    "weight": {
+                                        "description": "Weight in kilograms, e.g., up to two decimal places.",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 70.55
+                                    },
+                                    "mood": {
+                                        "description": "Patient's mood rating.",
+                                        "type": "string",
+                                        "enum": [
+                                            "very_bad",
+                                            "bad",
+                                            "good",
+                                            "very_good"
+                                        ],
+                                        "example": "good"
+                                    },
+                                    "pain_level": {
+                                        "description": "Pain level on a scale of 1 (no pain) to 10 (worst pain).",
+                                        "type": "integer",
+                                        "enum": [
+                                            1,
+                                            2,
+                                            3,
+                                            4,
+                                            5,
+                                            6,
+                                            7,
+                                            8,
+                                            9,
+                                            10
+                                        ],
+                                        "example": 3
+                                    },
+                                    "oxygen_saturation": {
+                                        "description": "Blood oxygen saturation (%, 0-100)",
+                                        "type": "integer",
+                                        "example": 98
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Medical record created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Medical record created successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": true,
+                                    "message": "Medical record created successfully"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 11000
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Authentication required",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 10002
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "Authentication token not provided.",
+                                    "code": 10002
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests - Rate limit exceeded",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 15001
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You have made too many requests in a short period. Please try again later."
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "You have made too many requests in a short period. Please try again later.",
+                                    "code": 15001
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred on the server."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19001
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "An unexpected error occurred on the server.",
+                                    "code": 19001
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable - Database connection issues",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The service is temporarily unavailable. Please try again later."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19002
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "The service is temporarily unavailable. Please try again later.",
+                                    "code": 19002
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/medical-visits/schedule": {
+            "post": {
+                "tags": [
+                    "Medical Visits"
+                ],
+                "summary": "Schedule New Medical Appointment",
+                "description": "Creates a new medical appointment booking.",
+                "operationId": "scheduleVisit",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "specialist_type",
+                                    "date_time",
+                                    "reason"
+                                ],
+                                "properties": {
+                                    "specialist_type": {
+                                        "description": "Type of the specialist for the visit. Possible values: doctor, nurse, physiotherapist.",
+                                        "type": "string",
+                                        "enum": [
+                                            "doctor",
+                                            "nurse",
+                                            "physiotherapist"
+                                        ],
+                                        "example": "doctor"
+                                    },
+                                    "date_time": {
+                                        "description": "Date and time of the visit in YYYY-MM-DD-HH-mm format.",
+                                        "type": "string",
+                                        "example": "2025-06-15-14-30"
+                                    },
+                                    "reason": {
+                                        "type": "string",
+                                        "example": "Consultation about blood pressure"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Appointment scheduled successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Medical visit scheduled successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 10002
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 11000
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Specialist of the requested type not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The requested resource was not found."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 13001
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict - Visit slot unavailable",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The selected specialist is unavailable at this time. Please choose a different time slot."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 14001
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "The selected specialist is unavailable at this time. Please choose a different time slot.",
+                                    "code": 14001
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable - Database connection issues",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The service is temporarily unavailable. Please try again later."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19002
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "The service is temporarily unavailable. Please try again later.",
+                                    "code": 19002
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred on the server."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19001
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "An unexpected error occurred on the server.",
+                                    "code": 19001
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/medications": {
+            "get": {
+                "tags": [
+                    "Medications"
+                ],
+                "summary": "Get patient's medications for a specific day",
+                "description": "Returns a list of medications assigned to the logged-in patient for a given date.",
+                "operationId": "getMedicationsByDate",
+                "responses": {
+                    "200": {
+                        "description": "List of medications",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "medication_id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "name": {
+                                                "type": "string",
+                                                "example": "Aspirin"
+                                            },
+                                            "dosage": {
+                                                "type": "string",
+                                                "example": "100mg"
+                                            },
+                                            "part_of_day": {
+                                                "description": "Indicates the part of the day for medication intake. Possible values: morning, midday, evening, night.",
+                                                "type": "string",
+                                                "enum": [
+                                                    "morning",
+                                                    "midday",
+                                                    "evening",
+                                                    "night"
+                                                ],
+                                                "example": "morning"
+                                            },
+                                            "is_taken": {
+                                                "type": "boolean",
+                                                "example": false
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "example": [
+                                    {
+                                        "medication_id": 1,
+                                        "name": "Aspirin",
+                                        "dosage": "100mg",
+                                        "part_of_day": "morning",
+                                        "is_taken": false
+                                    },
+                                    {
+                                        "medication_id": 2,
+                                        "name": "Vitamin D",
+                                        "dosage": "1000 IU",
+                                        "part_of_day": "evening",
+                                        "is_taken": true
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized access",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 10002
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "Authentication token not provided.",
+                                    "code": 10002
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable - Database connection issues",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The service is temporarily unavailable. Please try again later."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19002
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "The service is temporarily unavailable. Please try again later.",
+                                    "code": 19002
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred on the server."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19001
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "An unexpected error occurred on the server.",
+                                    "code": 19001
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/medications/confirm": {
+            "post": {
+                "tags": [
+                    "Medications"
+                ],
+                "summary": "Confirm medication intake",
+                "description": "Updates the intake status of a medication for a given ID.",
+                "operationId": "confirmMedication",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "medication_ids"
+                                ],
+                                "properties": {
+                                    "medication_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "example": {
+                                "medication_ids": [
+                                    1,
+                                    2,
+                                    3
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Medication status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Medication status updated"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": true,
+                                    "message": "Medication status updated"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized access",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 10002
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "Authentication token not provided.",
+                                    "code": 10002
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable - Database connection issues",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The service is temporarily unavailable. Please try again later."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19002
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "The service is temporarily unavailable. Please try again later.",
+                                    "code": 19002
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred on the server."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19001
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "An unexpected error occurred on the server.",
+                                    "code": 19001
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/recommendations": {
+            "get": {
+                "tags": [
+                    "Recommendations"
+                ],
+                "summary": "Get all recommendations",
+                "description": "Get all recommendations\n\nReturns a list of all recommendations available in the system.",
+                "operationId": "getRecommendations",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "title": {
+                                                "type": "string",
+                                                "example": "Check-up Visit"
+                                            },
+                                            "description": {
+                                                "type": "string",
+                                                "example": "Recommended check-up visit in 3 months"
+                                            },
+                                            "created_at": {
+                                                "description": "Creation date in YYYY-MM-DD-HH-mm-ss format",
+                                                "type": "string",
+                                                "example": "2025-05-13-14-30-00"
+                                            },
+                                            "specialist_type": {
+                                                "description": "Type of the specialist who added the recommendation. Possible values: doctor, nurse, physiotherapist.",
+                                                "type": "string",
+                                                "enum": [
+                                                    "doctor",
+                                                    "nurse",
+                                                    "physiotherapist"
+                                                ],
+                                                "example": "doctor"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 10002
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "Unauthorized",
+                                    "code": 10002
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable - Database connection issues",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The service is temporarily unavailable. Please try again later."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19002
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "The service is temporarily unavailable. Please try again later.",
+                                    "code": 19002
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred on the server."
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 19001
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "An unexpected error occurred on the server.",
+                                    "code": 19001
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "responses": {
+            "401": {
+                "description": "Refresh token not provided, invalid, or expired",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Unauthorized"
+                                },
+                                "code": {
+                                    "type": "integer",
+                                    "example": 10002
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "422": {
+                "description": "Validation error",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "properties": {
+                                "success": {
+                                    "type": "boolean",
+                                    "example": false
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "The given data was invalid."
+                                },
+                                "code": {
+                                    "type": "integer",
+                                    "example": 11000
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": "Enter your JWT token in the format: Bearer {token}"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "EmergencyCalls",
+            "description": "API Endpoints for managing emergency calls for patients"
+        },
+        {
+            "name": "Medical Records",
+            "description": "API Endpoints for managing patient medical records"
+        },
+        {
+            "name": "Medications",
+            "description": "API Endpoints for managing patient medications"
+        },
+        {
+            "name": "Recommendations",
+            "description": "Operations related to recommendations"
+        },
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "Medical Visits",
+            "description": "Medical Visits"
+        }
+    ],
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ]
+}

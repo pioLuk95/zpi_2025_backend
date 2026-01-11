@@ -10,30 +10,29 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator; 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\QueryException; 
-use Illuminate\Database\Eloquent\ModelNotFoundException; 
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class MedicalVisitController extends Controller
 {
     use ApiResponseTrait;
 
-    private array $availableSpecialists = []; 
-    private array $visits = [];
-
     /**
      * @OA\Post(
      *     path="/api/medical-visits/schedule",
-     *     summary="Schedule New Medical Appointment",
-     *     description="Creates a new medical appointment booking.",
+    *     summary="Schedule New Medical Appointment",
+    *     description="Creates a new medical appointment request for the authenticated patient.",
      *     operationId="scheduleVisit",
      *     tags={"Medical Visits"},
      *     security={{"bearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"specialist_type", "date_time", "reason"},
-     *             @OA\Property(property="specialist_type", type="string", example="doctor", enum={"doctor", "nurse", "physiotherapist"}, description="Type of the specialist for the visit. Possible values: doctor, nurse, physiotherapist."),
-     *             @OA\Property(property="date_time", type="string", example="2025-06-15-14-30", description="Date and time of the visit in YYYY-MM-DD-HH-mm format."),
-     *             @OA\Property(property="reason", type="string", example="Consultation about blood pressure")
+    *             required={"staff_role_id", "visit_date", "visit_hour", "comment"},
+    *             @OA\Property(property="staff_role_id", type="integer", example=3, description="Requested staff role id (references roles.id)."),
+    *             @OA\Property(property="visit_date", type="string", format="date", example="2026-01-15", description="Visit date (YYYY-MM-DD)."),
+    *             @OA\Property(property="visit_hour", type="string", example="14:30", description="Visit hour (HH:mm)."),
+    *             @OA\Property(property="comment", type="string", example="Consultation about blood pressure", description="Patient comment/reason for the visit.")
      *         )
      *     ),
      *     @OA\Response(
@@ -61,26 +60,6 @@ class MedicalVisitController extends Controller
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="The given data was invalid."),
      *             @OA\Property(property="code", type="integer", example=11000)
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Specialist of the requested type not found",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="The requested resource was not found."),
-     *             @OA\Property(property="code", type="integer", example=13001)
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=409,
-     *         description="Conflict - Visit slot unavailable",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="The selected specialist is unavailable at this time. Please choose a different time slot."),
-     *             @OA\Property(property="code", type="integer", example=14001),
-     *             example={"success": false, "message": "The selected specialist is unavailable at this time. Please choose a different time slot.", "code": 14001}
      *         )
      *     ),
      *     @OA\Response(
@@ -117,9 +96,10 @@ class MedicalVisitController extends Controller
             }
 
             $validator = Validator::make($request->all(), [
-                'specialist_type' => 'required|in:doctor,nurse,physiotherapist',
-                'date_time' => 'required|date_format:Y-m-d-H-i|after_or_equal:today',
-                'reason' => 'required|string|min:3'
+                'staff_role_id' => 'required|integer|in:3,4,5|exists:roles,id',
+                'visit_date' => 'required|date_format:Y-m-d|after_or_equal:today',
+                'visit_hour' => 'required|date_format:H:i',
+                'comment' => 'required|string|min:3',
             ]);
 
             if ($validator->fails()) {
@@ -128,31 +108,31 @@ class MedicalVisitController extends Controller
 
             $data = $validator->validated();
 
-            
-            foreach ($this->visits as $existingVisit) {
-                if (isset($existingVisit['specialist_type']) && $existingVisit['specialist_type'] === $data['specialist_type'] &&
-                    isset($existingVisit['date_time']) && $existingVisit['date_time'] === $data['date_time']) {
-                    return $this->errorResponse(ApiErrorCodes::VISIT_SLOT_UNAVAILABLE);
-                }
-            }
-            
-
-            $specialist = collect($this->availableSpecialists)->firstWhere('type', $data['specialist_type']);
-            
-            if (!$specialist && empty($this->availableSpecialists)) { 
-                
+            $now = Carbon::now();
+            $visitHour = $data['visit_hour'];
+            if (preg_match('/^\d{2}:\d{2}$/', $visitHour) === 1) {
+                $visitHour .= ':00';
             }
 
-            $visitId = 'visit_' . time() . '_' . rand(1000, 9999);
-            $this->visits[] = array_merge($data, ['visit_id' => $visitId, 'patient_id' => $user->id]);
+            DB::table('appointments')->insert([
+                'patient_id' => $user->id,
+                'staff_id' => null,
+                'staff_role_id' => $data['staff_role_id'],
+                'insert_date' => $now,
+                'visit_date' => $data['visit_date'],
+                'visit_hour' => $visitHour,
+                'comment' => $data['comment'],
+                'type' => 'home',
+                'status' => 'new',
+                'location' => null,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
 
             return $this->successResponse([], 'Medical visit scheduled successfully', 201);
         } catch (QueryException $e) {
             Log::error('Service unavailable - DB connection issue in MedicalVisitController@scheduleVisit: ' . $e->getMessage());
             return $this->errorResponse(ApiErrorCodes::SERVICE_UNAVAILABLE);
-        } catch (ModelNotFoundException $e) {
-            Log::warning('Resource not found in MedicalVisitController@scheduleVisit: ' . $e->getMessage());
-            return $this->errorResponse(ApiErrorCodes::RESOURCE_NOT_FOUND);
         } catch (\Exception $e) {
             Log::error('Generic exception in MedicalVisitController@scheduleVisit: ' . $e->getMessage());
             return $this->errorResponse(ApiErrorCodes::SERVER_ERROR);

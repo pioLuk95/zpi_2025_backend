@@ -4,12 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Common\ApiErrorCodes;
 use App\Http\Traits\ApiResponseTrait;
-use App\Models\Recomendation;
 use Illuminate\Http\JsonResponse;
-use Carbon\Carbon; 
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @group Recommendations
@@ -28,7 +27,7 @@ class RecomendationController extends Controller
     /**
      * Get all recommendations
      * 
-     * Returns a list of all recommendations available in the system.
+    * Returns a list of recommendations for the authenticated patient.
      * 
      * @OA\Get(
      *     path="/api/recommendations",
@@ -39,14 +38,21 @@ class RecomendationController extends Controller
      *         response=200,
      *         description="Successful operation",
      *         @OA\JsonContent(
-     *             type="array",
-     *             @OA\Items(
-     *                 type="object",
-     *                 @OA\Property(property="title", type="string", example="Check-up Visit"),
-     *                 @OA\Property(property="description", type="string", example="Recommended check-up visit in 3 months"),
-     *                 @OA\Property(property="created_at", type="string", example="2025-05-13-14-30-00", description="Creation date in YYYY-MM-DD-HH-mm-ss format"),
-     *                 @OA\Property(property="specialist_type", type="string", example="doctor", enum={"doctor", "nurse", "physiotherapist"}, description="Type of the specialist who added the recommendation. Possible values: doctor, nurse, physiotherapist.")
-     *             )
+    *             type="object",
+    *             @OA\Property(property="success", type="boolean", example=true),
+    *             @OA\Property(property="message", type="string", example="Recommendations retrieved successfully."),
+    *             @OA\Property(
+    *                 property="data",
+    *                 type="array",
+    *                 @OA\Items(
+    *                     type="object",
+    *                     @OA\Property(property="id", type="integer", example=1),
+    *                     @OA\Property(property="role", type="string", example="Doctor"),
+    *                     @OA\Property(property="date", type="string", format="date", example="2025-05-12"),
+    *                     @OA\Property(property="type", type="string", example="Breathing exercises"),
+    *                     @OA\Property(property="text", type="string", example="Perform breathing exercises 3 times a day for 10 minutes.")
+    *                 )
+    *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -101,24 +107,23 @@ class RecomendationController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $recommendations = Recomendation::all();
-            $transformedRecommendations = $recommendations->map(function (Recomendation $recommendation) {
-                $specialistType = null;
-                if ($recommendation->staffPatient && $recommendation->staffPatient->staff && $recommendation->staffPatient->staff->type) {
-                    
-                    $type = strtolower($recommendation->staffPatient->staff->type);
-                    if (in_array($type, ['doctor', 'nurse', 'physiotherapist'])) {
-                        $specialistType = $type;
-                    }
-                }
-                return [
-                    'title' => $recommendation->title,
-                    'description' => $recommendation->description,
-                    'created_at' => Carbon::parse($recommendation->created_at)->format('Y-m-d-H-i-s'),
-                    'specialist_type' => $specialistType,
-                ];
-            });
-            return $this->successResponse($transformedRecommendations, 'Recommendations retrieved successfully.');
+            $patient = auth()->user();
+
+            $recommendations = DB::table('recomendations')
+                ->join('staff_patients', 'recomendations.staff_patient_id', '=', 'staff_patients.id')
+                ->join('staff', 'staff_patients.staff_id', '=', 'staff.id')
+                ->leftJoin('roles', 'staff.role_id', '=', 'roles.id')
+                ->where('staff_patients.patient_id', '=', $patient->id)
+                ->select([
+                    'recomendations.id as id',
+                    DB::raw("COALESCE(roles.name, '') as role"),
+                    'recomendations.date as date',
+                    'recomendations.type as type',
+                    'recomendations.text as text',
+                ])
+                ->get();
+
+            return $this->successResponse($recommendations, 'Recommendations retrieved successfully.');
         } catch (QueryException $e) {
             Log::error('Service unavailable - DB connection issue in RecomendationController@index: ' . $e->getMessage());
             return $this->errorResponse(ApiErrorCodes::SERVICE_UNAVAILABLE);

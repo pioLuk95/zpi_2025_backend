@@ -63,3 +63,8 @@ Route::get('/patients_medications', [PatientMedicationController::class, 'landin
 Route::post('/patients_medications/{patient}', [App\Http\Controllers\PatientMedicationController::class, 'store'])->name('patients_medications.store');
 Route::put('/patients_medications/{patient}/{patientMedication}', [App\Http\Controllers\PatientMedicationController::class, 'update'])->name('patients_medications.update');
 Route::delete('/patients_medications/{patient}/{patientMedication}', [App\Http\Controllers\PatientMedicationController::class, 'destroy'])->name('patients_medications.destroy');
+
+// Statistics - Admin only
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/patients_medications/statistics', [PatientMedicationController::class, 'statistics'])->name('patients_medications.statistics');
+});

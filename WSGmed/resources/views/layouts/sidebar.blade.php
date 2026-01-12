@@ -66,6 +66,15 @@
     </li>
     @endif
 
+    @if(Auth::check() && Auth::user()->role === 'admin')
+    <li class="nav-item {{ active_class(['/patients_medications/statistics']) }}">
+        <a class="nav-link" href="/patients_medications/statistics">
+            <i class="menu-icon mdi mdi-chart-bar"></i>
+            <span class="menu-title">Statystyki</span>
+        </a>
+    </li>
+    @endif
+
     {{--<li class="nav-item {{ active_class(['user-pages/*']) }}">
       <a class="nav-link" data-toggle="collapse" href="#user-pages" aria-expanded="{{ is_active_route(['user-pages/*']) }}" aria-controls="user-pages">
         <i class="menu-icon mdi mdi-lock-outline"></i>

@@ -23,6 +23,10 @@ class Patient extends Authenticatable implements JWTSubject
         'password',
     ];
 
+    protected $casts = [
+        'date_of_birth' => 'date',
+    ];
+
     public function records()
     {
         return $this->hasMany(MedicalRecord::class);

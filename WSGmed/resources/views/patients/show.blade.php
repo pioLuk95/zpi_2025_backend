@@ -5,12 +5,11 @@
     <h2>Szczegóły pacjenta</h2>
      <a href="{{ route('patient-emergencies.show', $patient) }}" class="btn btn-primary mb-3">Pokaż emergency calle dla tego pacjenta</a>
 
-    <div class="card mt-3">
+    <div class="card mt-3 p-5">
         <div class="card-body">
             <h5 class="card-title">{{ $patient->name }} {{ $patient->s_name }}</h5>
             <p class="card-text"><strong>Email:</strong> {{ $patient->email }}</p>
             <p class="card-text"><strong>Data urodzenia:</strong> {{ $patient->date_of_birth }}</p>
-            <p class="card-text"><strong>Lokalizacja:</strong> {{ $patient->location->name ?? 'Brak' }}</p>
 
             <a href="{{ route('patients.edit', $patient) }}" class="btn btn-warning">Edytuj</a>
             <form action="{{ route('patients.destroy', $patient) }}" method="POST" class="d-inline"
@@ -49,7 +48,7 @@
                 <tr><td colspan="10">Brak wpisów</td></tr>
                 @endforelse
             </tbody>
-        </table>    
+        </table>
 
         <a href="{{ route('patient-medications.create', $patient) }}" class="btn btn-primary mt-3">Przypisz lek</a>
 
@@ -151,7 +150,7 @@
                 <tr><td colspan="10">Brak wpisów</td></tr>
                 @endforelse
             </tbody>
-        </table>    
+        </table>
 
     </div>
 </div>

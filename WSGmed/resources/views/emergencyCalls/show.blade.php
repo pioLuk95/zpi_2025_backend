@@ -9,7 +9,6 @@
             <h5 class="card-title">{{ $emergency_call->patient->name }} {{ $emergency_call->patient->s_name }}</h5>
             <p class="card-text"><strong>Email:</strong> {{ $emergency_call->patient->email }}</p>
             <p class="card-text"><strong>Data urodzenia:</strong> {{ $emergency_call->patient->date_of_birth }}</p>
-            <p class="card-text"><strong>Lokalizacja:</strong> {{ $emergency_call->patient->location->name ?? 'Brak' }}</p>
             <hr>
             <p class="card-text"><strong>Data zdarzenia:</strong> {{ $emergency_call->date}}</p>
             <p class="card-text"><strong>Status zdarzenia:</strong> {{ $emergency_call->status}}</p>
@@ -18,7 +17,7 @@
 
 
 
-            <a href="{{ route('emergency_calls.edit', $emergency_call) }}" class="btn btn-warning">Edutuj opis</a>
+            <a href="{{ route('emergency_calls.edit', $emergency_call) }}" class="btn btn-warning">Edytuj opis</a>
             <form action="{{ route('emergency_calls.destroy', $emergency_call) }}" method="POST" class="d-inline"
                   onsubmit="return confirm('Na pewno usunąć emergency call?');">
                 @csrf

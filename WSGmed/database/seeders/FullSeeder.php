@@ -20,7 +20,6 @@ class FullSeeder extends Seeder
      */
     public function run(): void
     {
-        Location::factory()->count(20)->create();
         Medication::factory()->count(15)->create();
         $staff = Staff::factory()->count(10)->create();
         $patients = Patient::factory()->count(50)->create();
@@ -31,16 +30,14 @@ class FullSeeder extends Seeder
                 's_name' => 'Test',
                 'password' => Hash::make('password123'),
                 'email' => 'p.lukaszewski95@gmail.com',
-                'date_of_birth' => '1973-05-12',
-                'location_id' => '1'
+                'date_of_birth' => '1973-05-12'
             ]),
             Patient::factory()->create([
                 'name' => 'Dominik',
                 's_name' => 'Test',
                 'password' => bcrypt('password123'),
                 'email' => 'raisecreed@gmail.com',
-                'date_of_birth' => '1973-05-12',
-                'location_id' => '1'
+                'date_of_birth' => '1973-05-12'
             ])
         );
 

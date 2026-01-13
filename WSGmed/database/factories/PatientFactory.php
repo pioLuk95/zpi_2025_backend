@@ -22,9 +22,7 @@ class PatientFactory extends Factory
             'password' => bcrypt('password'),
             'name' => $this->faker->firstName,
             's_name' => $this->faker->lastName,
-            'date_of_birth' => $this->faker->date('Y-m-d', '2005-01-01'),
-            // Użyj istniejącej lokalizacji lub stwórz nową, jeśli żadna nie istnieje
-            'location_id' => Location::inRandomOrder()->first()->id ?? Location::factory()->create()->id,
+            'date_of_birth' => $this->faker->date('Y-m-d', '2005-01-01')
         ];
     }
 }

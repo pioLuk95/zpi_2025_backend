@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('name', 255);
             $table->string('s_name', 255);
             $table->date('date_of_birth');
-            $table->foreignId('location_id')->constrained('locations')->onDelete('cascade');
             $table->timestamps();
         });
     }

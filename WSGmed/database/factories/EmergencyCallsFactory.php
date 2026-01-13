@@ -18,7 +18,7 @@ class EmergencyCallsFactory extends Factory
     {
         return [
             'patient_id' => \App\Models\Patient::inRandomOrder()->first()->id,
-            'date' => $this->faker->dateTimeBetween('-6 months', 'now'),
+            'insert_date' => $this->faker->dateTimeBetween('-6 months', 'now'),
             'status' => $this->faker->numberBetween(0, 2),
         ];
     }

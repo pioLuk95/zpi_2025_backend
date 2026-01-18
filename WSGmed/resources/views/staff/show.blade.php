@@ -22,20 +22,18 @@
                 <thead>
                     <tr>
                         <th>Imię i nazwisko</th>
-                        <th>Sala</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($patients as $patient)
                     <tr>
                         <td><a href="{{ route('patients.show', $patient) }}">{{ $patient->name }} {{ $patient->s_name }}</a></td>
-                        <td>{{ $patient->location->name }}</td>
                     </tr>
                     @empty
                     <tr><td colspan="2">Brak wpisów</td></tr>
                     @endforelse
                 </tbody>
-            </table>    
+            </table>
         </div>
     </div>
 </div>

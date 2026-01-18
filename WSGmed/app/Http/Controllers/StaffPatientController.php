@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Staff;
 use App\Models\StaffPatient;
 use Illuminate\Http\Request;
+use App\Models\Role;
+
 
 
 class StaffPatientController extends Controller
@@ -76,17 +78,23 @@ class StaffPatientController extends Controller
 
     public function renderAssign(Request $request, $patient)
     {
-        $staff = Staff::all()->filter(function ($s) use ($patient) {
+        // Pobierz wszystkie role
+        $roles = Role::all();
+
+        // Pobierz pracowników, którzy NIE są jeszcze przypisani do pacjenta
+        $staff = Staff::with('role')->get()->filter(function ($s) use ($patient) {
             return !StaffPatient::where('staff_id', $s->id)
                 ->where('patient_id', $patient)
                 ->exists();
         });
-        
+
         return view('staff_patients.assign', [
             'staff' => $staff,
+            'roles' => $roles,
             'patient' => $patient,
         ]);
     }
+
 
     public function assign(Request $request, $patient)
     {
@@ -97,7 +105,7 @@ class StaffPatientController extends Controller
         StaffPatient::create([
         'staff_id' => $valideted['staff_id'],
         'patient_id' => $patient]);
-        
+
         return redirect()->route('patients.show', $patient);
     }
 }

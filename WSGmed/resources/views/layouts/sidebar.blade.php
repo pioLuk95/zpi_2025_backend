@@ -30,12 +30,6 @@
           </a>
       </li>
       <li class="nav-item {{ active_class(['/']) }}">
-          <a class="nav-link" @if(Auth::check())href="{{ url('/locations') }}"@endif>
-              <i class="menu-icon mdi mdi-hospital-building"></i>
-              <span class="menu-title">Sale</span>
-          </a>
-      </li>
-      <li class="nav-item {{ active_class(['/']) }}">
           <a class="nav-link" @if(Auth::check())href="{{ url('/staff') }}"@endif>
               <i class="menu-icon mdi mdi-doctor"></i>
               <span class="menu-title">Personel</span>
@@ -57,14 +51,14 @@
     </li>
     @endif
 
-    @if(Auth::check() && Auth::user()->role !== 'user')
+{{--    @if(Auth::check() && Auth::user()->role !== 'user')
     <li class="nav-item {{ active_class(['/patients_medications']) }}">
         <a class="nav-link" href="/patients_medications">
             <i class="menu-icon mdi mdi-note-text"></i>
             <span class="menu-title">Przyjmowane leki</span>
         </a>
     </li>
-    @endif
+    @endif--}}
 
     @if(Auth::check() && Auth::user()->role === 'admin')
     <li class="nav-item {{ active_class(['/patients_medications/statistics']) }}">

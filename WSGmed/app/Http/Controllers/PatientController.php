@@ -13,7 +13,7 @@ class PatientController extends Controller
     {
         $this->middleware(RequireTotpVerification::class)->only('index');
     }
-    
+
     /**
      * Display a listing of the resource.
      */
@@ -27,9 +27,8 @@ class PatientController extends Controller
      * Show the form for creating a new resource.
      */
     public function create()
-    {   
-        $locations = Location::all();
-        return view('patients.create', compact('locations'));
+    {
+        return view('patients.create');
     }
 
     /**
@@ -42,7 +41,6 @@ class PatientController extends Controller
             's_name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:patients',
             'date_of_birth' => 'required|date',
-            'location_id' => 'required|exists:locations,id',
         ]);
 
         $validated['password'] = bcrypt("saa2fasg3as"); // TODO
@@ -64,7 +62,7 @@ class PatientController extends Controller
      * Show the form for editing the specified resource.
      */
     public function edit(Patient $patient)
-    {   
+    {
         $locations = Location::all();
         return view('patients.edit', compact('patient', 'locations'));
     }
@@ -77,9 +75,8 @@ class PatientController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             's_name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:patients',
+            'email' => 'required|email|max:255|unique:patients,email,' . $patient->id,
             'date_of_birth' => 'required|date',
-            'location_id' => 'required|exists:locations,id',
         ]);
 
         $patient->update($validated);

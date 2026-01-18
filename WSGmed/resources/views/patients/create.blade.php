@@ -31,19 +31,6 @@
             <input type="email" class="form-control" id="email" name="email" value="{{ old('email', $patient->email ?? '') }}" required>
         </div>
 
-        <div class="mb-3">
-            <label for="location_id" class="form-label">Lokalizacja</label>
-            <select name="location_id" class="form-select" required>
-                <option value="">-- wybierz lokalizację --</option>
-                @foreach ($locations as $location)
-                    <option value="{{ $location->id }}" 
-                        {{ old('location_id', $patient->location_id ?? '') == $location->id ? 'selected' : '' }}>
-                        {{ $location->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        
         <button type="submit" class="btn btn-success">{{ isset($patient) ? 'Zapisz zmiany' : 'Dodaj' }}</button>
     </form>
 </div>

@@ -19,7 +19,7 @@
                 <td>{{ $patient->s_name }}</td>
                 <td>{{ $patient->email }}</td>
                 <td>
-                    <form action="{{ route('patients_medications.store', ['patient' => $patient->id]) }}" method="POST" class="d-flex align-items-center">
+                    <form action="{{ route('patient-medications.store', ['patient' => $patient->id]) }}" method="POST" class="d-flex align-items-center">
                         @csrf
                         <select name="medication_id" class="form-control form-control-sm me-2" required>
                             <option value="">Select Medicament</option>

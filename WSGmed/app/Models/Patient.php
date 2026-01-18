@@ -55,6 +55,11 @@ class Patient extends Authenticatable implements JWTSubject
         return $this->hasMany(PatientMedication::class);
     }
 
+    public function recommendations()
+    {
+        return $this->hasMany(Recomendation::class);
+    }
+
     public function getJWTCustomClaims()
     {
         return [];

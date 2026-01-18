@@ -114,7 +114,6 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>Pacjent</th>
                     <th>Data</th>
                     <th>Ciśnienie</th>
                     <th>Temp.</th>
@@ -129,8 +128,7 @@
             <tbody>
                 @forelse ($records as $record)
                 <tr>
-                    <td>{{ $record->patient->name }} {{ $record->patient->s_name }}</td>
-                    <td>{{ $record->record_date }}</td>
+                    <td>{{ $record->insert_date }}</td>
                     <td>{{ $record->blood_pressure }}</td>
                     <td>{{ $record->temperature }}</td>
                     <td>{{ $record->pulse }}</td>
@@ -140,6 +138,37 @@
                     <td>{{ $record->oxygen_saturation }}</td>
                     <td>
                         <form action="{{ route('medical-records.destroy', $record) }}" method="POST" onsubmit="return confirm('Na pewno usunąć?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-sm btn-danger">Usuń</button>
+                        </form>
+                    </td>
+                </tr>
+                @empty
+                <tr><td colspan="10">Brak wpisów</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        <a href="{{ route('recommendations.create', $patient) }}" class="btn btn-primary mt-3">Dodaj zalecenia</a>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Osoba wystawiająca</th>
+                    <th>Treść</th>
+                    <th>Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($patient->recommendations as $recommendation)
+                <tr>
+                    <td>{{ $recommendation->date }}</td>
+                    <td>{{ $recommendation->staff->name }}</td>
+                    <td>{{ $recommendation->text }}</td>
+                    <td>
+                        <form action="{{ route('recommendations.destroy', $recommendation) }}" method="POST">
                             @csrf
                             @method('DELETE')
                             <button class="btn btn-sm btn-danger">Usuń</button>

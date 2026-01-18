@@ -11,9 +11,9 @@ class Recomendation extends Model
     use HasFactory;
 
     protected $fillable = [
-        'staff_patient_id',
+        'patient_id',
+        'staff_id',
         'date',
-        'type',
         'text',
     ];
 
@@ -21,8 +21,13 @@ class Recomendation extends Model
         'date' => 'date:Y-m-d',
     ];
     
-    public function staffPatient()
+    public function patient()
     {
-        return $this->belongsTo(StaffPatient::class);
+        return $this->belongsTo(Patient::class);
+    }
+    
+    public function staff()
+    {
+        return $this->belongsTo(Staff::class);
     }
 }

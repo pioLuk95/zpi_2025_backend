@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Patient;
 use App\Models\Recomendation;
+use App\Models\StaffPatient;
 use Illuminate\Http\Request;
 
 
@@ -19,9 +21,11 @@ class RecomendationController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Patient $patient)
     {
-        //
+        return view("recommendations.create", [
+            'patient' => $patient
+        ]);
     }
 
     /**
@@ -29,7 +33,14 @@ class RecomendationController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        Recomendation::create([
+            'patient_id' => $request->input('patient_id'),
+            'staff_id' => auth()->user()->id,
+            'date' => $request->input('date'),
+            'text' => $request->input('text'),
+        ]);
+
+        return redirect()->route('patients.show', $request->input('patient_id'));
     }
 
     /**
@@ -59,8 +70,10 @@ class RecomendationController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Recomendation $recomendation)
+    public function destroy(Recomendation $recommendation)
     {
-        //
+        $patientId = $recommendation->patient->id;
+        $recommendation->delete();
+        return redirect()->route('patients.show', $patientId);
     }
 }

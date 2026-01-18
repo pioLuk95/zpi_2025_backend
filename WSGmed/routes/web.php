@@ -53,6 +53,11 @@ Route::delete('staff_patients/{staff}/{patient}', [App\Http\Controllers\StaffPat
 Route::get('patients/{patient}/assign', [App\Http\Controllers\StaffPatientController::class, 'renderAssign'])->name('staff_patients.renderAssign');
 Route::post('patients/{patient}/assign', [App\Http\Controllers\StaffPatientController::class, 'assign'])->name('staff_patients.assign');
 
+// Recommendations
+Route::get('/patients/{patient}/recommendations/create', [App\Http\Controllers\RecomendationController::class, 'create'])->name('recommendations.create');
+Route::post('/patients/{patient}/recommendations', [App\Http\Controllers\RecomendationController::class, 'store'])->name('recommendations.store');
+Route::delete('/recommendations/{recommendation}', [App\Http\Controllers\RecomendationController::class, 'destroy'])->name('recommendations.destroy');
+
 // User Role Management
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/roles', [App\Http\Controllers\UserRoleController::class, 'index'])->name('roles.index');

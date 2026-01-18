@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('recomendations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('staff_patient_id')->constrained('staff_patients')->onDelete('cascade');
+            $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade');
+            $table->foreignId('staff_id')->constrained('staff')->onDelete('cascade');
             $table->date('date');
-            $table->string('type', 255);
             $table->text('text');
             $table->timestamps();
         });

@@ -30,14 +30,15 @@ class MedicalRecordController extends Controller
     /**
      * Create a new medical record
      * * Creates a new medical record for the authenticated patient with the provided health parameters. 
-     * The patient_id is automatically retrieved from the authenticated user. The record timestamp is set automatically by the server.
-     * * @bodyParam blood_pressure integer required Blood pressure value. Example: 120
+    * The patient_id is automatically retrieved from the authenticated user. The record timestamp is set automatically by the server.
+    * * @bodyParam systolic_pressure integer required Systolic blood pressure value (mmHg). Example: 120
+    * @bodyParam diastolic_pressure integer required Diastolic blood pressure value (mmHg). Example: 80
      * @bodyParam temperature numeric required Body temperature in Celsius (e.g., 36.6). Example: 36.6
-     * @bodyParam pulse integer required Pulse rate (beats per minute). Example: 75
+    * @bodyParam pulse numeric required Pulse rate (beats per minute). Example: 75
      * @bodyParam weight numeric required Weight in kilograms (e.g., 70.55). Example: 70.55
-     * @bodyParam mood string required Mood rating. Possible values: "very_bad", "bad", "good", "very_good". Example: "good"
-     * @bodyParam pain_level integer required Pain level (scale 1-10, where 1 is no pain and 10 is worst pain). Example: 3
-     * @bodyParam oxygen_saturation integer required Blood oxygen saturation (%, 0-100). Example: 98
+    * @bodyParam mood string required Mood value. One of: very_bad, bad, good, very_good. Example: good
+    * @bodyParam pain_level integer required Pain level (scale 1-10, where 1 is no pain and 10 is worst pain). Example: 3
+    * @bodyParam oxygen_saturation integer required Blood oxygen saturation (%, 1-100). Example: 98
      * * @response status=201 scenario="Success" {
      * "success": true,
      * "message": "Medical record created successfully",
@@ -76,14 +77,15 @@ class MedicalRecordController extends Controller
      * @OA\RequestBody(
      * required=true,
      * @OA\JsonContent(
-     * required={"blood_pressure", "temperature", "pulse", "weight", "mood", "pain_level", "oxygen_saturation"},
-     * @OA\Property(property="blood_pressure", type="integer", example=120),     
+    * required={"systolic_pressure", "diastolic_pressure", "temperature", "pulse", "weight", "mood", "pain_level", "oxygen_saturation"},
+    * @OA\Property(property="systolic_pressure", type="integer", example=120, description="Systolic blood pressure (mmHg)"),
+    * @OA\Property(property="diastolic_pressure", type="integer", example=80, description="Diastolic blood pressure (mmHg)"),
      * @OA\Property(property="temperature", type="number", format="float", example=36.6, description="Body temperature in Celsius, e.g., up to one decimal place."),
-     * @OA\Property(property="pulse", type="integer", example=75),
+    * @OA\Property(property="pulse", type="number", format="float", example=75, description="Pulse rate (beats per minute)."),
      * @OA\Property(property="weight", type="number", format="float", example=70.55, description="Weight in kilograms, e.g., up to two decimal places."),
-     * @OA\Property(property="mood", type="string", example="good", enum={"very_bad", "bad", "good", "very_good"}, description="Patient's mood rating."),
-     * @OA\Property(property="pain_level", type="integer", example=3, enum={1,2,3,4,5,6,7,8,9,10}, description="Pain level on a scale of 1 (no pain) to 10 (worst pain)."),
-     * @OA\Property(property="oxygen_saturation", type="integer", example=98, description="Blood oxygen saturation (%, 0-100)")
+    * @OA\Property(property="mood", type="string", example="good", enum={"very_bad","bad","good","very_good"}, description="Mood value."),
+    * @OA\Property(property="pain_level", type="integer", example=3, enum={1,2,3,4,5,6,7,8,9,10}, description="Pain level on a scale of 1 (no pain) to 10 (worst pain)."),
+    * @OA\Property(property="oxygen_saturation", type="integer", example=98, description="Blood oxygen saturation (%, 1-100)")
      * )
      * ),
      * @OA\Response(
@@ -173,13 +175,14 @@ class MedicalRecordController extends Controller
             $user = auth()->user(); 
 
             $validator = Validator::make($request->all(), [
-                'blood_pressure' => 'required|integer',
+                'systolic_pressure' => 'required|integer|min:0',
+                'diastolic_pressure' => 'required|integer|min:0',
                 'temperature' => 'required|numeric',
-                'pulse' => 'required|integer',
-                'weight' => 'required|numeric',
+                'pulse' => 'required|numeric|min:0',
+                'weight' => 'required|numeric|min:0',
                 'mood' => 'required|string|in:very_bad,bad,good,very_good',
-                'pain_level' => 'required|integer|between:0,10',
-                'oxygen_saturation' => 'required|integer|between:0,100',
+                'pain_level' => 'required|integer|between:1,10',
+                'oxygen_saturation' => 'required|integer|between:1,100',
 
 
             ]);
@@ -189,13 +192,20 @@ class MedicalRecordController extends Controller
             }
 
             $validatedData = $validator->validated();
-            $validatedData['patient_id'] = $user->id;
+            $record = new MedicalRecord();
+            $record->patient_id = $user->id;
+            $record->insert_date = Carbon::now();
 
-             
-             $validatedData['record_date'] = Carbon::now();
+            $record->temperature = (float) $validatedData['temperature'];
+            $record->pulse = (float) $validatedData['pulse'];
+            $record->weight = (float) $validatedData['weight'];
+            $record->mood = $validatedData['mood'];
+            $record->pain_level = $validatedData['pain_level'];
+            $record->oxygen_saturation = $validatedData['oxygen_saturation'];
+            $record->systolic_pressure = $validatedData['systolic_pressure'];
+            $record->diastolic_pressure = $validatedData['diastolic_pressure'];
 
-
-            MedicalRecord::create($validatedData);
+            $record->save();
 
             return $this->successResponse([], 'Medical record created successfully', 201);
         } catch (ValidationException $e) {
@@ -213,4 +223,5 @@ class MedicalRecordController extends Controller
             return $this->errorResponse(ApiErrorCodes::SERVER_ERROR);
         }
     }
+
 }

@@ -8,6 +8,8 @@ use App\Http\Traits\ApiResponseTrait;
 use App\Models\EmergencyCalls;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @OA\Tag(
@@ -22,18 +24,25 @@ class EmergencyCallsController extends Controller
     /**
      * Create a new emergency call.
      *
-     * Creates a new emergency call for the authenticated user. 
-     * The patient_id is automatically assigned based on the logged-in user.
-     * The creation timestamp is automatically set by the server.
+    * Creates a new emergency call for the authenticated patient.
+    * The patient_id is taken from the JWT token (any provided patient_id in the payload is ignored).
+    * Server sets insert_date to now and status to 1.
      *
      * @group EmergencyCalls
-     * * @OA\Post(
-     * path="/api/emergency-calls",
-     * operationId="createEmergencyCall",
-     * tags={"EmergencyCalls"},
-     * summary="Create a new emergency call",
-     * description="Creates a new emergency call for the authenticated user. The patient_id is automatically assigned based on the logged-in user. This endpoint does not require a request body.",
-     * security={{"bearerAuth": {}}},
+    * @OA\Post(
+    *     path="/api/emergency-calls",
+    *     operationId="createEmergencyCall",
+    *     tags={"EmergencyCalls"},
+    *     summary="Create a new emergency call",
+    *     description="Creates a new emergency call for the authenticated patient. patient_id is derived from the JWT token; insert_date is set by the server; status is set to 1.",
+    *     security={{"bearerAuth": {}}},
+    *     @OA\RequestBody(
+    *         required=false,
+    *         @OA\JsonContent(
+    *             type="object",
+    *             @OA\Property(property="patient_id", type="integer", example=123, description="Optional. Ignored (patient_id is taken from JWT token).")
+    *         )
+    *     ),
      * @OA\Response(
      * response=201,
      * description="Emergency call created successfully",
@@ -113,31 +122,25 @@ class EmergencyCallsController extends Controller
      */
     public function store(Request $request)
     {
-        $user = auth()->user(); 
-        $patientId = $user->id;
-
         try {
+            $user = auth()->user();
+            if (!$user || !isset($user->id)) {
+                return $this->errorResponse(ApiErrorCodes::AUTH_INVALID_OR_EXPIRED_TOKEN);
+            }
+
             EmergencyCalls::create([
-                'patient_id' => $patientId,
-                'date' => Carbon::now(),
-                'status' => 0, 
+                'patient_id' => $user->id,
+                'insert_date' => Carbon::now(),
+                'status' => 1,
             ]);
            
             return $this->successResponse([], 'Emergency call created successfully', 201);
             
-        } catch (\Illuminate\Database\QueryException $e) {
-            $sqlState = $e->errorInfo[0] ?? null;
-            
-            if (in_array($sqlState, ['08001', '08003', '08004', '08006', '08007', '08S01'])) {
-                \Illuminate\Support\Facades\Log::error('Service unavailable - DB connection issue: ' . $e->getMessage());
-                return $this->errorResponse(ApiErrorCodes::SERVICE_UNAVAILABLE);
-            }
-            
-            \Illuminate\Support\Facades\Log::error('Server error - DB query exception: ' . $e->getMessage());
-            return $this->errorResponse(ApiErrorCodes::SERVER_ERROR);
-            
+        } catch (QueryException $e) {
+            Log::error('DB query exception in EmergencyCallsController@store: ' . $e->getMessage());
+            return $this->errorResponse(ApiErrorCodes::SERVICE_UNAVAILABLE);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Generic exception in EmergencyCallsController: ' . $e->getMessage());
+            Log::error('Generic exception in EmergencyCallsController@store: ' . $e->getMessage());
             return $this->errorResponse(ApiErrorCodes::SERVER_ERROR);
         }
     }

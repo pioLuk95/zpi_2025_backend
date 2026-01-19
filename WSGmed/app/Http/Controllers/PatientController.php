@@ -87,20 +87,13 @@ class PatientController extends Controller
      */
     public function destroy(Patient $patient)
     {
-// Usuń powiązania staff-patient
         StaffPatient::where('patient_id', $patient->id)->delete();
-
-// Usuń rekordy medyczne
         if (method_exists($patient, 'records')) {
             $patient->records()->delete();
         }
-
-// Usuń powiązania leków (pivot)
         if (method_exists($patient, 'medications')) {
             $patient->medications()->detach();
         }
-
-// Usuń pacjenta
         $patient->delete();
 
         return redirect()->route('patients.index')->with('success', 'Pacjent został usunięty.');

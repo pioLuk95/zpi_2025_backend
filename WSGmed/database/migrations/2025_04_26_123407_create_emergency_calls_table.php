@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('emergency_calls', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade');
-            $table->date('date');
-            $table->integer('status');
+            $table->foreignId('patient_id')->constrained('patients');
+
+            $table->dateTime('insert_date')->nullable();
+            $table->integer('status')->nullable();
+            
             $table->timestamps();
         });
     }

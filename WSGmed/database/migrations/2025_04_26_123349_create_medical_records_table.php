@@ -13,15 +13,18 @@ return new class extends Migration
     {
         Schema::create('medical_records', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade');
-            $table->date('record_date');
-            $table->double('blood_pressure');
-            $table->double('temperature');
-            $table->double('pulse');
-            $table->double('weight');
-            $table->tinyInteger('mood'); //1-10
-            $table->tinyInteger('pain_level'); //1-10
-            $table->double('oxygen_saturation');
+            $table->foreignId('patient_id')->constrained('patients');
+
+            $table->dateTime('insert_date')->nullable();
+            $table->float('temperature')->nullable();
+            $table->float('pulse')->nullable();
+            $table->float('weight')->nullable();
+            $table->enum('mood', ['very_bad', 'bad', 'good', 'very_good'])->nullable();
+            $table->integer('pain_level')->nullable();
+            $table->integer('oxygen_saturation')->nullable();
+            $table->integer('systolic_pressure')->nullable();
+            $table->integer('diastolic_pressure')->nullable();
+
             $table->timestamps();
         });
     }

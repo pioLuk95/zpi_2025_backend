@@ -62,6 +62,26 @@ class FullSeeder extends Seeder
                     'staff_id' => $staff->random()->id,
                 ]);
             }
+
+            $recommendationsCount = rand(1, 4);
+            for ($k = 0; $k < $recommendationsCount; $k++) {
+                $patient->recommendations()->create([
+                    'staff_id' => $staff->random()->id,
+                    'date' => now()->subDays(rand(0, 30)),
+                    'text' => 'This is a recommendation text for patient ' . $patient->id,
+                ]);
+            }
+
+            $patientMedicationsCount = rand(1, 5);
+            for ($m = 0; $m < $patientMedicationsCount; $m++) {
+                $patient->patientMedications()->create([
+                    'medication_id' => Medication::inRandomOrder()->first()->id,
+                    'dosage' => rand(1, 500) . ' mg',
+                    'frequency' => rand(1, 4) . ' times a day',
+                    'start_date' => now()->subDays(rand(0, 60)),
+                    'end_date' => now()->addDays(rand(1, 60))
+                ]);
+            }
         }
     }
 }

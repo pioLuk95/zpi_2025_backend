@@ -18,7 +18,7 @@ class EmergencyCallsController extends Controller
     }
 
     public function showEmergencies(Patient $patient)
-    {   
+    {
         $calls = EmergencyCalls::where('patient_id', $patient->id)->paginate(10);
         return view('emergencyCalls.index', ['calls' => $calls]);
     }
@@ -60,10 +60,27 @@ class EmergencyCallsController extends Controller
      */
     public function update(Request $request, EmergencyCalls $emergency_call)
     {
-        $emergency_call->description = $request->input('description');
+        $request->validate([
+            'status' => 'nullable|integer|in:0,1,2',
+            'description' => 'nullable|string',
+        ]);
+
+        if ($request->has('status')) {
+            $emergency_call->status = $request->status;
+        }
+
+        if ($request->has('description')) {
+            $emergency_call->description = $request->description;
+        }
+
         $emergency_call->save();
-        return redirect()->route('emergency_calls.index')->with('success', 'Opis został zaktualizowany.');
+
+        return redirect()
+            ->route('emergency_calls.index')
+            ->with('success', 'Status zaktualizowany');
+
     }
+
 
     /**
      * Remove the specified resource from storage.

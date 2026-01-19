@@ -3,6 +3,11 @@
 @section('content')
 <div class="container">
     <h1>Emergency Calle</h1>
+    @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
 
 
     <table class="table table-striped">
@@ -19,11 +24,12 @@
             @foreach($calls as $call)
             <tr>
                 <td>{{ $call->patient->name }} {{ $call->patient->s_name }}</td>
-                <td>{{ $call->date }}</td>
+                <td>{{ $call->insert_date }}</td>
                 <td>{{ $call->status_name }}</td>
                 <td>
                     <a href="{{ route('emergency_calls.show', $call) }}" class="btn btn-primary btn-sm">Pokaż</a>
-                    <form action="{{ route('emergency_calls.destroy', $call->id) }}" method="POST" class="d-inline ms-2">
+                    <form action="{{ route('emergency_calls.destroy', $call->id) }}" method="POST" class="d-inline ms-2"
+                          onsubmit="return confirm('Na pewno usunąć emergency call?');">
                         @csrf
                         @method('DELETE')
                         <button class="btn btn-danger btn-sm">Usuń</button>

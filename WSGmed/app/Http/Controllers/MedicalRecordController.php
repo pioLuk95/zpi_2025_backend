@@ -34,18 +34,18 @@ class MedicalRecordController extends Controller
     {
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
-            'record_date' => 'required|date',
+            'insert_date' => 'required|date',
             'blood_pressure' => 'required|numeric',
             'temperature' => 'required|numeric',
             'pulse' => 'required|numeric',
             'weight' => 'required|numeric',
-            'mood' => 'required|integer|between:1,10',
+            'mood' => 'required|in:very_bad,bad,good,very_good',
             'pain_level' => 'required|integer|between:1,10',
             'oxygen_saturation' => 'required|numeric',
         ]);
-    
+
         MedicalRecord::create($validated);
-    
+
         return redirect()
             ->route('patients.show', $validated['patient_id'])
             ->with('success', 'Wpis medyczny został dodany.');
@@ -79,7 +79,7 @@ class MedicalRecordController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(MedicalRecord $medicalRecord)
-    {   
+    {
         $patient = $medicalRecord->patient;
         $medicalRecord->delete();
 

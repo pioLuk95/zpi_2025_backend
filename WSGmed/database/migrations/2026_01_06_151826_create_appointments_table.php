@@ -20,7 +20,6 @@ return new class extends Migration
             $table->date('visit_date')->nullable();
             $table->time('visit_hour')->nullable();
             $table->enum('type', ['home', 'clinic']);
-            $table->string('location')->nullable();
             $table->enum('status', ['new', 'accepted', 'rejected', 'canceled', 'completed']);
             $table->text('comment')->nullable();
             $table->enum('staff_role', ['internist', 'specialist', 'rehabilitator','nurse','doctor']);

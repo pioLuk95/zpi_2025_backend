@@ -9,7 +9,6 @@ use App\Models\Staff;
 use App\Models\Medication;
 use App\Models\MedicalRecord;
 use App\Models\EmergencyCalls;
-use App\Models\Location;
 use App\Models\StaffPatient;
 use Illuminate\Support\Facades\Hash;
 
@@ -23,7 +22,7 @@ class FullSeeder extends Seeder
         Medication::factory()->count(15)->create();
         $staff = Staff::factory()->count(10)->create();
         $patients = Patient::factory()->count(50)->create();
-        
+
         $patients->push(
             Patient::factory()->create([
                 'name' => 'Piotr',

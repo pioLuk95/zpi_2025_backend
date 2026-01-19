@@ -13,8 +13,12 @@
             </div>
 
             <div class="mb-3">
-                <label for="record_date">Data wpisu</label>
-                <input type="date" name="insert_date" class="form-control" value="{{ now()->toDateString() }}" required>
+                <label for="insert_date">Data i godzina wpisu</label>
+                <input type="datetime-local"
+                       name="insert_date"
+                       class="form-control"
+                       value="{{ now()->format('Y-m-d\TH:i') }}"
+                       required>
             </div>
 
             {{-- Ciśnienie krwi --}}

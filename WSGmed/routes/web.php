@@ -17,15 +17,20 @@ Route::get('/', function () {
 Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
+// Staff routes - Admin only
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::resource('staff', App\Http\Controllers\StaffController::class);
+    Route::get('/patients_medications/statistics', [PatientMedicationController::class, 'statistics'])->name('patients_medications.statistics');
+    Route::get('/roles', [App\Http\Controllers\UserRoleController::class, 'index'])->name('roles.index');
+    Route::patch('/roles/{user}', [App\Http\Controllers\UserRoleController::class, 'update'])->name('roles.update');
+});
+
+Route::middleware('auth')->group(function () {
+
 // Basic CRUD operations
 Route::resource('patients', App\Http\Controllers\PatientController::class);
 Route::resource('medications', App\Http\Controllers\MedicationController::class);
 Route::resource('emergency_calls', App\Http\Controllers\EmergencyCallsController::class);
-
-// Staff routes - Admin only
-Route::middleware(['auth', 'admin'])->group(function () {
-    Route::resource('staff', App\Http\Controllers\StaffController::class);
-});
 
 // Profile
 Route::get('/profile/show', [ProfileController::class, 'show'])->name('profile.show');
@@ -58,18 +63,9 @@ Route::get('/patients/{patient}/recommendations/create', [App\Http\Controllers\R
 Route::post('/patients/{patient}/recommendations', [App\Http\Controllers\RecomendationController::class, 'store'])->name('recommendations.store');
 Route::delete('/recommendations/{recommendation}', [App\Http\Controllers\RecomendationController::class, 'destroy'])->name('recommendations.destroy');
 
-// User Role Management
-Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/roles', [App\Http\Controllers\UserRoleController::class, 'index'])->name('roles.index');
-    Route::patch('/roles/{user}', [App\Http\Controllers\UserRoleController::class, 'update'])->name('roles.update');
-});
-
 Route::get('/patients_medications', [PatientMedicationController::class, 'landing'])->name('patients_medications.landing');
 Route::post('/patients_medications/{patient}', [App\Http\Controllers\PatientMedicationController::class, 'store'])->name('patients_medications.store');
 Route::put('/patients_medications/{patient}/{patientMedication}', [App\Http\Controllers\PatientMedicationController::class, 'update'])->name('patients_medications.update');
 Route::delete('/patients_medications/{patient}/{patientMedication}', [App\Http\Controllers\PatientMedicationController::class, 'destroy'])->name('patients_medications.destroy');
 
-// Statistics - Admin only
-Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/patients_medications/statistics', [PatientMedicationController::class, 'statistics'])->name('patients_medications.statistics');
 });

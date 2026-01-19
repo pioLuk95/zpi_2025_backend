@@ -51,13 +51,6 @@
                             </button>
                         </div>
                     </form>
-
-                    <div class="mt-4 text-center">
-                        <small class="text-muted">
-                            <i class="bi bi-question-circle"></i> Nie masz dostępu do aplikacji? 
-                            <a href="{{ route('logout') }}" class="text-decoration-none">Skontaktuj się z administratorem</a>
-                        </small>
-                    </div>
                 </div>
             </div>
         </div>

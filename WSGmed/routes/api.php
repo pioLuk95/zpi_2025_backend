@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\EmergencyCallsController;
 use App\Http\Controllers\Api\MedicalRecordController;
 use App\Http\Controllers\Api\PatientMedicationController;
 use App\Http\Controllers\Api\RecomendationController;
+use App\Http\Controllers\Api\SwaggerController;
 use App\Http\Controllers\Api\AuthTokenController;
 use App\Http\Controllers\Api\MedicalVisitController;
 
@@ -22,4 +23,5 @@ Route::post('medical-visits/schedule', [MedicalVisitController::class, 'schedule
 
 Route::apiResource('recommendations', RecomendationController::class)->only(['index']);
 Route::post('medical-records', [MedicalRecordController::class, "save"])->middleware('throttle:5,1'); 
+Route::get('/api/docs', [SwaggerController::class, 'documentationList']);
 });

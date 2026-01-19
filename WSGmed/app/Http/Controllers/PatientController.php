@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Middleware\RequireTotpVerification;
 use App\Models\Patient;
+use App\Models\StaffPatient;
 use Illuminate\Http\Request;
-use App\Models\Location;
 
 class PatientController extends Controller
 {
@@ -63,8 +63,7 @@ class PatientController extends Controller
      */
     public function edit(Patient $patient)
     {
-        $locations = Location::all();
-        return view('patients.edit', compact('patient', 'locations'));
+        return view('patients.edit', compact('patient'));
     }
 
     /**
@@ -88,7 +87,15 @@ class PatientController extends Controller
      */
     public function destroy(Patient $patient)
     {
+        StaffPatient::where('patient_id', $patient->id)->delete();
+        if (method_exists($patient, 'records')) {
+            $patient->records()->delete();
+        }
+        if (method_exists($patient, 'medications')) {
+            $patient->medications()->detach();
+        }
         $patient->delete();
+
         return redirect()->route('patients.index')->with('success', 'Pacjent został usunięty.');
     }
 }

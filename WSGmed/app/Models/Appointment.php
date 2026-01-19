@@ -15,7 +15,6 @@ class Appointment extends Model{
         'visit_date',
         'visit_hour',
         'type',
-        'location',
         'status',
         'comment',
         'staff_role_id',

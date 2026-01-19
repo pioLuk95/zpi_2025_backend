@@ -7,9 +7,9 @@ use App\Common\ApiErrorCodes;
 use App\Http\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Validator; 
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Database\QueryException; 
+use Illuminate\Database\QueryException;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -88,8 +88,8 @@ class MedicalVisitController extends Controller
      */
     public function scheduleVisit(Request $request): JsonResponse
     {
-       
-        try { 
+
+        try {
             $user = auth()->user();
             if (!$user || !isset($user->id)) {
                 return $this->errorResponse(ApiErrorCodes::AUTH_INVALID_OR_EXPIRED_TOKEN);
@@ -124,7 +124,6 @@ class MedicalVisitController extends Controller
                 'comment' => $data['comment'],
                 'type' => 'home',
                 'status' => 'new',
-                'location' => null,
                 'created_at' => $now,
                 'updated_at' => $now,
             ]);

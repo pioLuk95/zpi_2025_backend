@@ -14,16 +14,15 @@ return new class extends Migration
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('patient_id')->constrained('patients');
-            $table->foreignId('staff_id')->constrained('staff');
+            $table->foreignId('staff_id')->nullable()->constrained('staff');
 
             $table->dateTime('insert_date')->nullable();
             $table->date('visit_date')->nullable();
             $table->time('visit_hour')->nullable();
             $table->enum('type', ['home', 'clinic']);
-            $table->string('location')->nullable();
             $table->enum('status', ['new', 'accepted', 'rejected', 'canceled', 'completed']);
             $table->text('comment')->nullable();
-            $table->enum('staff_role', ['internist', 'specialist', 'rehabilitator','nurse','doctor']);
+            $table->foreignId('staff_role_id')->nullable()->constrained('roles')->onDelete('set null');
 
             $table->timestamps();
         });

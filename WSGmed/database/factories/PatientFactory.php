@@ -1,8 +1,6 @@
 <?php
 
 namespace Database\Factories;
-use App\Models\Location; // Import modelu Location
-
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

@@ -21,6 +21,16 @@ class MedicalRecord extends Model
         'systolic_pressure',
         'diastolic_pressure',
     ];
+    public function getMoodLabelAttribute()
+    {
+        return [
+            'very_bad'   => 'Bardzo zły',
+            'bad'        => 'Zły',
+            'good'       => 'Dobry',
+            'very_good'  => 'Bardzo dobry',
+        ][$this->mood] ?? 'Nieznany';
+    }
+
 
     public $casts = [
         'insert_date' => 'datetime',

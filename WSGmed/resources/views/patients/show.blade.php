@@ -133,7 +133,7 @@
                     <td>{{ $record->temperature }}</td>
                     <td>{{ $record->pulse }}</td>
                     <td>{{ $record->weight }}</td>
-                    <td>{{ $record->mood }}</td>
+                    <td>{{ $record->mood_label }}</td>
                     <td>{{ $record->pain_level }}</td>
                     <td>{{ $record->oxygen_saturation }}</td>
                     <td>

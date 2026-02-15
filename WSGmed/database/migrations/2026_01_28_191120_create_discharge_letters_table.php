@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('patient_medication_confirmations', function (Blueprint $table) {
+        Schema::create('discharge_letters', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('patient_medication_id')->constrained('patient_medications');
-
-            $table->dateTime('confirmation_date')->nullable();
-
+            $table->foreignId('patient_id')->constrained()->onDelete('cascade');
+            $table->date('discharge_date');
+            $table->text('discharge_notes')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('patient_medication_confirmations');
+        Schema::dropIfExists('discharge_letters');
     }
 };

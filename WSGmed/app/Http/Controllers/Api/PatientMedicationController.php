@@ -10,8 +10,9 @@ use Carbon\Carbon;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Models\PatientMedication;
+use App\Models\PatientMedicationConfirmation;
 
 /**
  * @OA\Tag(
@@ -23,38 +24,41 @@ class PatientMedicationController extends Controller
 {
     use ApiResponseTrait;
 
-    /**
-     * @OA\Get(
-     *     path="/api/medications",
-        *     summary="Get patient's medications for today",
-        *     description="Returns a list of medications assigned to the logged-in patient for today based on start_date/end_date and marks them as taken if a confirmation exists for today.",
-     *     operationId="getMedicationsByDate",
-     *     tags={"Medications"},
-     *     security={{"bearerAuth": {}}},
-     *     @OA\Response(
-     *         response=200,
-     *         description="List of medications",
-     *         @OA\JsonContent(
-        *             type="object",
-        *             @OA\Property(property="success", type="boolean", example=true),
-        *             @OA\Property(property="message", type="string", example="Medications retrieved successfully."),
-        *             @OA\Property(
-        *                 property="data",
-        *                 type="array",
-        *                 @OA\Items(
-        *                     type="object",
-        *                     @OA\Property(property="name", type="string", example="Aspirin"),
-        *                     @OA\Property(property="info", type="string", example="Pain reliever and fever reducer."),
-        *                     @OA\Property(property="patient_medication_id", type="integer", example=10),
-        *                     @OA\Property(property="dosage", type="number", format="float", example=100),
-        *                     @OA\Property(property="unit", type="string", example="MG", enum={"MG","ML","TABLET"}),
-        *                     @OA\Property(property="is_taken", type="boolean", example=false),
-        *                     @OA\Property(property="med_taken", type="integer", example=1),
-        *                     @OA\Property(property="med_all", type="integer", example=3)
-        *                 )
-        *             )
-     *         )
-     *     ),
+        /**
+         * @OA\Get(
+         *     path="/api/medications",
+         *     summary="Get patient's medications for today",
+         *     description="Returns a list of medications assigned to the logged-in patient for today based on start_date/end_date and marks them as taken if a confirmation exists for today.",
+         *     operationId="getMedicationsByDate",
+         *     tags={"Medications"},
+         *     security={{"bearerAuth": {}}},
+         *     @OA\Response(
+         *         response=200,
+         *         description="List of medications",
+         *         @OA\JsonContent(
+         *             type="object",
+         *             @OA\Property(property="success", type="boolean", example=true),
+         *             @OA\Property(property="message", type="string", example="Medications retrieved successfully."),
+         *             @OA\Property(
+         *                 property="data",
+         *                 type="object",
+         *                 @OA\Property(property="med_taken", type="integer", example=2),
+         *                 @OA\Property(property="med_all", type="integer", example=3),
+         *                 @OA\Property(
+         *                     property="medications",
+         *                     type="array",
+         *                     @OA\Items(
+         *                         type="object",
+         *                         @OA\Property(property="name", type="string", example="Aspirin"),
+         *                         @OA\Property(property="info", type="string", example="Pain reliever and fever reducer."),
+         *                         @OA\Property(property="patient_medication_id", type="integer", example=10),
+         *                         @OA\Property(property="dosage", type="string", example="1 tabletka"),
+         *                         @OA\Property(property="is_taken", type="boolean", example=false)
+         *                     )
+         *                 )
+         *             )
+         *         )
+         *     ),
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized access",
@@ -103,47 +107,55 @@ class PatientMedicationController extends Controller
         try {
             $today = Carbon::today()->toDateString();
 
-            $rows = DB::table('patient_medications as pm')
-                ->join('medications as m', 'pm.medication_id', '=', 'm.id')
-                ->leftJoin('patient_medication_confirmations as pmc', function ($join) use ($today) {
-                    $join->on('pmc.patient_medication_id', '=', 'pm.id')
-                        ->where('pmc.planned_date', '=', $today)
-                        ->whereNotNull('pmc.confirmation_date');
-                })
-                ->where('pm.patient_id', '=', $patientId)
-                ->where('pm.start_date', '<=', $today)
+            $patientMedicationsQuery = PatientMedication::query()
+                ->where('patient_id', '=', $patientId)
+                ->whereDate('start_date', '<=', $today)
                 ->where(function ($query) use ($today) {
-                    $query->whereNull('pm.end_date')
-                        ->orWhere('pm.end_date', '>=', $today);
-                })
-                ->select([
-                    'm.name as name',
-                    'm.info as info',
-                    'pm.id as patient_medication_id',
-                    'pm.dosage as dosage',
-                    'pm.unit as unit',
-                    DB::raw('CASE WHEN pmc.id IS NULL THEN 0 ELSE 1 END as is_taken'),
+                    $query->whereNull('end_date')
+                        ->orWhereDate('end_date', '>=', $today);
+                });
+
+            $medAll = (clone $patientMedicationsQuery)->count();
+            $medTaken = (int) PatientMedicationConfirmation::query()
+                ->whereNotNull('confirmation_date')
+                ->whereDate('confirmation_date', '=', $today)
+                ->whereIn('patient_medication_id', (clone $patientMedicationsQuery)->select('id'))
+                ->distinct()
+                ->count('patient_medication_id');
+
+            $patientMedications = (clone $patientMedicationsQuery)
+                ->with([
+                    'medication:id,name,info',
                 ])
-                ->orderBy('pm.id')
-                ->get();
+                ->get(['id', 'medication_id', 'dosage']);
 
-            $medAll = $rows->count();
-            $medTaken = $rows->filter(fn ($row) => (int) $row->is_taken === 1)->count();
+            $medicationIds = $patientMedications->pluck('id')->all();
+            $takenIds = empty($medicationIds)
+                ? []
+                : PatientMedicationConfirmation::query()
+                    ->whereIn('patient_medication_id', $medicationIds)
+                    ->whereNotNull('confirmation_date')
+                    ->whereDate('confirmation_date', '=', $today)
+                    ->pluck('patient_medication_id')
+                    ->unique()
+                    ->all();
+            $takenIdSet = empty($takenIds) ? [] : array_fill_keys($takenIds, true);
 
-            $medications = $rows->map(function ($row) use ($medTaken, $medAll) {
+            $medications = $patientMedications->map(function (PatientMedication $pm) use ($takenIdSet) {
                 return [
-                    'name' => $row->name,
-                    'info' => $row->info,
-                    'patient_medication_id' => (int) $row->patient_medication_id,
-                    'dosage' => (float) $row->dosage,
-                    'unit' => $row->unit,
-                    'is_taken' => (bool) $row->is_taken,
-                    'med_taken' => $medTaken,
-                    'med_all' => $medAll,
+                    'name' => $pm->medication?->name,
+                    'info' => $pm->medication?->info,
+                    'patient_medication_id' => (int) $pm->id,
+                    'dosage' => (string) $pm->dosage,
+                    'is_taken' => isset($takenIdSet[$pm->id]),
                 ];
             });
 
-            return $this->successResponse($medications, 'Medications retrieved successfully.');
+            return $this->successResponse([
+                'med_taken' => $medTaken,
+                'med_all' => $medAll,
+                'medications' => $medications,
+            ], 'Medications retrieved successfully.');
         } catch (QueryException $e) {
             Log::error('Service unavailable - DB connection issue in PatientMedicationController@getMedicationsByDate: ' . $e->getMessage());
             return $this->errorResponse(ApiErrorCodes::SERVICE_UNAVAILABLE);
@@ -157,7 +169,7 @@ class PatientMedicationController extends Controller
      * @OA\Post(
      *     path="/api/medications/confirm",
      *     summary="Confirm medication intake",
-        *     description="Saves medication confirmations for the given day by inserting (or updating) a confirmation record with planned_date and confirmation_date.",
+             *     description="Creates (or removes) today's medication confirmations.",
      *     operationId="confirmMedication",
      *     tags={"Medications"},
      *     security={{"bearerAuth": {}}},
@@ -171,16 +183,15 @@ class PatientMedicationController extends Controller
         *                 type="array",
         *                 @OA\Items(
         *                     type="object",
-        *                     required={"patient_medication_id","current_date","is_taken"},
+          *                     required={"patient_medication_id","is_taken"},
         *                     @OA\Property(property="patient_medication_id", type="integer", example=10),
-        *                     @OA\Property(property="current_date", type="string", format="date", example="2026-01-09"),
         *                     @OA\Property(property="is_taken", type="boolean", example=true)
         *                 )
         *             ),
         *             example={
         *                 "medications": {
-        *                     {"patient_medication_id": 10, "current_date": "2026-01-09", "is_taken": true},
-        *                     {"patient_medication_id": 11, "current_date": "2026-01-09", "is_taken": false}
+          *                     {"patient_medication_id": 10, "is_taken": true},
+          *                     {"patient_medication_id": 11, "is_taken": false}
         *                 }
         *             }
      *         )
@@ -191,11 +202,17 @@ class PatientMedicationController extends Controller
      *         @OA\JsonContent(
      *             type="object",
      *             @OA\Property(property="success", type="boolean", example=true),
-        *             @OA\Property(property="message", type="string", example="Medication confirmations saved"),
-     *             example={
-     *                 "success": true,
-        *                 "message": "Medication confirmations saved"
-     *             }
+          *             @OA\Property(property="message", type="string", example="Medication confirmations saved"),
+          *             @OA\Property(
+          *                 property="data",
+          *                 type="object",
+          *                 @OA\Property(property="confirmed", type="integer", example=2)
+          *             ),
+      *             example={
+      *                 "success": true,
+          *                 "message": "Medication confirmations saved",
+          *                 "data": {"confirmed": 2}
+      *             }
      *         )
      *     ),
      *     @OA\Response(
@@ -255,7 +272,6 @@ class PatientMedicationController extends Controller
                         return $query->where('patient_id', $patientId);
                     }),
                 ],
-                'medications.*.current_date' => 'required|date_format:Y-m-d',
                 'medications.*.is_taken' => 'required|boolean',
             ], [
                 'medications.*.patient_medication_id.exists' => 'One or more medication IDs are invalid or do not belong to this patient.',
@@ -270,46 +286,30 @@ class PatientMedicationController extends Controller
             $confirmedCount = 0;
 
             foreach ($validated['medications'] as $item) {
-                if (!$item['is_taken']) {
-                    continue;
-                }
+                $id = (int) $item['patient_medication_id'];
 
-                $patientMedicationId = (int) $item['patient_medication_id'];
-                $plannedDate = $item['current_date'];
+                if ($item['is_taken']) {
+                    $existsToday = PatientMedicationConfirmation::query()
+                        ->where('patient_medication_id', $id)
+                        ->whereDate('confirmation_date', Carbon::today())
+                        ->exists();
 
-                $updated = DB::table('patient_medication_confirmations')
-                    ->where('patient_medication_id', '=', $patientMedicationId)
-                    ->where('planned_date', '=', $plannedDate)
-                    ->whereNull('confirmation_date')
-                    ->update([
+                    if ($existsToday) {
+                        continue;
+                    }
+
+                    PatientMedicationConfirmation::create([
+                        'patient_medication_id' => $id,
                         'confirmation_date' => $now,
-                        'updated_at' => $now,
                     ]);
 
-                if ($updated > 0) {
                     $confirmedCount++;
-                    continue;
+                } else {
+                    PatientMedicationConfirmation::query()
+                        ->where('patient_medication_id', $id)
+                        ->whereDate('confirmation_date', Carbon::today())
+                        ->delete();
                 }
-
-                $alreadyConfirmed = DB::table('patient_medication_confirmations')
-                    ->where('patient_medication_id', '=', $patientMedicationId)
-                    ->where('planned_date', '=', $plannedDate)
-                    ->whereNotNull('confirmation_date')
-                    ->exists();
-
-                if ($alreadyConfirmed) {
-                    continue;
-                }
-
-                DB::table('patient_medication_confirmations')->insert([
-                    'patient_medication_id' => $patientMedicationId,
-                    'planned_date' => $plannedDate,
-                    'confirmation_date' => $now,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ]);
-
-                $confirmedCount++;
             }
 
             return $this->successResponse([

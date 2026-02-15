@@ -33,10 +33,22 @@ class StaffController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            's_name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:patients',
-            'date_of_birth' => 'required|date',
+            'name' => [
+            'required',
+            'string',
+            'min:2',
+            'max:50',
+            'regex:/^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s-]+$/'
+            ],
+            's_name' => [
+            'required',
+            'string',
+            'min:2',
+            'max:50',
+            'regex:/^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s-]+$/'
+            ],
+            'email' => 'required|email|max:255|unique:staff,email',
+            'date_of_birth' => 'required|date|before:today',
             'role_id' => 'required|exists:roles,id'
         ]);
 
@@ -69,12 +81,24 @@ class StaffController extends Controller
     public function update(Request $request, Staff $staff)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            's_name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:patients',
-            'date_of_birth' => 'required|date',
+            'name' => [
+            'required',
+            'string',
+            'min:2',
+            'max:50',
+            'regex:/^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s-]+$/'
+            ],
+            's_name' => [
+            'required',
+            'string',
+            'min:2',
+            'max:50',
+            'regex:/^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s-]+$/'
+            ],
+            'email' => 'required|email|max:255|unique:staff,email,' . $staff->id,
+            'date_of_birth' => 'required|date|before:today',
             'role_id' => 'required|exists:roles,id'
-        ]);
+      ]);
 
         $staff->update($validated);
         return redirect()->route('staff.index')->with('success', 'Worker został zaktualizowany.');

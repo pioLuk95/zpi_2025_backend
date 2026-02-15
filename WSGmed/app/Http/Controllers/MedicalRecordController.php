@@ -35,7 +35,8 @@ class MedicalRecordController extends Controller
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
             'insert_date' => 'required|date',
-            'blood_pressure' => 'required|numeric',
+            'systolic_pressure' => 'required|integer|min:0',
+            'diastolic_pressure' => 'required|integer|min:0',
             'temperature' => 'required|numeric',
             'pulse' => 'required|numeric',
             'weight' => 'required|numeric',

@@ -29,6 +29,7 @@ class FullSeeder extends Seeder
                 's_name' => 'Test',
                 'password' => Hash::make('password123'),
                 'email' => 'p.lukaszewski95@gmail.com',
+                'status' => Patient::STATUS_NEW,
                 'date_of_birth' => '1973-05-12'
             ]),
             Patient::factory()->create([
@@ -36,6 +37,7 @@ class FullSeeder extends Seeder
                 's_name' => 'Test',
                 'password' => bcrypt('password123'),
                 'email' => 'raisecreed@gmail.com',
+                'status' => Patient::STATUS_NEW,
                 'date_of_birth' => '1973-05-12'
             ])
         );
@@ -69,6 +71,7 @@ class FullSeeder extends Seeder
                     'staff_id' => $staff->random()->id,
                     'date' => now()->subDays(rand(0, 30)),
                     'text' => 'This is a recommendation text for patient ' . $patient->id,
+                    'tittle' => 'Recommendation ' . ($k + 1)
                 ]);
             }
 

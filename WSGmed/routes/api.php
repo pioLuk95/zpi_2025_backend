@@ -14,7 +14,6 @@ Route::post('password/email', [AuthTokenController::class, 'sendResetLinkEmail']
 
 Route::middleware('auth:api')->group(function () {
 Route::post('logout', [AuthTokenController::class, 'logout']);
-Route::post('password/email', [AuthTokenController::class, 'sendResetLinkEmail']);
 Route::post('emergency-calls', [EmergencyCallsController::class, 'store'])->middleware('throttle:5,1');
 Route::get('medications', [PatientMedicationController::class, 'getMedicationsByDate']); 
 Route::post('medications/confirm', [PatientMedicationController::class, 'confirmMedication']);

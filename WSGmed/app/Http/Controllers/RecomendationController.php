@@ -37,6 +37,7 @@ class RecomendationController extends Controller
             'patient_id' => $request->input('patient_id'),
             'staff_id' => auth()->user()->id,
             'date' => $request->input('date'),
+            'tittle' => $request->input('tittle'),
             'text' => $request->input('text'),
         ]);
 

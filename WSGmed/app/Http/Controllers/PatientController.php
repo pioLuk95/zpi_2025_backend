@@ -40,7 +40,7 @@ class PatientController extends Controller
             'name' => 'required|string|max:255',
             's_name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:patients',
-            'date_of_birth' => 'required|date',
+            'date_of_birth' => 'required|date'
         ]);
 
         $validated['password'] = bcrypt("saa2fasg3as"); // TODO
@@ -63,7 +63,13 @@ class PatientController extends Controller
      */
     public function edit(Patient $patient)
     {
-        return view('patients.edit', compact('patient'));
+        $statuses = [
+            Patient::STATUS_NEW,
+            Patient::STATUS_UNDER_TREATMENT,
+            Patient::STATUS_DISCHARGED,
+            Patient::STATUS_DIED
+        ];
+        return view('patients.edit', compact('patient','statuses'));
     }
 
     /**
@@ -76,6 +82,12 @@ class PatientController extends Controller
             's_name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:patients,email,' . $patient->id,
             'date_of_birth' => 'required|date',
+            'status' => 'required|in:' . implode(',', [
+                Patient::STATUS_NEW,
+                Patient::STATUS_UNDER_TREATMENT,
+                Patient::STATUS_DISCHARGED,
+                Patient::STATUS_DIED
+            ]),
         ]);
 
         $patient->update($validated);

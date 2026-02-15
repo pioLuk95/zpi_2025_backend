@@ -20,11 +20,15 @@
                        value="{{ now()->format('Y-m-d\TH:i') }}"
                        required>
             </div>
-
+            
             {{-- Ciśnienie krwi --}}
             <div class="mb-3">
-                <label for="blood_pressure">Ciśnienie krwi</label>
-                <input type="text" pattern="[0-9/]*" name="blood_pressure" class="form-control" required>
+                <label>Ciśnienie krwi (skurczowe / rozkurczowe)</label>
+
+                <div class="d-flex gap-2">
+                    <input type="number" name="systolic_pressure" class="form-control" placeholder="skurczowe np. 120" required>
+                    <input type="number" name="diastolic_pressure" class="form-control" placeholder="rozkurczowe np. 80" required>
+                </div>
             </div>
 
             {{-- Temperatura --}}

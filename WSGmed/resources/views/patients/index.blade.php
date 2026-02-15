@@ -10,6 +10,7 @@
         <thead>
             <tr>
                 <th>Imię i Nazwisko</th>
+                <th>Status</th>
                 <th>Data urodzenia</th>
                 <th>Akcje</th>
             </tr>
@@ -19,6 +20,7 @@
             @foreach($patients as $patient)
             <tr>
                 <td>{{ $patient->name }} {{ $patient->s_name }}</td>
+                <td>{{ $patient->status }}</td>
                 <td>{{ $patient->date_of_birth }}</td>
 
                 <td>

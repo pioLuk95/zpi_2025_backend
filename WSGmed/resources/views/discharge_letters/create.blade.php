@@ -2,35 +2,30 @@
 
 @section('content')
 <div class="container">
-    <h2>Nowe zalecenia</h2>
+    <h2>Stwórz wypis</h2>
 
-    <form action="{{ route('recommendations.store', $patient) }}" method="POST">
+    <form action="{{ route('discharge.store', $patient) }}" method="POST">
         @csrf
 
         <div class="mb-3">
             <input type="hidden" name="patient_id" value="{{ $patient->id }}">
             <p><strong>Pacjent:</strong> {{ $patient->name }} {{ $patient->s_name }}</p>
         </div>
-        <div class="mb-3">
-            <label for="record_date">Tytuł wpisu</label>
-            <input type="text" name="tittle" class="form-control">
-        </div>
 
         <div class="mb-3">
-            <label for="record_date">Data wpisu</label>
-            <input type="date" name="date" class="form-control" value="{{ now()->toDateString() }}" required>
+            <label for="discharge_date">Data wypisu</label>
+            <input type="date" name="discharge_date" class="form-control" value="{{ now()->toDateString() }}" required>
         </div>
 
+        Notatki:
        <textarea
-        name="text"
-        id="text"
+        name="discharge_notes"
+        id="discharge_notes"
         class="form-control"
         style="resize: both;"
         ></textarea>
 
-
-
-    @if ($errors->any())
+        @if ($errors->any())
             <div class="alert alert-danger">
                 <ul>
                     @foreach ($errors->all() as $error)
@@ -40,7 +35,7 @@
             </div>
         @endif
 
-        <button type="submit" class="btn btn-primary mt-5">Zapisz zalecenie</button>
+        <button type="submit" class="btn btn-primary mt-5">Zapisz wypis</button>
     </form>
 </div>
 @endsection

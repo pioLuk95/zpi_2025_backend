@@ -11,12 +11,10 @@ class PatientMedicationConfirmation extends Model
 
     protected $fillable = [
         'patient_medication_id',
-        'planned_date',
         'confirmation_date',
     ];
 
     protected $casts = [
-        'planned_date'       => 'date',
         'confirmation_date' => 'datetime',
     ];
 

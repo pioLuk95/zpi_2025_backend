@@ -48,6 +48,7 @@ Route::post('/2fa/verifyOtp', [TwoFactorController::class, 'verifyOtp'])->name('
 Route::get('/patients/{patient}/medications/create', [App\Http\Controllers\PatientMedicationController::class, 'create'])->name('patient-medications.create');
 Route::post('/patients/{patient}/medications', [App\Http\Controllers\PatientMedicationController::class, 'store'])->name('patient-medications.store');
 Route::delete('/patients/{patient}/medications/{patientMedication}', [App\Http\Controllers\PatientMedicationController::class, 'destroy'])->name('patient-medications.destroy');
+Route::post('/patient-medications/{patientMedication}/confirm', [App\Http\Controllers\PatientMedicationController::class, 'confirm'])->name('patient-medications.confirm');
 
 // Others
 Route::get('/patients/{patient}/medical_records/create', [App\Http\Controllers\MedicalRecordController::class, 'create'])->name('medical-records.create');
@@ -68,4 +69,8 @@ Route::post('/patients_medications/{patient}', [App\Http\Controllers\PatientMedi
 Route::put('/patients_medications/{patient}/{patientMedication}', [App\Http\Controllers\PatientMedicationController::class, 'update'])->name('patients_medications.update');
 Route::delete('/patients_medications/{patient}/{patientMedication}', [App\Http\Controllers\PatientMedicationController::class, 'destroy'])->name('patients_medications.destroy');
 
+Route::get('/discharge/{patient}/create', [App\Http\Controllers\DischargeLetterController::class, 'create'])->name('discharge.create');
+Route::post('/discharge', [App\Http\Controllers\DischargeLetterController::class, 'store'])->name('discharge.store');
+Route::get('/discharge/{dischargeLetter}/edit', [App\Http\Controllers\DischargeLetterController::class, 'edit'])->name('discharge.edit');
+Route::put('/discharge/{dischargeLetter}', [App\Http\Controllers\DischargeLetterController::class, 'update'])->name('discharge.update');
 });

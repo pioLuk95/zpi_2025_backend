@@ -14,7 +14,7 @@ use App\Http\Traits\ApiResponseTrait;
 /**
  * @OA\Tag(
  * name="Auth",
- * description="API Endpoints for authentication and token management"
+ * description="API Endpoints for authentication and token management!"
  * )
  */
 
@@ -34,7 +34,7 @@ class AuthTokenController extends Controller
      * @OA\Post(
      * path="/api/login",
      * tags={"Auth"},
-     * summary="Log in and get a JWT token",
+     * summary="Log in and get a JWT tokenn",
      * security={},
      * @OA\RequestBody(
      * required=true,
@@ -190,7 +190,7 @@ class AuthTokenController extends Controller
             return $this->errorResponse(ApiErrorCodes::VALIDATION_FAILED, $validator->errors());
         }
 
-        $status = Password::sendResetLink(
+        $status = Password::broker('patients')->sendResetLink(
             ['email' => $request->input('email')]
         );
         

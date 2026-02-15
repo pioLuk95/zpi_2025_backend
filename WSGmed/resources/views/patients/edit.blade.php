@@ -22,6 +22,15 @@
         </div>
 
         <div class="mb-3">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select" id="status" name="status" required>
+                @foreach($statuses as $status)
+                    <option value="{{ $status }}" {{ (old('status', $patient->status ?? '') == $status) ? 'selected' : '' }}>{{ $status }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="mb-3">
             <label for="date_of_birth" class="form-label">Data urodzenia</label>
             <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth', isset($patient) ? $patient->date_of_birth->format('Y-m-d') : '') }}" required>
         </div>

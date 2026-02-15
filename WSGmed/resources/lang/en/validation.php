@@ -129,9 +129,15 @@ return [
     */
 
     'custom' => [
-        'attribute-name' => [
-            'rule-name' => 'custom-message',
+        'name' => [
+        'regex' => 'Pole imię może zawierać tylko litery, spacje i myślniki.',
         ],
+        's_name' => [
+        'regex' => 'Pole nazwisko może zawierać tylko litery, spacje i myślniki.',
+       ],
+        'email' => [
+        'unique' => 'Adres email jest już zajęty.',
+       ]
     ],
 
     /*

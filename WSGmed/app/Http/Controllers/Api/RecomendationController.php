@@ -8,7 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\DB;
+use App\Models\Recomendation;
 
 /**
  * @group Recommendations
@@ -26,33 +26,34 @@ class RecomendationController extends Controller
 
     /**
      * Get all recommendations
-     * 
-    * Returns a list of recommendations for the authenticated patient.
-     * 
+     *
+     * Returns a list of recommendations for the authenticated patient.
+     *
      * @OA\Get(
      *     path="/api/recommendations",
      *     operationId="getRecommendations",
      *     summary="Get all recommendations",
      *     tags={"Recommendations"},
+     *     security={{"bearerAuth": {}}},
+     *     description="Returns recommendations for the authenticated patient.",
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
      *         @OA\JsonContent(
-    *             type="object",
-    *             @OA\Property(property="success", type="boolean", example=true),
-    *             @OA\Property(property="message", type="string", example="Recommendations retrieved successfully."),
-    *             @OA\Property(
-    *                 property="data",
-    *                 type="array",
-    *                 @OA\Items(
-    *                     type="object",
-    *                     @OA\Property(property="id", type="integer", example=1),
-    *                     @OA\Property(property="role", type="string", example="Doctor"),
-    *                     @OA\Property(property="date", type="string", format="date", example="2025-05-12"),
-    *                     @OA\Property(property="type", type="string", example="Breathing exercises"),
-    *                     @OA\Property(property="text", type="string", example="Perform breathing exercises 3 times a day for 10 minutes.")
-    *                 )
-    *             )
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Recommendations retrieved successfully."),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="role_name", type="string", example="doctor"),
+     *                     @OA\Property(property="date", type="string", format="date", example="2025-05-12"),
+     *                     @OA\Property(property="tittle", type="string", example="Recommendation 1"),
+     *                     @OA\Property(property="text", type="string", example="Perform breathing exercises 3 times a day for 10 minutes.")
+     *                 )
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -109,19 +110,16 @@ class RecomendationController extends Controller
         try {
             $patient = auth()->user();
 
-            $recommendations = DB::table('recomendations')
-                ->join('staff_patients', 'recomendations.staff_patient_id', '=', 'staff_patients.id')
-                ->join('staff', 'staff_patients.staff_id', '=', 'staff.id')
-                ->leftJoin('roles', 'staff.role_id', '=', 'roles.id')
-                ->where('staff_patients.patient_id', '=', $patient->id)
-                ->select([
-                    'recomendations.id as id',
-                    DB::raw("COALESCE(roles.name, '') as role"),
-                    'recomendations.date as date',
-                    'recomendations.type as type',
-                    'recomendations.text as text',
-                ])
-                ->get();
+            $recommendations = Recomendation::query()
+                ->where('patient_id', $patient->id)
+                ->with(['staff.role:id,name'])
+                ->get(['id', 'staff_id', 'date', 'tittle', 'text', 'patient_id'])
+                ->map(static fn (Recomendation $recommendation): array => [
+                    'role_name' => $recommendation->staff?->role?->name,
+                    'date' => $recommendation->date?->format('Y-m-d'),
+                    'tittle' => $recommendation->tittle,
+                    'text' => $recommendation->text,
+                ]);
 
             return $this->successResponse($recommendations, 'Recommendations retrieved successfully.');
         } catch (QueryException $e) {

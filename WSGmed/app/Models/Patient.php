@@ -9,17 +9,25 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
 
 
+
 class Patient extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\PatientFactory> */
     use HasFactory;
     use Notifiable;
+
+    const STATUS_NEW = 'Nowy';
+    const STATUS_UNDER_TREATMENT = 'W trakcie leczenia';
+    const STATUS_DISCHARGED = 'Wypisany';
+    const STATUS_DIED = 'Zmarły';
+
     protected $fillable = [
         'name',
         's_name',
         'email',
         'date_of_birth',
         'password',
+        'status',
     ];
 
     protected $casts = [
@@ -67,5 +75,10 @@ class Patient extends Authenticatable implements JWTSubject
     public function getJWTIdentifier()
     {
         return $this->getKey();
+    }
+
+    public function discharge()
+    {
+        return $this->hasOne(DischargeLetter::class);
     }
 }

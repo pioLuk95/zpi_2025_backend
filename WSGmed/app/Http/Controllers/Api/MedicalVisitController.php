@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
+use App\Models\Role;
 use App\Common\ApiErrorCodes;
 use App\Http\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\QueryException;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
+use App\Models\Appointment;
 
 class MedicalVisitController extends Controller
 {
@@ -96,7 +97,7 @@ class MedicalVisitController extends Controller
             }
 
             $validator = Validator::make($request->all(), [
-                'staff_role_id' => 'required|integer|in:3,4,5|exists:roles,id',
+                'staff_role' => 'required|string|exists:roles,name',
                 'visit_date' => 'required|date_format:Y-m-d|after_or_equal:today',
                 'visit_hour' => 'required|date_format:H:i',
                 'comment' => 'required|string|min:3',
@@ -108,24 +109,29 @@ class MedicalVisitController extends Controller
 
             $data = $validator->validated();
 
-            $now = Carbon::now();
+            $role = Role::where('name', $data['staff_role'])->first();
+
+            if (!$role) {
+            return $this->errorResponse(ApiErrorCodes::VALIDATION_FAILED, [
+                'staff_role' => ['Invalid role name']
+            ]);
+        }
+
             $visitHour = $data['visit_hour'];
             if (preg_match('/^\d{2}:\d{2}$/', $visitHour) === 1) {
                 $visitHour .= ':00';
             }
 
-            DB::table('appointments')->insert([
+            Appointment::query()->create([
                 'patient_id' => $user->id,
                 'staff_id' => null,
-                'staff_role_id' => $data['staff_role_id'],
-                'insert_date' => $now,
+                'staff_role_id' => $role->id,
+                'insert_date' => Carbon::now(),
                 'visit_date' => $data['visit_date'],
                 'visit_hour' => $visitHour,
                 'comment' => $data['comment'],
                 'type' => 'home',
                 'status' => 'new',
-                'created_at' => $now,
-                'updated_at' => $now,
             ]);
 
             return $this->successResponse([], 'Medical visit scheduled successfully', 201);

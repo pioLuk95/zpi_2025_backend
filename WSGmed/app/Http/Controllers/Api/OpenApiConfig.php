@@ -7,12 +7,12 @@ namespace App\Http\Controllers\Api;
  * @OA\Info(
  *     title="API Documentation",
  *     version="1.0.0",
- *     description="API for managing medical appointments with doctors, nurses, and physiotherapists. All endpoints require JWT authentication."
+ *     description="API for managing medical app."
  * )
  * 
  * @OA\Server(
- *     url="/api/",
- *     description="Medical Visit API Server"
+ *     url="/",
+ *     description="Medical API Server"
  * )
  */
 class OpenApiConfig

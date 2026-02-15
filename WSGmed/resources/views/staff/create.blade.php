@@ -3,7 +3,15 @@
 @section('content')
 <div class="container">
     <h1>{{ isset($staff) ? 'Edytuj Workera' : 'Dodaj Workera' }}</h1>
-
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <form method="POST" action="{{ isset($staff) ? route('staff.update', $staff) : route('staff.store') }}">
         @csrf
 
